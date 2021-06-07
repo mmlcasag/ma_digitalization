@@ -138,8 +138,12 @@ text_file.write(html)
 text_file.close()
 print('OK')
 
-print('Pegando a referência do lote...', end='')
-ref_lote = df['Nº lote'][0]
+print('Pegando o nome do responsável do lote...', end='')
+nom_acessor = df['Responsável CMD'][0]
+print('OK')
+
+print('Pegando o nome da unidade do lote...', end='')
+nom_unidade = df['CMD / Mina\n(selecionar a opção da lista)'][0]
 print('OK')
 
 print('Pegando o município e o estado do lote...', end='')
@@ -147,8 +151,8 @@ cidade_estado = df['Cidade / Estado\n(onde se encontra o lote fisicamente)'][0]
 cidade_estado = cidade_estado.replace(' / ','/').split('/')
 print('OK')
 
-print('Pegando o nome do responsável do lote...', end='')
-nom_acessor = df['Responsável CMD'][0]
+print('Pegando a referência do lote...', end='')
+ref_lote = df['Nº lote'][0]
 print('OK')
 
 print('Buscando a quantidade total de produtos no lote...', end='')
@@ -199,7 +203,7 @@ df_colunada = pandas.DataFrame({
   'VER': 0,
   'Incremento': incremento,
   'Valor de Referência do Vendedor (Contábil)': vlr_produtos,
-  'Comitente': 'Vale',
+  'Comitente': nom_unidade,
   'Município': cidade_estado[0],
   'UF': cidade_estado[1],
   'Assessor': nom_acessor,

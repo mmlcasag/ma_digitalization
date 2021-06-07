@@ -25,7 +25,7 @@ After git cloning the project into a local folder, please follow these steps:
 * Run command `Set-ExecutionPolicy Bypass`
 * Choose the option "Y"
 * Close Windows Powershell
-* Run command `.env\Source\activate`
+* Run command `.\env\Scripts\activate`
 
 ## 5. Install the project dependencies
 * pip install numpy
@@ -43,3 +43,7 @@ After git cloning the project into a local folder, please follow these steps:
 
 *Using Windows?*
 * Run command `python vale_mro.py`
+
+## 8. Deactivate the recently created virtual environment:
+
+* Run command `deactivate`
