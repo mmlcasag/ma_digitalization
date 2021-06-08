@@ -88,7 +88,7 @@ This command should be executed within virtualenv. Execute the `pipenv shell` be
 Inside the project's folder, run the following command:
 
 ```
-pip install
+pipenv install
 
 ```
 
