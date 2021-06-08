@@ -1,3 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+pandas = "*"
+openpyxl = "*"
+
+[dev-packages]
+pyinstaller = "*"
+
+[requires]
 {
     "_meta": {
         "hash": {
@@ -154,3 +168,4 @@
         }
     }
 }
+python_version = "3.9"

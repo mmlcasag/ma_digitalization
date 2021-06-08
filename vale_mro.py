@@ -199,7 +199,7 @@ df_colunada = pandas.DataFrame({
   'Nome do Lote (SEMPRE MAIUSCULA)': des_lote,
   'Descrição': 'Para maiores informações, clique em ANEXOS',
   'VI': vi,
-  'VMV': 0,
+  'VMV': 0,p
   'VER': 0,
   'Incremento': incremento,
   'Valor de Referência do Vendedor (Contábil)': vlr_produtos,
