@@ -1,7 +1,6 @@
 __pycache__
 build
 dist
-env
 output
 tmp
 vale_mro.spec
