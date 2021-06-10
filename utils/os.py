@@ -4,7 +4,11 @@ def get_absolute_path():
     return os.getcwd()
 
 def get_file_name(file_name):
-    return os.path.splitext(file_name)[0]
+    head, tail = os.path.split(file_name)
+    if not head:
+        return os.path.splitext(file_name)[0]
+    else:
+        return os.path.splitext(tail)[0]
 
 def get_file_extension(file_name):
     return os.path.splitext(file_name)[1]
@@ -16,7 +20,7 @@ def create_folder(folder_name, subfolder_name = ""):
     else:
         if not os.path.exists(os.path.join(folder_name, subfolder_name)):
             os.makedirs(os.path.join(folder_name, subfolder_name))
-        
+
 def get_files_list(folder_name, file_extension_list = []):
     files_list = []
     
@@ -29,4 +33,3 @@ def get_files_list(folder_name, file_extension_list = []):
                     files_list.append(file_name)
     
     return files_list
-
