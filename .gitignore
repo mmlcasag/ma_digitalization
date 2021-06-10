@@ -3,4 +3,4 @@ build
 dist
 output
 tmp
-vale_mro.spec
+*.spec
