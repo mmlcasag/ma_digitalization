@@ -1,6 +1,5 @@
 import os
 import csv
-import shutil
 
 import pandas
 import openpyxl
