@@ -12,7 +12,6 @@ contador = 0
 
 input_folder = 'input'
 output_folder = 'output'
-temporary_folder = 'tmp'
 
 colunada = {
     'Nº do lote': [],
@@ -40,14 +39,14 @@ colunada = {
 
 if not os.path.exists(input_folder):
     os.makedirs(input_folder)
-if not os.path.exists(temporary_folder):
-    os.makedirs(temporary_folder)
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
-if not os.path.exists(os.path.join(output_folder, 'Html')):
-    os.makedirs(os.path.join(output_folder, 'Html'))
 if not os.path.exists(os.path.join(output_folder, 'Backup')):
     os.makedirs(os.path.join(output_folder, 'Backup'))
+if not os.path.exists(os.path.join(output_folder, 'csv')):
+    os.makedirs(os.path.join(output_folder, 'csv'))
+if not os.path.exists(os.path.join(output_folder, 'Html')):
+    os.makedirs(os.path.join(output_folder, 'Html'))
 if not os.path.exists(os.path.join(output_folder, 'Planilha')):
     os.makedirs(os.path.join(output_folder, 'Planilha'))
 
@@ -85,26 +84,22 @@ for full_file_name in os.listdir(input_folder):
         sheet.delete_rows(1,linenum)
         print('OK')
 
-        print('-- Criando o arquivo CSV temporário...', end='')
-        csv_file = open(os.path.join(temporary_folder, file_name + '.csv'), 'w', newline='', encoding='utf-8')
+        print('-- Criando o arquivo CSV...', end='')
+        csv_file = open(os.path.join(output_folder, 'csv', file_name + '.csv'), 'w', newline='', encoding='utf-8')
         print('OK')
 
         print('-- Convertendo a planilha para o arquivo CSV...', end='')
-        col = csv.writer(csv_file)
-        for r in sheet.rows:
-            col.writerow([cell.value for cell in r])
+        writer = csv.writer(csv_file)
+        for row in sheet.rows:
+            writer.writerow([ cell.value for cell in row ])
         print('OK')
 
         print('-- Carregando os dados do arquivo CSV...', end='')
-        df = pandas.read_csv(os.path.join(temporary_folder, file_name + '.csv'))
+        df = pandas.read_csv(os.path.join(output_folder, 'csv', file_name + '.csv'))
         print('OK')
 
-        print('-- Fechando o arquivo CSV temporário...', end='')
+        print('-- Fechando o arquivo CSV...', end='')
         csv_file.close()
-        print('OK')
-
-        print('-- Removendo o arquivo CSV temporário...', end='')
-        os.remove(os.path.join(temporary_folder, file_name + '.csv'))
         print('OK')
         
         print('-- Ajustando os nomes das colunas...', end='')

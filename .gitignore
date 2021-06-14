@@ -1,6 +1,10 @@
-__pycache__
-build
-dist
-output
-tmp
+/__pycache__
+/build
+/dist
+/input
+/output
+/tmp
 *.spec
+
+services/*/output
+services/*/tmp

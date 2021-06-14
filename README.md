@@ -65,63 +65,52 @@ For Linux, it is important to check if the current bash has a path to `~/.local/
 
 ## 3. Run project using virtual environment (venv)
 <br>
-
 Inside the project's folder, run the following command:
-
 ```
 pipenv shell
 ```
-
 This command spawns a shell within the virtualenv.
-
 All `python` and `pip` commands will be executed using the binaries created by the virtual enviroment.
-
 Type 'exit' or 'Ctrl+D' to return.
-
-<br><br>
-
+<br>
+<br>
 ## 4. Install the project dependencies
 <br>
-
-This command should be executed within virtualenv. Execute the `pipenv shell` before install the packages:
-
+This command should be executed within virtualenv.
+Execute the `pipenv shell` before install the packages:
 Inside the project's folder, run the following command:
-
 ```
 pipenv install
-
 ```
-
 All packages inside `Pipfile` will be installed.
-
-<br><br>
-
+<br>
+<br>
 ## 5. Build the project
 <br>
 Run command:
-
 ```
-pyinstaller vale_mro.py --onefile
+pyinstaller .\services\extract_files\extract_files.py --onefile
+pyinstaller .\services\petrobras\petrobras.py --onefile
+pyinstaller .\services\vale\vale.py --onefile
 ```
-
-<br><br>
-
+<br>
+<br>
 ## 6. Run the project
 <br>
-
 Run command:
-
 ```
-python vale_mro.py
+cd .\services\extract_files
+python extract_files.py
+cd .\services\petrobras
+python petrobras.py
+cd .\services\vale
+python .\services\vale\vale.py
 ```
-
-<br><br>
-
+<br>
+<br>
 ## 7. Exit from the recently created virtual environment:
 <br>
-
 Run command:
-
 ```
 exit
 ```
