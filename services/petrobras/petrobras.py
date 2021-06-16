@@ -2,12 +2,13 @@ import os
 import sys
 import pandas
 import openpyxl
+
+sys.path.append("..\..")
+
 import utils.os as os_utils
 import utils.ma as ma_utils
 import utils.html as html_utils
 import utils.excel as excel_utils
-
-sys.path.append("..\..")
 
 absolute_path = os.getcwd()
 
@@ -198,5 +199,5 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
     excel_file.save()
 
     print('INFO: Arquivo Excel gerado com sucesso')
-    
+
 print('INFO: Processo finalizado com sucesso')

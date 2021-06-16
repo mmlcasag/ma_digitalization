@@ -55,7 +55,7 @@ if not os.path.exists(os.path.join(output_folder, "Planilha")):
 for full_file_name in os.listdir(input_folder):
     if full_file_name.endswith("xlsx"):
         contador = contador + 1
-
+        
         full_file_path = os.path.join(input_folder, full_file_name)
         file_name = os.path.splitext(full_file_name)[0]
         file_extension = os.path.splitext(full_file_name)[1]

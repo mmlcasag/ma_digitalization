@@ -1,9 +1,10 @@
 import os
 import sys
-import utils.os as os_utils
-import utils.excel as excel_utils
 
 sys.path.append("..\..")
+
+import utils.os as os_utils
+import utils.excel as excel_utils
 
 absolute_path = os.getcwd()
 
