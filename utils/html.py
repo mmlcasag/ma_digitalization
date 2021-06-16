@@ -1,5 +1,5 @@
 def get_header():
-    return '''
+    return """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -27,10 +27,11 @@ def get_header():
     </style>
     </head>
     <body>
-    '''
+    """
+
 
 def get_footer():
-    return '''
+    return """
     </body>
     </html>
-    '''
+    """

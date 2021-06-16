@@ -58,6 +58,11 @@ To check if pipenv was installed correctly, run:
 pipenv check
 ```
 
+After this, install git hooks running: 
+```
+pipenv run pre-commit install
+```
+
 For Linux, it is important to check if the current bash has a path to `~/.local/bin`.
 
 
