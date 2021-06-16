@@ -1,11 +1,16 @@
 def get_available_increments():
-    return [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
+    # increments must be of integer, round values that make sense business-wise
+    # defined by William de Andrade Ramos da Silva
+    return [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 def get_closest_value(lst, K):
+    # given a list of available increments and a given value
+    # determines the closest available increment for that given value
+    # i.e.:
+    # given list: [5, 10, 20, 50]
+    # given value: 27
+    # result: 20, because 27 is closest to 20, than it is to 50
     return lst[min(range(len(lst)), key = lambda i: abs(lst[i]-K))]
-
-def get_first_word(value):
-    return value.split(' ')[0]
 
 def get_asset_description(dataframe, description_column, sort_by_column, how_many_rows):
     # gets the total number of rows in the dataframe
@@ -13,7 +18,7 @@ def get_asset_description(dataframe, description_column, sort_by_column, how_man
     
     # retains in the dataframe only the first word of the original description
     for index, row in dataframe.iterrows():
-        dataframe.at[index, description_column] = get_first_word(row[description_column])
+        dataframe.at[index, description_column] = row[description_column].split(' ')[0]
     
     # sorts the dataframe by the requested column and retrieves only the unique values
     assets = dataframe.sort_values([sort_by_column], ascending=False)[description_column].unique()

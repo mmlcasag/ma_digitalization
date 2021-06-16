@@ -1,15 +1,3 @@
-def open_file(file_name):
-    return open(file_name, 'w', newline='', encoding='utf-8')
-
-def create_file(file_name):
-    return open(file_name, 'w', newline='', encoding='utf-8')
-
-def write(html_file, html_content):
-    html_file.write(html_content)
-
-def close_file(html_file):
-    html_file.close()
-
 def get_header():
     return '''
     <!DOCTYPE html>

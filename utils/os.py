@@ -1,19 +1,16 @@
 import os
 
-def get_absolute_path():
-    return os.getcwd()
-
+# from a file name like "foobar.txt"
+# returns "foobar"
 def get_file_name(file_name):
-    head, tail = os.path.split(file_name)
-    if not head:
-        return os.path.splitext(file_name)[0]
-    else:
-        return os.path.splitext(tail)[0]
+    return os.path.splitext(file_name)[0]
 
+# from a file name like "foobar.txt"
+# returns "txt"
 def get_file_extension(file_name):
-    return os.path.splitext(file_name)[1]
+    return os.path.splitext(file_name)[1].replace('.','')
 
-def create_folder(folder_name, subfolder_name = ""):
+def create_folder(folder_name, subfolder_name = ''):
     if not subfolder_name:
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
