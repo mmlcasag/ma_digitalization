@@ -38,12 +38,12 @@ def extract_images(file_name, output_folder):
                     output_folder, "image_{}.png".format(image_count)
                 )
 
-                print('DEBUG: - Extraindo a imagem "{}"'.format(image_name))
+                print('DEBUG: Extraindo a imagem "{}"'.format(image_name))
                 shape.Copy()
                 image = ImageGrab.grabclipboard()
-                image.save(image_name, "png")
-
-                print("DEBUG: - Convertendo de PNG para JPG")
+                image.save(image_name, 'png')
+                
+                print('DEBUG: Convertendo de PNG para JPG')
                 image_utils.convert_from_png_to_jpg(image_name, output_folder, False)
 
     workbook.Close()

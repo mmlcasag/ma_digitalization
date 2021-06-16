@@ -29,8 +29,8 @@ for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
             os_utils.get_file_name(file_name),
         )
 
-        print('DEBUG: - Arquivo de entrada "{}"'.format(input_path))
-        print('DEBUG: - Diretório de saída "{}"'.format(output_path))
+        print('DEBUG: Arquivo de entrada "{}"'.format(input_path))
+        print('DEBUG: Diretório de saída "{}"'.format(output_path))
 
         excel_utils.extract_images(input_path, output_path)
     except Exception as error:
