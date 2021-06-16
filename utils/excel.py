@@ -26,12 +26,15 @@ def get_cell_value(sheet, row_number, col_number):
 def get_first_cell(sheet):
     return get_cell_value(sheet, 1, 1)
 
-def delete_rows(sheet, initial_row, how_many_rows):
+def delete_cols(sheet, initial_col=1, how_many_cols=1):
+    sheet.delete_cols(initial_col, how_many_cols)
+
+def delete_rows(sheet, initial_row=1, how_many_rows=1):
     sheet.delete_rows(initial_row, how_many_rows)
 
 def delete_until(sheet, target_value):
     while str(get_first_cell(sheet)) != str(target_value):
-        delete_rows(sheet, 1, 1)
+        delete_rows(sheet)
 
 def export_to_csv(sheet, csv_file_name, delimiter=',', replacer='.'):
     csv_file = csv_utils.create_file(csv_file_name)
@@ -66,3 +69,9 @@ def extract_images(file_name, output_folder):
 
     workbook.Close()
     excel.Quit()
+
+def create_file(file_name):
+    return open(file_name, 'w', newline='', encoding='utf-8')
+
+def close_file(excel_file):
+    excel_file.close()

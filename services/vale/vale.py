@@ -87,7 +87,7 @@ for full_file_name in os.listdir(input_folder):
         print('-- Criando o arquivo CSV...', end='')
         csv_file = open(os.path.join(output_folder, 'csv', file_name + '.csv'), 'w', newline='', encoding='utf-8')
         print('OK')
-
+        
         print('-- Convertendo a planilha para o arquivo CSV...', end='')
         writer = csv.writer(csv_file)
         for row in sheet.rows:
@@ -105,7 +105,7 @@ for full_file_name in os.listdir(input_folder):
         print('-- Ajustando os nomes das colunas...', end='')
         df = df.rename(columns={'PMM': 'Unitário', 'Valor': 'Total', 'UM': 'UN'})
         print('OK')
-
+        
         print('-- Removendo colunas desnecessárias...', end='')
         unwanted_columns = [
             'Motivo', 

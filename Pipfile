@@ -9,6 +9,7 @@ pandas = "*"
 openpyxl = "*"
 pywin32 = {version = "*", sys_platform = "== 'win32'"}
 pillow = "*"
+xlsxwriter = "*"
 
 [dev-packages]
 pyinstaller = "*"
