@@ -37,7 +37,7 @@ def extract_images(file_name, output_folder):
                 image_name = os.path.join(
                     output_folder, "image_{}.png".format(image_count)
                 )
-
+                
                 print('DEBUG: Extraindo a imagem "{}"'.format(image_name))
                 shape.Copy()
                 image = ImageGrab.grabclipboard()
