@@ -70,6 +70,12 @@ For Linux, it is important to check if the current bash has a path to `~/.local/
 
 ## 3. Run project using virtual environment (venv)
 <br>
+
+First, set variable PIPENV_VENV_IN_PROJECT to pipenv install packages inside project folder (.venv)
+```
+export PIPENV_VENV_IN_PROJECT="enabled" 
+```
+
 Inside the project's folder, run the following command:
 ```
 pipenv shell

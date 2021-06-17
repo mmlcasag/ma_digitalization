@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+    api: 
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes: 
+            - .:/home/appuser
+        ports:
+            - "5000:5000"
+        environment:
+            - ENVIRONMENT=development
+
+        depends_on:
+            - localstack
+
+    localstack:
+        container_name: localstack
+        image: localstack/localstack:0.12.12
+        ports:
+            - '4566:4566'      
+        environment:
+            - SERVICES=s3,sqs      
+            - DEFAULT_REGION=us-west-2
+            - DATA_DIR=/tmp/localstack/data
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
