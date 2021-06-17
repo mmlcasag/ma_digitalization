@@ -4,5 +4,5 @@
     "python.linting.lintOnSave": true,
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
-    "python.pythonPath": ".venv/bin/python3.8"
+    "python.pythonPath": ".venv\\Scripts\\python.exe"
 }

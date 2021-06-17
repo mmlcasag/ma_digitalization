@@ -35,6 +35,6 @@ for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
 
         excel_utils.extract_images(input_path, output_path)
     except Exception as error:
-        print("ERROR: {}".format(error))
+        print("ERROR: {} ao tentar processar o arquivo {}".format(error, file_name))
 
 print("INFO: Processo finalizado com sucesso")
