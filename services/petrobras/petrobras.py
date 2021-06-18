@@ -17,12 +17,14 @@ output_folder = "output"
 csv_folder = "csv"
 html_folder = "html"
 excel_folder = "xlsx"
+images_folder = "images"
 
 os_utils.create_folder(input_folder)
 os_utils.create_folder(output_folder)
-os_utils.create_folder(os.path.join(output_folder, csv_folder))
-os_utils.create_folder(os.path.join(output_folder, html_folder))
-os_utils.create_folder(os.path.join(output_folder, excel_folder))
+os_utils.create_folder(output_folder, csv_folder)
+os_utils.create_folder(output_folder, html_folder)
+os_utils.create_folder(output_folder, excel_folder)
+os_utils.create_folder(output_folder, images_folder)
 
 allowed_extensions = ["xlsx", "xlsb", "xlsm"]
 
@@ -35,6 +37,16 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print('DEBUG: Nome do arquivo sem extensão "{}"'.format(file_name))
 
         dataset_sheet_1 = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns())
+
+        print("INFO: Extraindo imagens do arquivo Excel")
+        input_path = os.path.join(absolute_path, input_folder, excel_file_name)
+        output_path = os.path.join(
+            absolute_path,
+            output_folder,
+            images_folder,
+            file_name,
+        )
+        excel_utils.extract_images(input_path, output_path)
 
         print("INFO: Abrindo o arquivo Excel")
         workbook = openpyxl.load_workbook(
