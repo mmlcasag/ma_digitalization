@@ -28,35 +28,13 @@ allowed_extensions = ["xlsx", "xlsb", "xlsm"]
 
 for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:
-        dataset_sheet_1 = {
-            "Nº do lote": [],
-            "Status": [],
-            "Lote Ref. / Ativo-Frota": [],
-            "Nome do Lote (SEMPRE MAIUSCULA)": [],
-            "Descrição": [],
-            "VI": [],
-            "VMV": [],
-            "VER": [],
-            "Incremento": [],
-            "Valor de Referência do Vendedor (Contábil)": [],
-            "Comitente": [],
-            "Município": [],
-            "UF": [],
-            "Assessor": [],
-            "Pendências": [],
-            "Restrições": [],
-            "Débitos (Total)": [],
-            "Unid. Métrica": [],
-            "Fator Multiplicativo": [],
-            "Alteração/Adicionado": [],
-            "Descrição HTML": [],
-        }
-
         print('INFO: PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
 
         file_name = os_utils.get_file_name(excel_file_name)
 
         print('DEBUG: Nome do arquivo sem extensão "{}"'.format(file_name))
+
+        dataset_sheet_1 = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns())
 
         print("INFO: Abrindo o arquivo Excel")
         workbook = openpyxl.load_workbook(
@@ -187,6 +165,8 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
                 print("INFO: Exportação do arquivo HTML finalizada com sucesso")
 
+                print("INFO: Montando a linha da planilha colunada")
+
                 print("DEBUG: Definindo a descrição resumida do lote")
                 asset_description = ma_utils.get_asset_description(
                     local_df1, "TEXTO BREVE", "VALOR CONTÁBIL ATUAL", 5
@@ -210,33 +190,37 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 )
 
                 print("DEBUG: Gerando a linha colunada do lote")
-                dataset_sheet_1["Nº do lote"].append(asset_number)
-                dataset_sheet_1["Status"].append("novo")
-                dataset_sheet_1["Lote Ref. / Ativo-Frota"].append(asset_number)
-                dataset_sheet_1["Nome do Lote (SEMPRE MAIUSCULA)"].append(
-                    asset_description
+                dataset_sheet_1 = dataset_sheet_1.append(
+                    pandas.Series(
+                        [
+                            asset_number,
+                            "novo",
+                            asset_number,
+                            asset_description,
+                            "Para maiores informações, clique em ANEXOS",
+                            asset_initial_value,
+                            0,
+                            0,
+                            asset_increment_value,
+                            asset_reference_value,
+                            "Petrobrás",
+                            "",
+                            "",
+                            "Vendedor",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "1",
+                            "",
+                            "Em arquivo separado",
+                        ],
+                        index=dataset_sheet_1.columns,
+                    ),
+                    ignore_index=True,
                 )
-                dataset_sheet_1["Descrição"].append(
-                    "Para maiores informações, clique em ANEXOS"
-                )
-                dataset_sheet_1["VI"].append(asset_initial_value)
-                dataset_sheet_1["VMV"].append(0)
-                dataset_sheet_1["VER"].append(0)
-                dataset_sheet_1["Incremento"].append(asset_increment_value)
-                dataset_sheet_1["Valor de Referência do Vendedor (Contábil)"].append(
-                    asset_reference_value
-                )
-                dataset_sheet_1["Comitente"].append("Petrobrás")
-                dataset_sheet_1["Município"].append("")
-                dataset_sheet_1["UF"].append("")
-                dataset_sheet_1["Assessor"].append("Vendedor")
-                dataset_sheet_1["Pendências"].append("")
-                dataset_sheet_1["Restrições"].append("")
-                dataset_sheet_1["Débitos (Total)"].append("")
-                dataset_sheet_1["Unid. Métrica"].append("")
-                dataset_sheet_1["Fator Multiplicativo"].append("1")
-                dataset_sheet_1["Alteração/Adicionado"].append("")
-                dataset_sheet_1["Descrição HTML"].append("Em arquivo separado")
+
+                print("INFO: Linha da planilha colunada montada com sucesso")
             except Exception as error:
                 print(
                     "ERROR: {} ao tentar processar o lote {}".format(

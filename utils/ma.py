@@ -53,3 +53,29 @@ def get_asset_description(dataframe, description_column, sort_by_column, how_man
     asset_description = asset_description[0:225]
 
     return asset_description
+
+
+def get_spreadsheet_columns():
+    return [
+        "Nº do lote",
+        "Status",
+        "Lote Ref. / Ativo-Frota",
+        "Nome do Lote (SEMPRE MAIUSCULA)",
+        "Descrição",
+        "VI",
+        "VMV",
+        "VER",
+        "Incremento",
+        "Valor de Referência do Vendedor (Contábil)",
+        "Comitente",
+        "Município",
+        "UF",
+        "Assessor",
+        "Pendências",
+        "Restrições",
+        "Débitos (Total)",
+        "Unid. Métrica",
+        "Fator Multiplicativo",
+        "Alteração/Adicionado",
+        "Descrição HTML",
+    ]

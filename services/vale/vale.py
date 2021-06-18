@@ -1,127 +1,96 @@
 import os
-import csv
-
+import sys
 import pandas
 import openpyxl
 
+sys.path.append("..\..")
 
-# https://www.geeksforgeeks.org/python-find-closest-number-to-k-in-given-list/
-def closest(lst, K):
-    return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
+import utils.os as os_utils
+import utils.ma as ma_utils
+import utils.html as html_utils
+import utils.excel as excel_utils
 
-
-contador = 0
+absolute_path = os.getcwd()
 
 input_folder = "input"
 output_folder = "output"
+csv_folder = "csv"
+html_folder = "html"
+excel_folder = "xlsx"
 
-colunada = {
-    "Nº do lote": [],
-    "Status": [],
-    "Lote Ref. / Ativo-Frota": [],
-    "Nome do Lote (SEMPRE MAIUSCULA)": [],
-    "Descrição": [],
-    "VI": [],
-    "VMV": [],
-    "VER": [],
-    "Incremento": [],
-    "Valor de Referência do Vendedor (Contábil)": [],
-    "Comitente": [],
-    "Município": [],
-    "UF": [],
-    "Assessor": [],
-    "Pendências": [],
-    "Restrições": [],
-    "Débitos (Total)": [],
-    "Unid. Métrica": [],
-    "Fator Multiplicativo": [],
-    "Alteração/Adicionado": [],
-    "Descrição HTML": [],
-}
+os_utils.create_folder(input_folder)
+os_utils.create_folder(output_folder)
+os_utils.create_folder(os.path.join(output_folder, csv_folder))
+os_utils.create_folder(os.path.join(output_folder, html_folder))
+os_utils.create_folder(os.path.join(output_folder, excel_folder))
 
-if not os.path.exists(input_folder):
-    os.makedirs(input_folder)
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-if not os.path.exists(os.path.join(output_folder, "Backup")):
-    os.makedirs(os.path.join(output_folder, "Backup"))
-if not os.path.exists(os.path.join(output_folder, "csv")):
-    os.makedirs(os.path.join(output_folder, "csv"))
-if not os.path.exists(os.path.join(output_folder, "Html")):
-    os.makedirs(os.path.join(output_folder, "Html"))
-if not os.path.exists(os.path.join(output_folder, "Planilha")):
-    os.makedirs(os.path.join(output_folder, "Planilha"))
+dataset_sheet_1 = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns())
+dataset_sheet_2 = pandas.DataFrame()
 
-for full_file_name in os.listdir(input_folder):
-    if full_file_name.endswith("xlsx"):
-        contador = contador + 1
-        
-        full_file_path = os.path.join(input_folder, full_file_name)
-        file_name = os.path.splitext(full_file_name)[0]
-        file_extension = os.path.splitext(full_file_name)[1]
+asset_number = 0
 
-        print('\nPROCESSANDO O ARQUIVO "' + full_file_name + '"')
+allowed_extensions = ["xlsx", "xlsb"]
 
-        print("-- Carregando os dados do arquivo Excel...", end="")
-        # the argument data_only tells openpyxl to get only cell values, not formulas
-        excel = openpyxl.load_workbook(full_file_path, data_only=True)
-        print("OK")
+for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions):
+    try:
+        print('INFO: PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
 
-        print("-- Selecionando a aba ativa da planilha...", end="")
-        sheet = excel.active
-        print("OK")
+        asset_number = asset_number + 1
 
-        linenum = 0
-        print(
-            '-- Verificando quantidade de linhas de cabeçalho antes de chegar em "Cód."...',
-            end="",
+        file_name = os_utils.get_file_name(excel_file_name)
+
+        print('DEBUG: Nome do arquivo sem extensão "{}"'.format(file_name))
+
+        print("INFO: Abrindo o arquivo Excel")
+        workbook = openpyxl.load_workbook(
+            os.path.join(input_folder, excel_file_name), data_only=True
         )
-        for row in sheet.rows:
-            columns = [cell.value for cell in row]
 
-            if columns[0] == "Cód.":
-                break
+        print("INFO: Selecionando a aba ativa da planilha")
+        sheet = workbook.active
 
-            linenum = linenum + 1
-        print("OK")
+        print('DEBUG: Deletando linhas até chegar em "Cód."')
+        excel_utils.delete_until(sheet, "Cód.")
+
+        print("INFO: Exportando o resultado para um arquivo CSV")
+        excel_utils.export_to_csv(
+            sheet,
+            os.path.join(output_folder, csv_folder, file_name + ".csv"),
+            ";",
+            ",",
+        )
+
+        print("DEBUG: Fechando o arquivo Excel")
+        workbook.close()
+
+        print("INFO: Carregando um dataset com os dados do arquivo CSV")
+        df = pandas.read_csv(
+            os.path.join(output_folder, csv_folder, file_name + ".csv"),
+            delimiter=";",
+        )
 
         print(
-            "-- Apagando as " + str(linenum) + " linhas iniciais da planilha...", end=""
+            "DEBUG: Convertendo todas as colunas do dataset da primeira aba para texto"
         )
-        sheet.delete_rows(1, linenum)
-        print("OK")
+        df = df.astype(str)
 
-        print("-- Criando o arquivo CSV...", end="")
-        csv_file = open(
-            os.path.join(output_folder, "csv", file_name + ".csv"),
-            "w",
-            newline="",
-            encoding="utf-8",
+        print(
+            "DEBUG: Desconsiderando as linhas cujos valores de todas as colunas estão vazios ou inválidos"
         )
-        print("OK")
+        df = df.mask(df.eq("None")).dropna(how="all")
 
-        print("-- Convertendo a planilha para o arquivo CSV...", end="")
-        writer = csv.writer(csv_file)
-        for row in sheet.rows:
-            writer.writerow([cell.value for cell in row])
-        print("OK")
-
-        print("-- Carregando os dados do arquivo CSV...", end="")
-        df = pandas.read_csv(os.path.join(output_folder, "csv", file_name + ".csv"))
-        print("OK")
-
-        print("-- Fechando o arquivo CSV...", end="")
-        csv_file.close()
-        print("OK")
-
-        print("-- Ajustando os nomes das colunas...", end="")
+        print("DEBUG: Ajustando os nomes das colunas")
         df = df.rename(columns={"PMM": "Unitário", "Valor": "Total", "UM": "UN"})
-        print("OK")
 
-        print("-- Removendo colunas desnecessárias...", end="")
+        print(
+            "DEBUG: Carregando um dataset baseado no dataset principal, para ser utilizado na geração da aba de listagem"
+        )
+        df_listagem = df
+
+        print("DEBUG: Removendo colunas desnecessárias do dataset da aba de listagem")
         unwanted_columns = [
             "Motivo",
-            "Analista ",
+            "Analista",
             "Aprovador",
             "Diretoria",
             "Gerência",
@@ -137,183 +106,143 @@ for full_file_name in os.listdir(input_folder):
             "CMD / Mina\n(selecionar a opção da lista)",
             "Cidade / Estado\n(onde se encontra o lote fisicamente)",
         ]
-        df_excel = df.drop(columns=unwanted_columns)
-        print("OK")
+        df_listagem = df_listagem.drop(columns=unwanted_columns)
 
-        print("-- Gerando arquivo Excel processado...", end="")
-        # you will probably notice that by default, pandas writes the line index as the first column in the spreadsheet
-        # if you don't want that, you can switch it off by adding the parameter index=False
-        df_excel.to_excel(
-            os.path.join(output_folder, "Backup", file_name + ".xlsx"), index=False
-        )
-        print("OK")
+        print("INFO: Exportando os produtos do lote para um arquivo HTML")
 
         print(
-            "-- Desconsiderando colunas de valores para geração do arquivo HTML...",
-            end="",
+            "DEBUG: Carregando um dataset baseado no dataset do arquivo Excel, para ser utilizado na geração do HTML"
         )
-        df_html = df_excel.drop(columns=["Unitário", "Total"])
-        print("OK")
+        df_html = df_listagem
 
-        print("-- Movendo colunas de posição no arquivo HTML...", end="")
+        print("DEBUG: Removendo colunas desnecessárias do dataset do arquivo HTML")
+        df_html = df_html.drop(columns=["Unitário", "Total"])
+
+        print("DEBUG: Movendo colunas de posição no dataset do arquivo HTML")
         cols = list(df_html.columns.values)
         df_html = df_html[cols[0:4] + cols[5:8] + [cols[4]] + [cols[8]]]
-        print("OK")
 
-        print("-- Convertendo conteúdo do DataFrame para HTML...", end="")
-        # you will probably notice that by default, pandas writes the line index as the first column in the spreadsheet
-        # if you don't want that, you can switch it off by adding the parameter index=False
-        # na_rep ==> here you can set the value you want to replace with NaN values
-        html = df_html.to_html(index=False, na_rep="")
-        html = (
-            """
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <style>
-            * {
-            font-family: Arial;
-            font-size: x-small;
-            }
-            th {
-            text-align: left;
-            padding: 3px;
-            }
-            tr {
-            text-align: left;
-            padding: 3px;
-            }
-            td {
-            text-align: left;
-            padding: 3px;
-            }
-        </style>
-        </head>
-        <body>
-        """
-            + html
-            + """
-        </body>
-        </html>
-        """
-        )
-        print("OK")
+        print("DEBUG: Gerando código HTML a partir dos dados do dataset")
+        html_content = df_html.to_html(index=False, na_rep="")
 
-        print("-- Gerando arquivo HTML processado...", end="")
-        text_file = open(
-            os.path.join(output_folder, "Html", file_name + ".html"),
+        print("DEBUG: Concatenando o cabeçalho e o rodapé do arquivo HTML")
+        html_content = html_utils.get_header() + html_content + html_utils.get_footer()
+
+        print("DEBUG: Criando o arquivo HTML")
+        html_file = open(
+            os.path.join(
+                output_folder,
+                html_folder,
+                file_name + ".html",
+            ),
             "w",
             newline="",
             encoding="utf-8",
         )
-        text_file.write(html)
-        text_file.close()
-        print("OK")
 
-        print("-- Pegando o nome do responsável do lote...", end="")
-        nom_acessor = df["Responsável CMD"][0]
-        print("OK")
+        print("DEBUG: Escrevendo no arquivo HTML")
+        html_file.write(html_content)
 
-        print("-- Pegando o nome da unidade do lote...", end="")
-        nom_unidade = df["CMD / Mina\n(selecionar a opção da lista)"][0]
-        print("OK")
+        print("DEBUG: Fechando o arquivo HTML")
+        html_file.close()
 
-        print("-- Pegando o município e o estado do lote...", end="")
-        cidade_estado = df["Cidade / Estado\n(onde se encontra o lote fisicamente)"][0]
-        cidade_estado = cidade_estado.replace(" / ", "/").replace(" - ", "/").split("/")
-        print("OK")
+        print("INFO: Exportação do arquivo HTML finalizada com sucesso")
 
-        print("-- Pegando a referência do lote...", end="")
-        ref_lote = df["Nº lote"][0]
-        print("OK")
+        print("INFO: Montando a linha da planilha colunada")
 
-        print("-- Buscando a quantidade total de produtos no lote...", end="")
-        qtd_produtos = df["Cód."].count()
-        print("OK")
+        print("DEBUG: Buscando o nome do responsável do lote")
+        asset_manager_name = df["Responsável CMD"][0]
 
-        print("-- Somando o valor total dos produtos do lote...", end="")
-        vlr_produtos = round(df["Total"].sum(), 2)
-        print("OK")
+        print("DEBUG: Buscando o nome da unidade do lote")
+        asset_owner_name = df["CMD / Mina\n(selecionar a opção da lista)"][0]
 
-        print("-- Pegando os três produtos de valor mais expressivo...", end="")
-        produtos = df.sort_values(["Total"], ascending=False)[0:3]["Descrição"]
-        print("OK")
+        print("DEBUG: Buscando o município e o estado do lote")
+        asset_location = df["Cidade / Estado\n(onde se encontra o lote fisicamente)"][0]
+        asset_location = asset_location.replace(" / ", "/")
+        asset_location = asset_location.replace(" - ", "-")
+        asset_location = asset_location.replace("-", "/")
+        asset_location = asset_location.replace(" ", "/")
+        asset_location = asset_location.split("/")
+        asset_location_city = asset_location[0]
+        asset_location_state = asset_location[1]
 
-        print("-- Montando a descrição do lote...", end="")
-        des_lote = ""
+        print("DEBUG: Buscando o número de referência do lote")
+        asset_reference_number = df["Nº lote"][0]
 
-        # monta a descrição do lote baseado no primeiro nome do array dos produtos
-        for produto in produtos.values:
-            des_lote = des_lote + produto[0 : produto.find(" ")] + ", "
+        print("DEBUG: Definindo a descrição resumida do lote")
+        asset_description = ma_utils.get_asset_description(df, "Descrição", "Total", 5)
 
-        # apaga a última vírgula da string
-        des_lote = des_lote[0 : len(des_lote) - 2]
+        print("DEBUG: Buscando o valor de referência do lote")
+        asset_reference_value = round(df["Total"].astype(float).sum(), 2)
 
-        # concatena na descrição a quantidade restante de produtos
-        if qtd_produtos > 3:
-            des_lote = des_lote + " e outros"
+        print("DEBUG: Buscando o valor inicial do lote")
+        asset_initial_value = round(float(asset_reference_value / 100), 2)
 
-        # converte tudo para maiúsculo
-        des_lote = des_lote.upper()
-        print("OK")
+        print("DEBUG: Buscando o valor de incremento do lote")
+        asset_increment_value = int(
+            ma_utils.get_closest_value(
+                ma_utils.get_available_increments(), asset_initial_value / 10
+            )
+        )
 
-        print("-- Calculando valores de VI e incremento...", end="")
-        vi = round(vlr_produtos / 100, 0)
-        possiveis_incrementos = [
-            50,
-            100,
-            200,
-            500,
-            1000,
-            2000,
-            5000,
-            10000,
-            20000,
-            50000,
-            100000,
-        ]
-        incremento = closest(possiveis_incrementos, vi / 10)
-        print("OK")
+        print("DEBUG: Gerando a linha colunada do lote")
+        dataset_sheet_1 = dataset_sheet_1.append(
+            pandas.Series(
+                [
+                    asset_number,
+                    "novo",
+                    asset_reference_number,
+                    asset_description,
+                    "Para maiores informações, clique em ANEXOS",
+                    asset_initial_value,
+                    0,
+                    0,
+                    asset_increment_value,
+                    asset_reference_value,
+                    asset_owner_name,
+                    asset_location_city,
+                    asset_location_state,
+                    asset_manager_name,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "1",
+                    "",
+                    "Em arquivo separado",
+                ],
+                index=dataset_sheet_1.columns,
+            ),
+            ignore_index=True,
+        )
 
-        print("-- Inserindo linha na planilha colunada...", end="")
-        colunada["Nº do lote"].append(contador)
-        colunada["Status"].append("novo")
-        colunada["Lote Ref. / Ativo-Frota"].append(ref_lote)
-        colunada["Nome do Lote (SEMPRE MAIUSCULA)"].append(des_lote)
-        colunada["Descrição"].append("Para maiores informações, clique em ANEXOS")
-        colunada["VI"].append(vi)
-        colunada["VMV"].append(0)
-        colunada["VER"].append(0)
-        colunada["Incremento"].append(incremento)
-        colunada["Valor de Referência do Vendedor (Contábil)"].append(vlr_produtos)
-        colunada["Comitente"].append(nom_unidade)
-        colunada["Município"].append(cidade_estado[0])
-        colunada["UF"].append(cidade_estado[1])
-        colunada["Assessor"].append(nom_acessor)
-        colunada["Pendências"].append("")
-        colunada["Restrições"].append("")
-        colunada["Débitos (Total)"].append("")
-        colunada["Unid. Métrica"].append("")
-        colunada["Fator Multiplicativo"].append("1")
-        colunada["Alteração/Adicionado"].append("")
-        colunada["Descrição HTML"].append("Em arquivo separado")
-        df_colunada = pandas.DataFrame(colunada)
-        print("OK")
-    else:
-        print('\nNÃO PROCESSANDO O ARQUIVO "' + full_file_name + '"')
-        print("-- Este script processa apenas arquivos com extensão XLSX.")
+        dataset_sheet_2 = dataset_sheet_2.append(df_listagem)
 
-print("\nExportando planilha resultante para Excel...", end="")
-# you will probably notice that by default, pandas writes the line index as the first column in the spreadsheet
-# if you don't want that, you can switch it off by adding the parameter index=False
-df_colunada.to_excel(
-    os.path.join(output_folder, "Planilha", "Geral_UtilizadaAtualmente" + ".xlsx"),
-    index=False,
+        print("INFO: Linha da planilha colunada montada com sucesso")
+    except Exception as error:
+        print(
+            "ERROR: {} ao tentar processar o arquivo {}".format(error, excel_file_name)
+        )
+
+print("INFO: Gerando o arquivo Excel resultante")
+
+print("DEBUG: Montando o objeto de geração do arquivo Excel")
+excel_file = pandas.ExcelWriter(
+    os.path.join(output_folder, excel_folder, "resulting_spreadsheet.xlsx"),
+    engine="xlsxwriter",
 )
-print("OK")
 
-print("Processo finalizado com sucesso")
+print("DEBUG: Escrevendo na primeira aba da planilha o conteúdo da colunada")
+dataframe_sheet_1 = pandas.DataFrame(dataset_sheet_1)
+dataframe_sheet_1.to_excel(excel_file, sheet_name="Colunada", index=False)
+
+print("DEBUG: Escrevendo na segunda aba da planilha o conteúdo da listagem")
+dataframe_sheet_2 = pandas.DataFrame(dataset_sheet_2)
+dataframe_sheet_2.to_excel(excel_file, sheet_name="Listagem", index=False)
+
+print("DEBUG: Salvando e fechando o arquivo Excel resultante")
+excel_file.save()
+
+print("INFO: Arquivo Excel gerado com sucesso")
+
+print("INFO: Processo finalizado com sucesso")
