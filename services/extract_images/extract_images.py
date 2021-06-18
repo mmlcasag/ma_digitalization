@@ -1,7 +1,8 @@
 import os
 import sys
 
-sys.path.append("..\..")
+path = "..{}..".format(os.sep)
+sys.path.append(path)
 
 import utils.os as os_utils
 import utils.excel as excel_utils

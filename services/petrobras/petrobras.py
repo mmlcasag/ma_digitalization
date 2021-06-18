@@ -3,7 +3,8 @@ import sys
 import pandas
 import openpyxl
 
-sys.path.append("..\..")
+path = "..{}..".format(os.sep)
+sys.path.append(path)
 
 import utils.os as os_utils
 import utils.ma as ma_utils

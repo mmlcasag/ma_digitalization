@@ -1,6 +1,8 @@
 import os
 import csv
-import win32com.client as win32
+
+if os.name == "nt":
+    import win32com.client as win32
 
 import utils.os as os_utils
 import utils.image as image_utils
@@ -24,6 +26,10 @@ def export_to_csv(sheet, csv_file_name, delimiter=",", replacement="."):
 
 
 def extract_images(file_name, output_folder):
+    if os.name != "nt":
+        print("INFO: Importação de imagem não implementada para ambientes linux")
+        return
+
     excel = win32.gencache.EnsureDispatch("Excel.Application")
     workbook = excel.Workbooks.Open(file_name)
     os_utils.create_folder(output_folder)
