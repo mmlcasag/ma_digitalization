@@ -14,7 +14,7 @@ pre-commit = "*"
 
 [dev-packages]
 pyinstaller = "*"
-pywin32-ctypes = "*"
+pywin32-ctypes = {version = "*", sys_platform = "== 'win32'"}
 flake8 = "*"
 black = "*"
 
