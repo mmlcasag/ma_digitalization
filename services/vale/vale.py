@@ -62,8 +62,8 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("INFO: Selecionando a aba ativa da planilha")
         sheet = workbook.active
 
-        print('DEBUG: Deletando linhas até chegar em "Cód."')
-        excel_utils.delete_until(sheet, "Cód.")
+        print('DEBUG: Deletando linhas até que 4ª coluna, 1ª linha seja "Descrição"')
+        excel_utils.delete_until(sheet, "Descrição", 4, 1)
 
         print("INFO: Exportando o resultado para um arquivo CSV")
         excel_utils.export_to_csv(
@@ -93,7 +93,15 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         df = df.mask(df.eq("None")).dropna(how="all")
 
         print("DEBUG: Ajustando os nomes das colunas")
-        df = df.rename(columns={"PMM": "Unitário", "Valor": "Total", "UM": "UN"})
+        df = df.rename(
+            columns={
+                "Material": "Cód.",
+                "PMM": "Unitário",
+                "Valor": "Total",
+                "UM": "UN",
+                "PUC": "Preço da última compra ou valor comercial\n(PREÇO UNITÁRIO)",
+            }
+        )
 
         print(
             "DEBUG: Carregando um dataset baseado no dataset principal, para ser utilizado na geração da aba de listagem"

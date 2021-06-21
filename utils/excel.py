@@ -10,8 +10,8 @@ import utils.image as image_utils
 from PIL import ImageGrab
 
 
-def delete_until(sheet, target_value):
-    while str(sheet.cell(1, 1).value) != str(target_value):
+def delete_until(sheet, target_value, column_index=1, row_index=1):
+    while str(sheet.cell(row_index, column_index).value) != str(target_value):
         sheet.delete_rows(1, 1)
 
 
