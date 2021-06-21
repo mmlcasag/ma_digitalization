@@ -6,6 +6,7 @@
 /tmp
 *.venv
 *.spec
+.idea
 
 services/*/output
 services/*/tmp
