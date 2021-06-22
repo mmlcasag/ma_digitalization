@@ -20,7 +20,9 @@ def get_asset_description(dataframe, description_column, sort_by_column, how_man
 
     # retains in the dataframe only the first word of the original description
     for index, row in dataframe.iterrows():
-        dataframe.at[index, description_column] = row[description_column].split(" ")[0]
+        dataframe.at[index, description_column] = str(row[description_column]).split(
+            " "
+        )[0]
 
     # sorts the dataframe by the requested column and retrieves only the unique values
     assets = dataframe.sort_values([sort_by_column], ascending=False)[
@@ -53,6 +55,25 @@ def get_asset_description(dataframe, description_column, sort_by_column, how_man
     asset_description = asset_description[0:225]
 
     return asset_description
+
+
+def split_city_and_state(location):
+    location = location.replace(" / ", "/")
+    location = location.replace("/ ", "/")
+    location = location.replace(" /", "/")
+    location = location.replace(" - ", "-")
+    location = location.replace("- ", "-")
+    location = location.replace(" -", "-")
+    location = location.replace("-", "/")
+
+    if "/" in location:
+        location = location.split("/")
+    elif "-" in location:
+        location = location.split("-")
+    else:
+        location = location.split(" ")
+
+    return location
 
 
 def get_spreadsheet_columns():

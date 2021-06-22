@@ -2,6 +2,7 @@ import os
 import sys
 import pandas
 import openpyxl
+import warnings
 
 path = "..{}..".format(os.sep)
 sys.path.append(path)
@@ -10,6 +11,8 @@ import utils.os as os_utils
 import utils.ma as ma_utils
 import utils.html as html_utils
 import utils.excel as excel_utils
+
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 absolute_path = os.getcwd()
 
@@ -30,15 +33,11 @@ os_utils.create_folder(output_folder, images_folder)
 dataset_sheet_1 = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns())
 dataset_sheet_2 = pandas.DataFrame()
 
-asset_number = 0
-
 allowed_extensions = ["xlsx", "xlsb"]
 
 for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:
         print('INFO: PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
-
-        asset_number = asset_number + 1
 
         file_name = os_utils.get_file_name(excel_file_name)
 
@@ -50,7 +49,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             absolute_path,
             output_folder,
             images_folder,
-            str(asset_number),
+            file_name,
         )
         excel_utils.extract_images(input_path, output_path)
 
@@ -62,7 +61,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("INFO: Selecionando a aba ativa da planilha")
         sheet = workbook.active
 
-        print('DEBUG: Deletando linhas até que 4ª coluna, 1ª linha seja "Descrição"')
+        print(
+            'DEBUG: Deletando linhas até que quarta coluna, primeira linha seja "Descrição"'
+        )
         excel_utils.delete_until(sheet, "Descrição", 4, 1)
 
         print("INFO: Exportando o resultado para um arquivo CSV")
@@ -95,53 +96,54 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("DEBUG: Ajustando os nomes das colunas")
         df = df.rename(
             columns={
+                "Nº lote": "Lote Ref. / Ativo-Frota",
                 "Material": "Cód.",
                 "PMM": "Unitário",
                 "Valor": "Total",
                 "UM": "UN",
                 "PUC": "Preço da última compra ou valor comercial\n(PREÇO UNITÁRIO)",
+                "Código Grupo de Mercadorias": "Código Grupo de mercadorias",
+                "Descrição do Grupo de Mercadorias": "Descrição do grupo de mercadorias",
             }
         )
 
         print(
             "DEBUG: Carregando um dataset baseado no dataset principal, para ser utilizado na geração da aba de listagem"
         )
-        df_listagem = df
-
-        print("DEBUG: Removendo colunas desnecessárias do dataset da aba de listagem")
-        unwanted_columns = [
-            "Motivo",
-            "Analista",
-            "Aprovador",
-            "Diretoria",
-            "Gerência",
-            "Código Grupo de mercadorias",
-            "Descrição do grupo de mercadorias",
-            "Preço da última compra ou valor comercial\n(PREÇO UNITÁRIO)",
-            "Endereço do item",
-            "Campo de conferência para armazem",
-            "Campo de conferência para CMD (opcional)",
-            "Peso estimado em Kg",
-            "Valor estimado do sucateamento",
-            "Responsável CMD",
-            "CMD / Mina\n(selecionar a opção da lista)",
-            "Cidade / Estado\n(onde se encontra o lote fisicamente)",
-        ]
-        df_listagem = df_listagem.drop(columns=unwanted_columns)
+        df_listagem = df.reindex(
+            columns=[
+                "Cód.",
+                "Centro",
+                "Depósito",
+                "Descrição",
+                "Fabricante",
+                "PN",
+                "Qte",
+                "UN",
+                "Unitário",
+                "Total",
+                "Lote Ref. / Ativo-Frota",
+            ]
+        )
 
         print("INFO: Exportando os produtos do lote para um arquivo HTML")
 
         print(
-            "DEBUG: Carregando um dataset baseado no dataset do arquivo Excel, para ser utilizado na geração do HTML"
+            "DEBUG: Carregando um dataset baseado no dataset principal, para ser utilizado na geração do HTML"
         )
-        df_html = df_listagem
-
-        print("DEBUG: Removendo colunas desnecessárias do dataset do arquivo HTML")
-        df_html = df_html.drop(columns=["Unitário", "Total"])
-
-        print("DEBUG: Movendo colunas de posição no dataset do arquivo HTML")
-        cols = list(df_html.columns.values)
-        df_html = df_html[cols[0:4] + cols[5:8] + [cols[4]] + [cols[8]]]
+        df_html = df.reindex(
+            columns=[
+                "Cód.",
+                "Centro",
+                "Depósito",
+                "Descrição",
+                "Fabricante",
+                "PN",
+                "Qte",
+                "UN",
+                "Lote Ref. / Ativo-Frota",
+            ]
+        )
 
         print("DEBUG: Gerando código HTML a partir dos dados do dataset")
         html_content = df_html.to_html(index=False, na_rep="")
@@ -172,45 +174,93 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("INFO: Montando a linha da planilha colunada")
 
         print("DEBUG: Buscando o nome do responsável do lote")
-        asset_manager_name = df["Responsável CMD"][0]
+        try:
+            asset_manager_name = df["Responsável CMD"][0]
+        except Exception as error:
+            print(
+                "ERROR: {} ao tentar buscar o nome do responsável do lote".format(error)
+            )
+            asset_manager_name = ""
 
         print("DEBUG: Buscando o nome da unidade do lote")
-        asset_owner_name = df["CMD / Mina\n(selecionar a opção da lista)"][0]
+        try:
+            asset_owner_name = df["CMD / Mina\n(selecionar a opção da lista)"][0]
+        except Exception as error:
+            print("ERROR: {} ao tentar buscar o nome da unidade do lote".format(error))
+            asset_owner_name = ""
 
         print("DEBUG: Buscando o município e o estado do lote")
-        asset_location = df["Cidade / Estado\n(onde se encontra o lote fisicamente)"][0]
-        asset_location = asset_location.replace(" / ", "/")
-        asset_location = asset_location.replace(" - ", "-")
-        asset_location = asset_location.replace("-", "/")
-        asset_location = asset_location.replace(" ", "/")
-        asset_location = asset_location.split("/")
-        asset_location_city = asset_location[0]
-        asset_location_state = asset_location[1]
+        try:
+            asset_location = ma_utils.split_city_and_state(
+                df["Cidade / Estado\n(onde se encontra o lote fisicamente)"][0]
+            )
+            asset_location_city = asset_location[0]
+            asset_location_state = asset_location[1]
+        except Exception as error:
+            print(
+                "ERROR: {} ao tentar buscar o município e o estado do lote".format(
+                    error
+                )
+            )
+            asset_location_city = ""
+            asset_location_state = ""
 
         print("DEBUG: Buscando o número de referência do lote")
-        asset_reference_number = df["Nº lote"][0]
+        try:
+            asset_reference_number = df["Lote Ref. / Ativo-Frota"][0]
+        except Exception as error:
+            print(
+                "ERROR: {} ao tentar buscar o número de referência do lote".format(
+                    error
+                )
+            )
+            asset_reference_number = ""
 
         print("DEBUG: Definindo a descrição resumida do lote")
-        asset_description = ma_utils.get_asset_description(df, "Descrição", "Total", 5)
+        try:
+            asset_description = ma_utils.get_asset_description(
+                df, "Descrição", "Total", 5
+            )
+        except Exception as error:
+            print(
+                "ERROR: {} ao tentar definir a descrição resumida do lote".format(error)
+            )
+            asset_description = ""
 
         print("DEBUG: Buscando o valor de referência do lote")
-        asset_reference_value = round(df["Total"].astype(float).sum(), 2)
+        try:
+            asset_reference_value = round(df["Total"].astype(float).sum(), 2)
+        except Exception as error:
+            print(
+                "ERROR: {} ao tentar buscar o valor de referência do lote".format(error)
+            )
+            asset_reference_value = 0
 
         print("DEBUG: Buscando o valor inicial do lote")
-        asset_initial_value = round(float(asset_reference_value / 100), 2)
+        try:
+            asset_initial_value = round(float(asset_reference_value / 100), 2)
+        except Exception as error:
+            print("ERROR: {} ao tentar buscar o valor inicial do lote".format(error))
+            asset_initial_value = 0
 
         print("DEBUG: Buscando o valor de incremento do lote")
-        asset_increment_value = int(
-            ma_utils.get_closest_value(
-                ma_utils.get_available_increments(), asset_initial_value / 10
+        try:
+            asset_increment_value = int(
+                ma_utils.get_closest_value(
+                    ma_utils.get_available_increments(), asset_initial_value / 10
+                )
             )
-        )
+        except Exception as error:
+            print(
+                "ERROR: {} ao tentar buscar o valor de incremento do lote".format(error)
+            )
+            asset_increment_value = 0
 
         print("DEBUG: Gerando a linha colunada do lote")
         dataset_sheet_1 = dataset_sheet_1.append(
             pandas.Series(
                 [
-                    asset_number,
+                    asset_reference_number,
                     "novo",
                     asset_reference_number,
                     asset_description,

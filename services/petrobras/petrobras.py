@@ -2,6 +2,7 @@ import os
 import sys
 import pandas
 import openpyxl
+import warnings
 
 path = "..{}..".format(os.sep)
 sys.path.append(path)
@@ -10,6 +11,8 @@ import utils.os as os_utils
 import utils.ma as ma_utils
 import utils.html as html_utils
 import utils.excel as excel_utils
+
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 absolute_path = os.getcwd()
 

@@ -30,27 +30,39 @@ def extract_images(file_name, output_folder):
         print("INFO: Importação de imagem não implementada para ambientes linux")
         return
 
-    excel = win32.gencache.EnsureDispatch("Excel.Application")
-    workbook = excel.Workbooks.Open(file_name)
+    image_count = 0
     os_utils.create_folder(output_folder)
 
-    image_count = 0
+    try:
+        excel = win32.gencache.EnsureDispatch("Excel.Application")
+        workbook = excel.Workbooks.Open(file_name)
 
-    for sheet in workbook.Worksheets:
-        for i, shape in enumerate(sheet.Shapes):
-            if shape.Name.startswith("Picture") or shape.Name.startswith("Image"):
-                image_count = image_count + 1
-                image_name = os.path.join(
-                    output_folder, "image_{}.png".format(image_count)
-                )
+        for sheet in workbook.Worksheets:
+            for i, shape in enumerate(sheet.Shapes):
+                if shape.Name.startswith("Picture") or shape.Name.startswith("Image"):
+                    try:
+                        image_count = image_count + 1
+                        image_name = os.path.join(
+                            output_folder, "image_{}.png".format(image_count)
+                        )
 
-                print('DEBUG: Extraindo a imagem "{}"'.format(image_name))
-                shape.Copy()
-                image = ImageGrab.grabclipboard()
-                image.save(image_name, "png")
+                        print('DEBUG: Extraindo a imagem "{}"'.format(image_name))
+                        shape.Copy()
+                        image = ImageGrab.grabclipboard()
+                        image.save(image_name, "png")
 
-                print("DEBUG: Convertendo de PNG para JPG")
-                image_utils.convert_from_png_to_jpg(image_name, output_folder, False)
-
-    workbook.Close()
-    excel.Quit()
+                        print("DEBUG: Convertendo de PNG para JPG")
+                        image_utils.convert_from_png_to_jpg(
+                            image_name, output_folder, False
+                        )
+                    except Exception as error:
+                        print(
+                            "ERROR: {} ao tentar extrair a imagem {}".format(
+                                error, image_name
+                            )
+                        )
+    except Exception as error:
+        print("ERROR: {} ao tentar abrir o Excel {}".format(error, file_name))
+    finally:
+        workbook.Close()
+        excel.Quit()
