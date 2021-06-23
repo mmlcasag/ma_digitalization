@@ -73,7 +73,7 @@ class DedaloConverter(SpreadsheetConverter):
 
 
 if __name__ == "__main__":
-    dedadoConverter = DedaloConverter(
+    dedaloConverter = DedaloConverter(
         ".",
         ["input"],
         [
@@ -81,4 +81,4 @@ if __name__ == "__main__":
             os.path.join("output", "xlsx"),
         ],
     )
-    dedadoConverter.execute()
+    dedaloConverter.execute()
