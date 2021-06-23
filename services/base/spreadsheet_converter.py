@@ -16,25 +16,25 @@ class SpreadsheetConverter:
         self._name_output_folders = name_output_folders
 
     def execute(self):
-        self.createInputFolders()
-        self.createOutputFolders()
-        list_files = self.getFileList()
+        self.create_input_folder()
+        self.create_output_folder()
+        list_files = self.get_file_list()
         for file in list_files:
-            self.processFile(file)
+            self.process_file(file)
 
-    def createInputFolders(self):
+    def create_input_folder(self):
         for folder_name in self._name_input_folders:
             folder_directory = f"{self._base_folder}/{folder_name}"
             os_utils.create_folder(folder_directory)
             self._input_folders.append(folder_directory)
 
-    def createOutputFolders(self):
+    def create_output_folder(self):
         for folder_name in self._name_output_folders:
             folder_directory = f"{self._base_folder}/{folder_name}"
             os_utils.create_folder(folder_directory)
             self._output_folders.append(folder_directory)
 
-    def getFileList(self):
+    def get_file_list(self):
         file_list = []
         for folder in self._input_folders:
             for file in os_utils.get_files_list(folder):
@@ -48,5 +48,5 @@ class SpreadsheetConverter:
         return text
 
     @abc.abstractmethod
-    def processFile(self, file):
+    def process_file(self, file):
         """Create process to convert file"""
