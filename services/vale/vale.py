@@ -12,14 +12,13 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 absolute_path = os.getcwd()
 
-base_folder = f"{absolute_path}/services/vale"
-input_folder = f"{base_folder}/input"
-output_folder = f"{base_folder}/output"
-csv_folder = f"{output_folder}/csv"
-html_folder = f"{output_folder}/html"
-excel_folder = f"{output_folder}/xlsx"
-images_folder = f"{base_folder}/images"
-
+base_folder = "."
+input_folder = os.path.join(base_folder, "input")
+output_folder = os.path.join(base_folder, "output")
+csv_folder = os.path.join(output_folder, "csv")
+html_folder = os.path.join(output_folder, "html")
+excel_folder = os.path.join(output_folder, "xlsx")
+images_folder = os.path.join(output_folder, "images")
 
 os_utils.create_folder(input_folder)
 os_utils.create_folder(output_folder)
