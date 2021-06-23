@@ -35,7 +35,9 @@ for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
         print('DEBUG: Diretório de saída "{}"'.format(output_path))
 
         excel_utils.extract_images(input_path, output_path)
+
+        print("INFO: Arquivo processado com sucesso")
     except Exception as error:
         print("ERROR: {} ao tentar processar o arquivo {}".format(error, file_name))
 
-print("INFO: Processo finalizado com sucesso")
+done = str(input("INFO: Processo finalizado com sucesso"))
