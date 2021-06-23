@@ -1,11 +1,7 @@
 import os
-import sys
 import pandas
 import openpyxl
 import warnings
-
-path = "..{}..".format(os.sep)
-sys.path.append(path)
 
 import utils.os as os_utils
 import utils.ma as ma_utils
@@ -16,12 +12,14 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 absolute_path = os.getcwd()
 
-input_folder = "input"
-output_folder = "output"
-csv_folder = "csv"
-html_folder = "html"
-excel_folder = "xlsx"
-images_folder = "images"
+base_folder = f"{absolute_path}/services/vale"
+input_folder = f"{base_folder}/input"
+output_folder = f"{base_folder}/output"
+csv_folder = f"{output_folder}/csv"
+html_folder = f"{output_folder}/html"
+excel_folder = f"{output_folder}/xlsx"
+images_folder = f"{base_folder}/images"
+
 
 os_utils.create_folder(input_folder)
 os_utils.create_folder(output_folder)

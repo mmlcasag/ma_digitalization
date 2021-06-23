@@ -10,12 +10,14 @@ xlsxwriter = "*"
 pandas = "*"
 pillow = "*"
 pywin32 = {version = "*", sys_platform = "== 'win32'"}
+setuptools = "*"
 
 [dev-packages]
 flake8 = "*"
 black = "*"
 pyinstaller = "*"
 pefile = "*"
+unknown = {editable = true, path = "."}
 pywin32-ctypes = {version = "*", sys_platform = "== 'win32'"}
 
 [pipenv]
