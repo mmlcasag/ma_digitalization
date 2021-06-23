@@ -4,19 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-numpy = "*"
-pandas = "*"
-openpyxl = "*"
-pywin32 = {version = "*", sys_platform = "== 'win32'"}
-pillow = "*"
-xlsxwriter = "*"
 pre-commit = "*"
+openpyxl = "*"
+xlsxwriter = "*"
+pandas = "*"
+pillow = "*"
+pywin32 = {version = "*", sys_platform = "== 'win32'"}
 
 [dev-packages]
-pyinstaller = "*"
-pywin32-ctypes = {version = "*", sys_platform = "== 'win32'"}
 flake8 = "*"
 black = "*"
+pyinstaller = "*"
+pefile = "*"
+pywin32-ctypes = {version = "*", sys_platform = "== 'win32'"}
 
 [pipenv]
 allow_prereleases = true

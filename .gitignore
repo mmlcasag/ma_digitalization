@@ -1,12 +1,6 @@
-/__pycache__
+/.venv
 /build
 /dist
-/input
-/output
-/tmp
-*.venv
+services/*/output
 *.spec
 .idea
-
-services/*/output
-services/*/tmp
