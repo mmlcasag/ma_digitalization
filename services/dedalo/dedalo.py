@@ -5,7 +5,6 @@ from services.base.spreadsheet_converter import SpreadsheetConverter
 
 class DedaloConverter(SpreadsheetConverter):
     def process_file(self, file):
-        print("IMPORTANDO AQUIVO")
         sheet = pandas.read_excel(file)
         sheet["DESCRIÇÃO"] = sheet["DESCRIÇÃO"].apply(
             lambda x: self.remove_prefix(x, "Lote com").strip().capitalize()
