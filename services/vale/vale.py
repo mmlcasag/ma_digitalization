@@ -187,7 +187,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             asset_owner_name = df["CMD / Mina\n(selecionar a opção da lista)"][0]
         except Exception as error:
             print("ERROR: {} ao tentar buscar o nome da unidade do lote".format(error))
-            asset_owner_name = ""
+            asset_owner_name = "Vale"
 
         print("DEBUG: Buscando o município e o estado do lote")
         try:
