@@ -313,4 +313,6 @@ excel_file.save()
 
 print("INFO: Arquivo Excel gerado com sucesso")
 
-done = str(input("INFO: Processo finalizado com sucesso"))
+done = str(
+    input("INFO: Processo finalizado com sucesso. Pressione enter para continuar...")
+)

@@ -1,11 +1,7 @@
 import os
-import sys
 import pandas
 import openpyxl
 import warnings
-
-path = "..{}..".format(os.sep)
-sys.path.append(path)
 
 import utils.os as os_utils
 import utils.ma as ma_utils
@@ -381,4 +377,6 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             "ERROR: {} ao tentar processar o arquivo {}".format(error, excel_file_name)
         )
 
-done = str(input("INFO: Processo finalizado com sucesso"))
+done = str(
+    input("INFO: Processo finalizado com sucesso. Pressione enter para continuar...")
+)
