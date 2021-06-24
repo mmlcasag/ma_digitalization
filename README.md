@@ -93,6 +93,14 @@ pipenv install
 pipenv install --dev
 ```
 
+It is also necessary to generate the packages that the project itself generates, so you need to run the following command:
+
+```
+pipenv install -d --editable .
+```
+These packages are configured in the file `setup.cfg`, if you need to add new packages, you need to run the above command again
+
+
 All packages inside `Pipfile` will be installed.
 
 After this, install git hooks running:
