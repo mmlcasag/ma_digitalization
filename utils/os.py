@@ -19,7 +19,6 @@ def create_folder(folder_name, subfolder_name=""):
             os.makedirs(folder_name)
     else:
         if not os.path.exists(os.path.join(folder_name, subfolder_name)):
-            print(os.path.join(folder_name, subfolder_name))
             os.makedirs(os.path.join(folder_name, subfolder_name))
 
 

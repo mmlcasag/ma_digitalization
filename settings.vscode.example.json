@@ -4,5 +4,5 @@
     "python.linting.lintOnSave": true,
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
-    "python.pythonPath": ".venv/bin/python"
+    "python.pythonPath": "YOUR PYTHON PATCH INSIDE .venv"
 }
