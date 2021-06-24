@@ -1,11 +1,8 @@
-/__pycache__
 /.venv
+/.vscode
 /build
 /dist
 services/*/output
-services/*/tmp
-*.spec
-.vscode
-.idea
+services/*/log
 **.egg-info
-**log/
+*.spec

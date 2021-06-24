@@ -65,7 +65,7 @@ class DedaloConverter(SpreadsheetConverter):
 
         file_name = os.path.basename(file)
         filepath = os.path.join("output", "xlsx", file_name)
-        logger.info(f"Criando arquivo de saida: {filepath}")
+        logger.info(f"Criando arquivo de saída: {filepath}")
         writer = pandas.ExcelWriter(filepath, engine="xlsxwriter")
 
         df = pandas.DataFrame(data_to_output)
@@ -92,4 +92,4 @@ if __name__ == "__main__":
         logger.exception(error)
 
     logger.info("Processo finalizado com sucesso.")
-    done = str(input("Pressione enter para continuar..."))
+    done = str(input("Pressione ENTER para encerrar..."))

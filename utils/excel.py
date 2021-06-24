@@ -49,23 +49,21 @@ def extract_images(file_name, output_folder):
                             output_folder, "image_{}.png".format(image_count)
                         )
 
-                        print('DEBUG: Extraindo a imagem "{}"'.format(image_name))
+                        logger.info('Extraindo a imagem "{}"'.format(image_name))
                         shape.Copy()
                         image = ImageGrab.grabclipboard()
                         image.save(image_name, "png")
 
-                        print("DEBUG: Convertendo de PNG para JPG")
+                        logger.info("Convertendo de PNG para JPG")
                         image_utils.convert_from_png_to_jpg(
                             image_name, output_folder, False
                         )
                     except Exception as error:
-                        print(
-                            "ERROR: {} ao tentar extrair a imagem {}".format(
-                                error, image_name
-                            )
+                        logger.error(
+                            "{} ao tentar extrair a imagem {}".format(error, image_name)
                         )
     except Exception as error:
-        print("ERROR: {} ao tentar abrir o Excel {}".format(error, file_name))
+        logger.error("{} ao tentar abrir o Excel {}".format(error, file_name))
     finally:
         workbook.Close()
         excel.Quit()

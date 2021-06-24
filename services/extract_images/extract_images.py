@@ -29,14 +29,14 @@ for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
             os_utils.get_file_name(file_name),
         )
 
-        logger.debug('Arquivo de entrada "{}"'.format(input_path))
-        logger.debug('Diretório de saída "{}"'.format(output_path))
+        logger.info('Arquivo de entrada "{}"'.format(input_path))
+        logger.info('Diretório de saída "{}"'.format(output_path))
 
         excel_utils.extract_images(input_path, output_path)
 
-        logger.info("Arquivo processado com sucesso")
+        logger.info("Arquivo {} processado com sucesso".format(file_name))
     except Exception as error:
         logger.error("{} ao tentar processar o arquivo {}".format(error, file_name))
 
 logger.info("Processo finalizado com sucesso.")
-done = str(input("Pressione enter para continuar..."))
+done = str(input("Pressione ENTER para encerrar..."))

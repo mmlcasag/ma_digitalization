@@ -15,13 +15,12 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 absolute_path = os.getcwd()
 
-base_folder = "."
-input_folder = os.path.join(base_folder, "input")
-output_folder = os.path.join(base_folder, "output")
-csv_folder = os.path.join(output_folder, "csv")
-html_folder = os.path.join(output_folder, "html")
-excel_folder = os.path.join(output_folder, "xlsx")
-images_folder = os.path.join(output_folder, "images")
+input_folder = "input"
+output_folder = "output"
+csv_folder = "csv"
+html_folder = "html"
+excel_folder = "xlsx"
+images_folder = "images"
 
 os_utils.create_folder(input_folder)
 os_utils.create_folder(output_folder)
@@ -41,7 +40,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         file_name = os_utils.get_file_name(excel_file_name)
 
-        logger.debug('Nome do arquivo sem extensão "{}"'.format(file_name))
+        logger.info('Nome do arquivo sem extensão "{}"'.format(file_name))
 
         logger.info("Extraindo imagens do arquivo Excel")
         input_path = os.path.join(absolute_path, input_folder, excel_file_name)
@@ -61,7 +60,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.info("Selecionando a aba ativa da planilha")
         sheet = workbook.active
 
-        logger.debug(
+        logger.info(
             'Deletando linhas até que quarta coluna, primeira linha seja "Descrição"'
         )
         excel_utils.delete_until(sheet, "Descrição", 4, 1)
@@ -74,7 +73,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             ",",
         )
 
-        logger.debug("Fechando o arquivo Excel")
+        logger.info("Fechando o arquivo Excel")
         workbook.close()
 
         logger.info("Carregando um dataset com os dados do arquivo CSV")
@@ -83,17 +82,17 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             delimiter=";",
         )
 
-        logger.debug(
+        logger.info(
             "Convertendo todas as colunas do dataset da primeira aba para texto"
         )
         df = df.astype(str)
 
-        logger.debug(
+        logger.info(
             "Desconsiderando as linhas cujos valores de todas as colunas estão vazios ou inválidos"
         )
         df = df.mask(df.eq("None")).dropna(how="all")
 
-        logger.debug("Ajustando os nomes das colunas")
+        logger.info("Ajustando os nomes das colunas")
         df = df.rename(
             columns={
                 "Cód.": "Código do Produto",
@@ -118,7 +117,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             }
         )
 
-        logger.debug(
+        logger.info(
             "Desconsiderando colunas desnecessárias para o processamento do arquivo"
         )
         df = df.reindex(
@@ -144,9 +143,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Exportando os produtos do lote para um arquivo HTML")
 
-        logger.debug(
-            "Carregando um dataset baseado no dataset principal, para ser utilizado na geração do HTML"
-        )
+        logger.info("Carregando um dataset para geração do arquivo HTML")
         df_html = df.reindex(
             columns=[
                 "Código do Produto",
@@ -161,13 +158,13 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             ]
         )
 
-        logger.debug("Gerando código HTML a partir dos dados do dataset")
+        logger.info("Gerando código HTML a partir dos dados do dataset")
         html_content = df_html.to_html(index=False, na_rep="")
 
-        logger.debug("Concatenando o cabeçalho e o rodapé do arquivo HTML")
+        logger.info("Concatenando o cabeçalho e o rodapé do arquivo HTML")
         html_content = html_utils.get_header() + html_content + html_utils.get_footer()
 
-        logger.debug("Criando o arquivo HTML")
+        logger.info("Criando o arquivo HTML")
         html_file = open(
             os.path.join(
                 output_folder,
@@ -179,37 +176,35 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             encoding="utf-8",
         )
 
-        logger.debug("Escrevendo no arquivo HTML")
+        logger.info("Escrevendo no arquivo HTML")
         html_file.write(html_content)
 
-        logger.debug("Fechando o arquivo HTML")
+        logger.info("Fechando o arquivo HTML")
         html_file.close()
 
         logger.info("Exportação do arquivo HTML finalizada com sucesso")
 
         logger.info("Montando a linha da planilha colunada")
 
-        logger.debug("Buscando o nome do responsável do lote")
+        logger.info("Buscando o nome do responsável do lote")
         try:
-            asset_manager_name = df["Responsável CMD"][0]
+            asset_manager_name = df["Responsável"][0]
         except Exception as error:
             logger.error(
                 "{} ao tentar buscar o nome do responsável do lote".format(error)
             )
             asset_manager_name = ""
 
-        logger.debug("Buscando o nome da empresa do lote")
+        logger.info("Buscando o nome da empresa do lote")
         try:
             asset_owner_name = df["Empresa"][0]
         except Exception as error:
             logger.error("{} ao tentar buscar o nome da empresa do lote".format(error))
             asset_owner_name = "Vale"
 
-        logger.debug("Buscando o município e o estado do lote")
+        logger.info("Buscando o município e o estado do lote")
         try:
-            asset_location = ma_utils.split_city_and_state(
-                df["Cidade / Estado\n(onde se encontra o lote fisicamente)"][0]
-            )
+            asset_location = ma_utils.split_city_and_state(df["Localização"][0])
             asset_location_city = asset_location[0]
             asset_location_state = asset_location[1]
         except Exception as error:
@@ -219,7 +214,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             asset_location_city = ""
             asset_location_state = ""
 
-        logger.debug("Buscando o número do lote de referência")
+        logger.info("Buscando o número do lote de referência")
         try:
             asset_reference_number = df["Lote de Referência"][0]
         except Exception as error:
@@ -228,7 +223,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             )
             asset_reference_number = ""
 
-        logger.debug("Definindo a descrição resumida do lote")
+        logger.info("Definindo a descrição resumida do lote")
         try:
             asset_description = ma_utils.get_asset_description(
                 df, "Descrição do Produto", "Valor Total", 5
@@ -239,7 +234,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             )
             asset_description = ""
 
-        logger.debug("Buscando o valor de referência do lote")
+        logger.info("Buscando o valor de referência do lote")
         try:
             asset_reference_value = round(df["Valor Total"].astype(float).sum(), 2)
         except Exception as error:
@@ -248,14 +243,14 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             )
             asset_reference_value = 0
 
-        logger.debug("Buscando o valor inicial do lote")
+        logger.info("Buscando o valor inicial do lote")
         try:
             asset_initial_value = round(float(asset_reference_value / 100), 2)
         except Exception as error:
             logger.error("{} ao tentar buscar o valor inicial do lote".format(error))
             asset_initial_value = 0
 
-        logger.debug("Buscando o valor de incremento do lote")
+        logger.info("Buscando o valor de incremento do lote")
         try:
             asset_increment_value = int(
                 ma_utils.get_closest_value(
@@ -268,7 +263,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             )
             asset_increment_value = 0
 
-        logger.debug("Gerando a linha colunada do lote")
+        logger.info("Gerando a linha colunada do lote")
         dataset_sheet_1 = dataset_sheet_1.append(
             pandas.Series(
                 [
@@ -309,24 +304,24 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
 logger.info("Gerando o arquivo Excel resultante")
 
-logger.debug("Montando o objeto de geração do arquivo Excel")
+logger.info("Montando o objeto de geração do arquivo Excel")
 excel_file = pandas.ExcelWriter(
     os.path.join(output_folder, excel_folder, "resulting_spreadsheet.xlsx"),
     engine="xlsxwriter",
 )
 
-logger.debug("Escrevendo na primeira aba da planilha o conteúdo da colunada")
+logger.info("Escrevendo na primeira aba da planilha o conteúdo da colunada")
 dataframe_sheet_1 = pandas.DataFrame(dataset_sheet_1)
 dataframe_sheet_1.to_excel(excel_file, sheet_name="Colunada", index=False)
 
-logger.debug("Escrevendo na segunda aba da planilha o conteúdo da listagem")
+logger.info("Escrevendo na segunda aba da planilha o conteúdo da listagem")
 dataframe_sheet_2 = pandas.DataFrame(dataset_sheet_2)
 dataframe_sheet_2.to_excel(excel_file, sheet_name="Listagem", index=False)
 
-logger.debug("Salvando e fechando o arquivo Excel resultante")
+logger.info("Salvando e fechando o arquivo Excel resultante")
 excel_file.save()
 
 logger.info("Arquivo Excel gerado com sucesso")
 
 logger.info("Processo finalizado com sucesso.")
-done = str(input("Pressione enter para continuar..."))
+done = str(input("Pressione ENTER para encerrar..."))
