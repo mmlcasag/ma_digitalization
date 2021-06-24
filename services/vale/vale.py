@@ -93,33 +93,49 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("DEBUG: Ajustando os nomes das colunas")
         df = df.rename(
             columns={
-                "Nº lote": "Lote Ref. / Ativo-Frota",
-                "Material": "Cód.",
-                "PMM": "Unitário",
-                "Valor": "Total",
-                "UM": "UN",
-                "PUC": "Preço da última compra ou valor comercial\n(PREÇO UNITÁRIO)",
-                "Código Grupo de Mercadorias": "Código Grupo de mercadorias",
-                "Descrição do Grupo de Mercadorias": "Descrição do grupo de mercadorias",
+                "Cód.": "Código do Produto",
+                "Material": "Código do Produto",
+                "Descrição": "Descrição do Produto",
+                "PN": "Referência do Produto",
+                "Centro": "Centro",
+                "Depósito": "Depósito",
+                "Código Grupo de mercadorias": "Código do Grupo",
+                "Código Grupo de Mercadorias": "Código do Grupo",
+                "Descrição do grupo de mercadorias": "Descrição do Grupo",
+                "Descrição do Grupo de Mercadorias": "Descrição do Grupo",
+                "Fabricante": "Nome do Fabricante",
+                "Qte": "Quantidade",
+                "UM": "Unidade",
+                "PMM": "Valor Unitário",
+                "Valor": "Valor Total",
+                "Responsável CMD": "Responsável",
+                "CMD / Mina\n(selecionar a opção da lista)": "Empresa",
+                "Cidade / Estado\n(onde se encontra o lote fisicamente)": "Localização",
+                "Nº lote": "Lote de Referência",
             }
         )
 
         print(
-            "DEBUG: Carregando um dataset baseado no dataset principal, para ser utilizado na geração da aba de listagem"
+            "DEBUG: Desconsiderando colunas desnecessárias para o processamento do arquivo"
         )
-        df_listagem = df.reindex(
+        df = df.reindex(
             columns=[
-                "Cód.",
+                "Código do Produto",
+                "Descrição do Produto",
+                "Referência do Produto",
                 "Centro",
                 "Depósito",
-                "Descrição",
-                "Fabricante",
-                "PN",
-                "Qte",
-                "UN",
-                "Unitário",
-                "Total",
-                "Lote Ref. / Ativo-Frota",
+                "Código do Grupo",
+                "Descrição do Grupo",
+                "Nome do Fabricante",
+                "Quantidade",
+                "Unidade",
+                "Valor Unitário",
+                "Valor Total",
+                "Responsável",
+                "Empresa",
+                "Localização",
+                "Lote de Referência",
             ]
         )
 
@@ -130,15 +146,15 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
         df_html = df.reindex(
             columns=[
-                "Cód.",
+                "Código do Produto",
+                "Descrição do Produto",
+                "Referência do Produto",
                 "Centro",
                 "Depósito",
-                "Descrição",
-                "Fabricante",
-                "PN",
-                "Qte",
-                "UN",
-                "Lote Ref. / Ativo-Frota",
+                "Nome do Fabricante",
+                "Quantidade",
+                "Unidade",
+                "Lote de Referência",
             ]
         )
 
@@ -172,25 +188,23 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         print("DEBUG: Buscando o nome do responsável do lote")
         try:
-            asset_manager_name = df["Responsável CMD"][0]
+            asset_manager_name = df["Responsável"][0]
         except Exception as error:
             print(
                 "ERROR: {} ao tentar buscar o nome do responsável do lote".format(error)
             )
             asset_manager_name = ""
 
-        print("DEBUG: Buscando o nome da unidade do lote")
+        print("DEBUG: Buscando o nome da empresa do lote")
         try:
-            asset_owner_name = df["CMD / Mina\n(selecionar a opção da lista)"][0]
+            asset_owner_name = df["Empresa"][0]
         except Exception as error:
-            print("ERROR: {} ao tentar buscar o nome da unidade do lote".format(error))
+            print("ERROR: {} ao tentar buscar o nome da empresa do lote".format(error))
             asset_owner_name = "Vale"
 
         print("DEBUG: Buscando o município e o estado do lote")
         try:
-            asset_location = ma_utils.split_city_and_state(
-                df["Cidade / Estado\n(onde se encontra o lote fisicamente)"][0]
-            )
+            asset_location = ma_utils.split_city_and_state(df["Localização"][0])
             asset_location_city = asset_location[0]
             asset_location_state = asset_location[1]
         except Exception as error:
@@ -202,12 +216,12 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             asset_location_city = ""
             asset_location_state = ""
 
-        print("DEBUG: Buscando o número de referência do lote")
+        print("DEBUG: Buscando o número do lote de referência")
         try:
-            asset_reference_number = df["Lote Ref. / Ativo-Frota"][0]
+            asset_reference_number = df["Lote de Referência"][0]
         except Exception as error:
             print(
-                "ERROR: {} ao tentar buscar o número de referência do lote".format(
+                "ERROR: {} ao tentar buscar o número do lote de referência".format(
                     error
                 )
             )
@@ -216,7 +230,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("DEBUG: Definindo a descrição resumida do lote")
         try:
             asset_description = ma_utils.get_asset_description(
-                df, "Descrição", "Total", 5
+                df, "Descrição do Produto", "Valor Total", 5
             )
         except Exception as error:
             print(
@@ -226,7 +240,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         print("DEBUG: Buscando o valor de referência do lote")
         try:
-            asset_reference_value = round(df["Total"].astype(float).sum(), 2)
+            asset_reference_value = round(df["Valor Total"].astype(float).sum(), 2)
         except Exception as error:
             print(
                 "ERROR: {} ao tentar buscar o valor de referência do lote".format(error)
@@ -284,7 +298,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             ignore_index=True,
         )
 
-        dataset_sheet_2 = dataset_sheet_2.append(df_listagem)
+        dataset_sheet_2 = dataset_sheet_2.append(df)
 
         print("INFO: Linha da planilha colunada montada com sucesso")
     except Exception as error:

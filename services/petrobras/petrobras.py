@@ -138,7 +138,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         print("DEBUG: Ajustando os nomes das colunas")
         df2 = df2.rename(
             columns={
-                "Unidade": "Unidade",
+                "Unidade": "Empresa",
                 "Localização": "Localização",
                 "Nº do Lote": "Número do Lote",
                 "Descrição do lote": "Descrição do Lote",
@@ -152,7 +152,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
         df2 = df2.reindex(
             columns=[
-                "Unidade",
+                "Empresa",
                 "Localização",
                 "Número do Lote",
                 "Descrição do Lote",
@@ -197,8 +197,6 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                         "Avaliação",
                         "Quantidade",
                         "Unidade",
-                        "Valor Unitário",
-                        "Valor Total",
                         "Número do Lote",
                     ]
                 )
@@ -215,7 +213,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 html_file_name = os.path.join(
                     output_folder,
                     html_folder,
-                    file_name + "_" + asset_number + ".html",
+                    asset_number + ".html",
                 )
 
                 print("DEBUG: Criando o arquivo HTML")
@@ -244,12 +242,12 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                     )
                     asset_description = ""
 
-                print("DEBUG: Buscando o nome da unidade do lote")
+                print("DEBUG: Buscando o nome da empresa do lote")
                 try:
-                    asset_owner_name = local_df2.at[0, "Unidade"]
+                    asset_owner_name = local_df2.at[0, "Empresa"]
                 except Exception as error:
                     print(
-                        "ERROR: {} ao tentar buscar o nome da unidade do lote".format(
+                        "ERROR: {} ao tentar buscar o nome da empresa do lote".format(
                             error
                         )
                     )
