@@ -1,11 +1,9 @@
 import os
-import sys
-
-path = "..{}..".format(os.sep)
-sys.path.append(path)
-
 import utils.os as os_utils
 import utils.excel as excel_utils
+from services.base.logger import Logger
+
+logger = Logger.__call__().get_logger()
 
 absolute_path = os.getcwd()
 
@@ -21,7 +19,7 @@ allowed_extensions = ["xlsx", "xlsb", "xlsm"]
 
 for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:
-        print('INFO: PROCESSANDO O ARQUIVO "{}"'.format(file_name))
+        logger.info('PROCESSANDO O ARQUIVO "{}"'.format(file_name))
 
         input_path = os.path.join(absolute_path, input_folder, file_name)
         output_path = os.path.join(
@@ -31,13 +29,14 @@ for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
             os_utils.get_file_name(file_name),
         )
 
-        print('DEBUG: Arquivo de entrada "{}"'.format(input_path))
-        print('DEBUG: Diretório de saída "{}"'.format(output_path))
+        logger.debug('Arquivo de entrada "{}"'.format(input_path))
+        logger.debug('Diretório de saída "{}"'.format(output_path))
 
         excel_utils.extract_images(input_path, output_path)
 
-        print("INFO: Arquivo processado com sucesso")
+        logger.info("Arquivo processado com sucesso")
     except Exception as error:
-        print("ERROR: {} ao tentar processar o arquivo {}".format(error, file_name))
+        logger.error("{} ao tentar processar o arquivo {}".format(error, file_name))
 
-done = str(input("INFO: Processo finalizado com sucesso"))
+logger.info("Processo finalizado com sucesso.")
+done = str(input("Pressione enter para continuar..."))

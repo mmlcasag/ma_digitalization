@@ -1,6 +1,9 @@
 import abc
 import os
 import utils.os as os_utils
+from .logger import Logger
+
+logger = Logger.__call__().get_logger()
 
 
 class SpreadsheetConverter:
@@ -19,8 +22,13 @@ class SpreadsheetConverter:
         self.create_input_folder()
         self.create_output_folder()
         list_files = self.get_file_list()
+        logger.info(f"Encontrados {len(list_files)} arquivo(s) na pasta de entrada")
         for file in list_files:
-            self.process_file(file)
+            try:
+                self.process_file(file)
+            except Exception as error:
+                logger.error(f"Erro no processamento do arquivo {file}")
+                logger.exception(error)
 
     def create_input_folder(self):
         for folder_name in self._name_input_folders:

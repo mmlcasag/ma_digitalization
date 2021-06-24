@@ -8,6 +8,9 @@ import utils.os as os_utils
 import utils.image as image_utils
 
 from PIL import ImageGrab
+from services.base.logger import Logger
+
+logger = Logger.__call__().get_logger()
 
 
 def delete_until(sheet, target_value, column_index=1, row_index=1):
@@ -27,7 +30,7 @@ def export_to_csv(sheet, csv_file_name, delimiter=",", replacement="."):
 
 def extract_images(file_name, output_folder):
     if os.name != "nt":
-        print("INFO: Importação de imagem não implementada para ambientes linux")
+        logger.warning("Importação de imagem não implementada para ambientes linux")
         return
 
     image_count = 0

@@ -1,6 +1,9 @@
 import os
 import pandas
 from services.base.spreadsheet_converter import SpreadsheetConverter
+from services.base.logger import Logger
+
+logger = Logger.__call__().get_logger()
 
 
 class DedaloConverter(SpreadsheetConverter):
@@ -61,17 +64,19 @@ class DedaloConverter(SpreadsheetConverter):
         data_to_output["Descrição HTML"] = ""
 
         file_name = os.path.basename(file)
-        writer = pandas.ExcelWriter(
-            f"{os.path.join('output/xlsx')}/{file_name}", engine="xlsxwriter"
-        )
+        filepath = os.path.join("output", "xlsx", file_name)
+        logger.info(f"Criando arquivo de saida: {filepath}")
+        writer = pandas.ExcelWriter(filepath, engine="xlsxwriter")
 
         df = pandas.DataFrame(data_to_output)
         df["VI"] = pandas.to_numeric(df["VI"])
         df.to_excel(writer, sheet_name="Colunada", index=False)
         writer.save()
+        logger.info(f"Arquivo processado com sucesso: {filepath}")
 
 
 if __name__ == "__main__":
+    logger.info("Iniciando a conversão")
     dedaloConverter = DedaloConverter(
         ".",
         ["input"],
@@ -80,4 +85,11 @@ if __name__ == "__main__":
             os.path.join("output", "xlsx"),
         ],
     )
-    dedaloConverter.execute()
+    try:
+        dedaloConverter.execute()
+    except Exception as error:
+        logger.error("Ocorreu algum erro inesperado no processamento")
+        logger.exception(error)
+
+    logger.info("Processo finalizado com sucesso.")
+    done = str(input("Pressione enter para continuar..."))

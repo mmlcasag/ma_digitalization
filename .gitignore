@@ -8,3 +8,4 @@ services/*/tmp
 .vscode
 .idea
 **.egg-info
+**log/
