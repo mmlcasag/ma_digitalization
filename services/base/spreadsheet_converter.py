@@ -46,7 +46,9 @@ class SpreadsheetConverter:
         file_list = []
         for folder in self._input_folders:
             for file in os_utils.get_files_list(folder):
-                file_list.append(f"{folder}/{file}")
+                file_src = os.path.join(folder, file)
+                if os.path.isfile(file_src):
+                    file_list.append(file_src)
 
         return file_list
 

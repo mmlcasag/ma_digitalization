@@ -1,4 +1,6 @@
 import os
+import shutil
+import re
 
 
 # from a file name like "foobar.txt"
@@ -34,3 +36,21 @@ def get_files_list(folder_name, file_extension_list=[]):
                     files_list.append(file_name)
 
     return files_list
+
+
+# Apply a regex to file name and create a folder with string returned
+# Move all files that match with regex to folder
+def move_files_by_regex_name(input_folder, output_folder, regex):
+    file_list = get_files_list(input_folder)
+
+    if len(file_list) > 0:
+        create_folder(output_folder)
+
+    file_list.sort()
+    for img_name in file_list:
+        found = re.search(regex, img_name)
+        if found:
+            destination_folder = os.path.join(output_folder, found[0])
+            create_folder(destination_folder)
+            origin_file_src = os.path.join(input_folder, img_name)
+            shutil.copy(origin_file_src, destination_folder)

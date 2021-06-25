@@ -2,6 +2,7 @@ import os
 import pandas
 from services.base.spreadsheet_converter import SpreadsheetConverter
 from services.base.logger import Logger
+import utils.os as os_utils
 
 logger = Logger.__call__().get_logger()
 
@@ -20,10 +21,15 @@ class DedaloConverter(SpreadsheetConverter):
 
             sheet[
                 "INFORMAÇÕES COMPLEMENTARES"
-            ] = "<br><br>#PRODUCT_DESCRIPTION" + sheet[
+            ] = "<br><br>#PRODUCT_DESCRIPTION<br><br>" + sheet[
                 "INFORMAÇÕES COMPLEMENTARES"
             ].astype(
                 str
+            )
+
+            sheet["INFORMAÇÕES COMPLEMENTARES"] = sheet.apply(
+                lambda x: x["INFORMAÇÕES COMPLEMENTARES"].replace("\n", "<br>"),
+                axis=1,
             )
 
             sheet["INFORMAÇÕES COMPLEMENTARES"] = sheet.apply(
@@ -88,8 +94,20 @@ if __name__ == "__main__":
     try:
         dedaloConverter.execute()
     except Exception as error:
-        logger.error("Ocorreu algum erro inesperado no processamento")
+        logger.error("Ocorreu algum erro inesperado no processamento da planilha")
         logger.exception(error)
 
-    logger.info("Processo finalizado com sucesso.")
+    logger.info("Processo de conversão da planilha finalizado com sucesso.")
+
+    input_folder = os.path.join("input", "images")
+    output_folder = os.path.join("output", "images")
+
+    try:
+        logger.info("Iniciando processo de separação das imagens")
+        os_utils.move_files_by_regex_name(input_folder, output_folder, r"\d+")
+        logger.info("Iniciando processo de separação das imagens")
+    except Exception as error:
+        logger.error("Ocorreu algum erro inesperado ao mover as imagens")
+        logger.exception(error)
+
     done = str(input("Pressione ENTER para encerrar..."))
