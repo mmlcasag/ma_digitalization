@@ -27,6 +27,9 @@ def create_folder(folder_name, subfolder_name=""):
 def get_files_list(folder_name, file_extension_list=[]):
     files_list = []
 
+    if not os.path.isdir(folder_name):
+        return files_list
+
     if len(file_extension_list) == 0:
         files_list = os.listdir(folder_name)
     else:

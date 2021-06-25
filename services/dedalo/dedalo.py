@@ -105,7 +105,7 @@ if __name__ == "__main__":
     try:
         logger.info("Iniciando processo de separação das imagens")
         os_utils.move_files_by_regex_name(input_folder, output_folder, r"\d+")
-        logger.info("Iniciando processo de separação das imagens")
+        logger.info("Finalizando processo de separação das imagens")
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado ao mover as imagens")
         logger.exception(error)
