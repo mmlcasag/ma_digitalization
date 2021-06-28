@@ -1,5 +1,8 @@
 import os
 import csv
+import zipfile
+import tempfile
+import shutil
 
 if os.name == "nt":
     import win32com.client as win32
@@ -67,3 +70,12 @@ def extract_images(file_name, output_folder):
     finally:
         workbook.Close()
         excel.Quit()
+
+
+def extract_images_from_xlsx(file, output_folder):
+    with zipfile.ZipFile(file, "r") as zip_ref:
+        shutil.rmtree(output_folder, ignore_errors=True)
+        tempdir = tempfile.mkdtemp()
+        zip_ref.extractall(tempdir)
+        shutil.copytree(os.path.join(tempdir, "xl", "media"), output_folder)
+        shutil.rmtree(tempdir)
