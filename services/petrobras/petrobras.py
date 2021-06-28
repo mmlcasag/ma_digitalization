@@ -1,7 +1,9 @@
 import os
+from services.base.images_handler import ImageHandler
 import pandas
 import openpyxl
 import warnings
+import re
 
 import utils.os as os_utils
 import utils.ma as ma_utils
@@ -369,6 +371,30 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.error(
             "{} ao tentar processar o arquivo {}".format(error, excel_file_name)
         )
+
+try:
+    input_folder = os.path.join("input", "images")
+    output_folder = os.path.join("output", "images")
+
+    logger.info("Iniciando processo de separação das imagens")
+
+    img_handler = ImageHandler(input_folder, output_folder)
+
+    img_handler.move_images(
+        lambda img_name: img_name.find("LOTE") != -1,
+        lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
+    )
+
+    img_handler.move_images(
+        lambda img_name: img_name.find("lt") != -1,
+        lambda img_name: re.search(r"lt\d+", img_name)[0].replace("lt", ""),
+    )
+
+    logger.info("Finalizando processo de separação das imagens")
+except Exception as error:
+    logger.error("Ocorreu algum erro inesperado ao mover as imagens")
+    logger.exception(error)
+
 
 logger.info("Processo finalizado com sucesso.")
 done = str(input("Pressione ENTER para encerrar..."))

@@ -2,7 +2,8 @@ import os
 import pandas
 from services.base.spreadsheet_converter import SpreadsheetConverter
 from services.base.logger import Logger
-import utils.os as os_utils
+from services.base.images_handler import ImageHandler
+import re
 
 logger = Logger.__call__().get_logger()
 
@@ -104,7 +105,12 @@ if __name__ == "__main__":
 
     try:
         logger.info("Iniciando processo de separação das imagens")
-        os_utils.move_files_by_regex_name(input_folder, output_folder, r"\d+")
+        img_handler = ImageHandler(input_folder, output_folder)
+        img_handler.move_images(
+            lambda img_name: re.search(r"\d+", img_name),
+            lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
+        )
+
         logger.info("Finalizando processo de separação das imagens")
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado ao mover as imagens")
