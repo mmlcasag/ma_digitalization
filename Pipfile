@@ -11,6 +11,7 @@ pandas = "*"
 pillow = "*"
 pywin32 = {version = "*", sys_platform = "== 'win32'"}
 setuptools = "*"
+pyxlsb = "*"
 
 [dev-packages]
 flake8 = "*"

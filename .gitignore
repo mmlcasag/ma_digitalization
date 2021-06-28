@@ -7,3 +7,4 @@ services/*/output
 services/*/log
 **.egg-info
 *.spec
+.idea/
