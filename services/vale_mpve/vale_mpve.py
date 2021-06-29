@@ -13,7 +13,7 @@ def handle_sheet_row(row, prefix="", empty_value="", as_type=str):
     return prefix + row.fillna(empty_value).astype(as_type).values[0]
 
 
-class ValeIndividualConverter(SpreadsheetConverter):
+class ValeMPVEConverter(SpreadsheetConverter):
     def process_file(self, file):
         sheet_row_01 = pandas.read_excel(
             file, header=7, usecols="C:I", nrows=1, engine="pyxlsb"
@@ -131,7 +131,7 @@ class ValeIndividualConverter(SpreadsheetConverter):
 
 if __name__ == "__main__":
     logger.info("Iniciando a conversão")
-    valeIndividualConverter = ValeIndividualConverter(
+    valeMPVEConverter = ValeMPVEConverter(
         ".",
         ["input"],
         [
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         ],
     )
     try:
-        valeIndividualConverter.execute()
+        valeMPVEConverter.execute()
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado no processamento da planilha")
         logger.exception(error)
