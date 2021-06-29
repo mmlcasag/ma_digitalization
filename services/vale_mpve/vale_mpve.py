@@ -80,6 +80,8 @@ class ValeMPVEConverter(SpreadsheetConverter):
                 sheet_row_01["Cidade / Estado: \n(onde se encontra o lote fisicamente)"]
             )
         )
+        category = handle_sheet_row(sheet_row_01["Categoria: "])
+        subcategory = handle_sheet_row(sheet_row_01["Sub-categoria:"])
 
         data_to_output = dict()
         data_to_output["Nº do lote"] = handle_sheet_row(sheet_row_01["Lote: "])
@@ -111,6 +113,8 @@ class ValeMPVEConverter(SpreadsheetConverter):
         data_to_output["Fator Multiplicativo"] = 1
         data_to_output["Alteração/Adicionado"] = ""
         data_to_output["Descrição HTML"] = ""
+        data_to_output["Categoria"] = category
+        data_to_output["Subcategoria"] = subcategory
 
         excel_utils.extract_images_from_xlsx(
             file,
