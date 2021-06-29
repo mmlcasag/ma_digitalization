@@ -33,6 +33,7 @@ class ValeIndividualConverter(SpreadsheetConverter):
 
         lot_name = handle_sheet_row(sheet_row_01["Sub-categoria:"])
         lot_name += handle_sheet_row(sheet_row_02["Marca:"], " ")
+        lot_name += handle_sheet_row(sheet_row_02["Modelo:"], " ")
         lot_name += handle_sheet_row(sheet_row_02["Ano: "], ", ANO: ")
         lot_name += handle_sheet_row(sheet_row_02["Serial / Chassi: "], ", SÉRIE: ")
 
@@ -92,7 +93,7 @@ class ValeIndividualConverter(SpreadsheetConverter):
         data_to_output["VMV"] = 0
         data_to_output["VER"] = 0
         data_to_output["Incremento"] = ma_utils.get_closest_value(
-            ma_utils.get_available_increments(), vi
+            ma_utils.get_available_increments(), vi / 10
         )
         data_to_output["Valor de Referência do Vendedor (Contábil)"] = handle_sheet_row(
             sheet_row_03["Valor de avaliação: "], "", 0
@@ -109,7 +110,7 @@ class ValeIndividualConverter(SpreadsheetConverter):
         data_to_output["Unid. Métrica"] = ""
         data_to_output["Fator Multiplicativo"] = 1
         data_to_output["Alteração/Adicionado"] = ""
-        data_to_output["Descrição HTML"] = "Em arquivo separado"
+        data_to_output["Descrição HTML"] = ""
 
         excel_utils.extract_images_from_xlsx(
             file,
