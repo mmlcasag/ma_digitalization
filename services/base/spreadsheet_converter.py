@@ -11,12 +11,20 @@ class SpreadsheetConverter:
     _name_output_folders = []
     _input_folders = []
     _output_folders = []
+    _output_xlsx_file = []
     _allowed_extensions = ["xlsx", "xlsb"]
 
-    def __init__(self, base_folder, name_input_folders, name_output_folders):
+    def __init__(
+        self,
+        base_folder,
+        name_input_folders,
+        name_output_folders,
+        output_xlsx_file=None,
+    ):
         self._base_folder = os.path.join(os.getcwd(), base_folder)
         self._name_input_folders = name_input_folders
         self._name_output_folders = name_output_folders
+        self._output_xlsx_file = output_xlsx_file
 
     def execute(self):
         self.create_input_folder()
