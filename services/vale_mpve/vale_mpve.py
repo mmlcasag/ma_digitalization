@@ -14,7 +14,29 @@ def handle_sheet_row(row, prefix="", empty_value="", as_type=str):
 
 
 class ValeMPVEConverter(SpreadsheetConverter):
+    def execute(self):
+        self.create_input_folder()
+        self.create_output_folder()
+
+        if os.path.isfile(self._output_xlsx_file):
+            os.remove(self._output_xlsx_file)
+
+        list_files = self.get_file_list()
+        logger.info(f"Encontrados {len(list_files)} arquivo(s) na pasta de entrada")
+        count = 1
+        for file in list_files:
+            try:
+                self.process_file(file)
+                logger.info(
+                    f"Processamento da planilha {count} de {len(list_files)} finalizado"
+                )
+                count += 1
+            except Exception as error:
+                logger.error(f"Erro no processamento do arquivo {file}")
+                logger.exception(error)
+
     def process_file(self, file):
+
         sheet_row_01 = pandas.read_excel(
             file, header=7, usecols="C:I", nrows=1, engine="pyxlsb"
         )
@@ -80,57 +102,56 @@ class ValeMPVEConverter(SpreadsheetConverter):
                 sheet_row_01["Cidade / Estado: \n(onde se encontra o lote fisicamente)"]
             )
         )
-        category = handle_sheet_row(sheet_row_01["Categoria: "])
-        subcategory = handle_sheet_row(sheet_row_01["Sub-categoria:"])
 
-        data_to_output = dict()
-        data_to_output["Nº do lote"] = handle_sheet_row(sheet_row_01["Lote: "])
-        data_to_output["Status"] = "novo"
-        data_to_output["Lote Ref. / Ativo-Frota"] = handle_sheet_row(
-            sheet_row_01["Lote: "]
+        df = pandas.DataFrame(
+            {
+                "Nº do lote": handle_sheet_row(sheet_row_01["Lote: "]),
+                "Status": "novo",
+                "Lote Ref. / Ativo-Frota": handle_sheet_row(sheet_row_01["Lote: "]),
+                "Nome do Lote (SEMPRE MAIUSCULA)": lot_name.strip().upper(),
+                "Descrição": description,
+                "VI": vi,
+                "VMV": 0,
+                "VER": 0,
+                "Incremento": ma_utils.get_closest_value(
+                    ma_utils.get_available_increments(), vi / 10
+                ),
+                "Valor de Referência do Vendedor (Contábil)": handle_sheet_row(
+                    sheet_row_03["Valor de avaliação: "], "", 0
+                ),
+                "Comitente": handle_sheet_row(sheet_row_01["CMD / Mina: "]),
+                "Município": location[0],
+                "UF": location[1],
+                "Assessor": handle_sheet_row(
+                    sheet_row_01["Solicitante: "], "", "Vendedor"
+                ),
+                "Pendências": "",
+                "Restrições": "",
+                "Débitos (Total)": "",
+                "Unid. Métrica": "",
+                "Fator Multiplicativo": 1,
+                "Alteração/Adicionado": "",
+                "Descrição HTML": "",
+                "Categoria": handle_sheet_row(sheet_row_01["Categoria: "]),
+                "Subcategoria": handle_sheet_row(sheet_row_01["Sub-categoria:"]),
+            },
+            index=[0],
         )
-        data_to_output["Nome do Lote (SEMPRE MAIUSCULA)"] = lot_name.strip().upper()
-        data_to_output["Descrição"] = description
-        data_to_output["VI"] = vi
-        data_to_output["VMV"] = 0
-        data_to_output["VER"] = 0
-        data_to_output["Incremento"] = ma_utils.get_closest_value(
-            ma_utils.get_available_increments(), vi / 10
-        )
-        data_to_output["Valor de Referência do Vendedor (Contábil)"] = handle_sheet_row(
-            sheet_row_03["Valor de avaliação: "], "", 0
-        )
-        data_to_output["Comitente"] = handle_sheet_row(sheet_row_01["CMD / Mina: "])
-        data_to_output["Município"] = location[0]
-        data_to_output["UF"] = location[1]
-        data_to_output["Assessor"] = handle_sheet_row(
-            sheet_row_01["Solicitante: "], "", "Vendedor"
-        )
-        data_to_output["Pendências"] = ""
-        data_to_output["Restrições"] = ""
-        data_to_output["Débitos (Total)"] = ""
-        data_to_output["Unid. Métrica"] = ""
-        data_to_output["Fator Multiplicativo"] = 1
-        data_to_output["Alteração/Adicionado"] = ""
-        data_to_output["Descrição HTML"] = ""
-        data_to_output["Categoria"] = category
-        data_to_output["Subcategoria"] = subcategory
 
         excel_utils.extract_images_from_xlsx(
             file,
             os.path.join("output", "images", handle_sheet_row(sheet_row_01["Lote: "])),
         )
 
-        file_name = os.path.basename(file).replace("xlsb", "xlsx")
-        print("file_name", file_name)
-        filepath = os.path.join("output", "xlsx", file_name)
-        logger.info(f"Criando arquivo de saída: {filepath}")
-        writer = pandas.ExcelWriter(filepath, engine="xlsxwriter")
+        if os.path.isfile(self._output_xlsx_file):
+            append_data = pandas.read_excel(
+                self._output_xlsx_file, sheet_name="Colunada"
+            )
+            df = pandas.concat([append_data, df])
 
-        df = pandas.DataFrame(data_to_output, index=[0])
+        writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name="Colunada", index=False)
         writer.save()
-        logger.info(f"Arquivo processado com sucesso: {filepath}")
 
 
 if __name__ == "__main__":
@@ -142,6 +163,7 @@ if __name__ == "__main__":
             "output",
             os.path.join("output", "xlsx"),
         ],
+        os.path.join("output", "xlsx", "resulting_spreadsheet.xlsx"),
     )
     try:
         valeMPVEConverter.execute()
