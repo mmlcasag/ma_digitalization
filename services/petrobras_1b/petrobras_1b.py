@@ -49,8 +49,8 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.info('Selecionando a aba de nome "1. Materiais"')
         sheet = workbook["1. Materiais"]
 
-        logger.info('Deletando linhas até chegar em "NM"')
-        excel_utils.delete_until(sheet, "NM")
+        logger.info('Deletando linhas até que a primeira linha seja "NM"')
+        excel_utils.delete_until(sheet, ["NM"])
 
         logger.info("Exportando o resultado da aba para um arquivo CSV")
         excel_utils.export_to_csv(

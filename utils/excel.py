@@ -17,7 +17,7 @@ logger = Logger.__call__().get_logger()
 
 
 def delete_until(sheet, target_value, column_index=1, row_index=1):
-    while str(sheet.cell(row_index, column_index).value) != str(target_value):
+    while not str(sheet.cell(row_index, column_index).value) in target_value:
         sheet.delete_rows(1, 1)
 
 

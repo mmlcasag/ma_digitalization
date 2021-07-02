@@ -61,9 +61,11 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         sheet = workbook.active
 
         logger.info(
-            'Deletando linhas até que quarta coluna, primeira linha seja "Descrição"'
+            'Deletando linhas até que a primeira linha seja "Cód", "Descrição" ou algo do gênero'
         )
-        excel_utils.delete_until(sheet, "Descrição", 4, 1)
+        excel_utils.delete_until(
+            sheet, ["Cód.", "Centro", "Depósito", "Material", "Descrição", "Processo"]
+        )
 
         logger.info("Exportando o resultado para um arquivo CSV")
         excel_utils.export_to_csv(
