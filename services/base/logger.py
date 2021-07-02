@@ -34,7 +34,7 @@ class Logger(object, metaclass=SingletonType):
             os.mkdir(dirname)
 
         fileHandler = logging.FileHandler(
-            dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log", "w"
+            dirname + "/log_" + now.strftime("%Y-%m-%d_%H:%M:%S") + ".log", "w"
         )
 
         streamHandler = logging.StreamHandler()
