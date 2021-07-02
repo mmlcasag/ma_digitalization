@@ -58,6 +58,10 @@ def get_asset_description(dataframe, description_column, sort_by_column, how_man
 
 
 def split_city_and_state(location):
+    # workaround in case the user fills out only the state and not the state
+    if len(location) == 2:
+        return ["", location]
+
     location = location.replace(" / ", "/")
     location = location.replace("/ ", "/")
     location = location.replace(" /", "/")
