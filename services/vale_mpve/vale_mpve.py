@@ -36,21 +36,24 @@ class ValeMPVEConverter(SpreadsheetConverter):
                 logger.exception(error)
 
     def process_file(self, file):
+        engine = None
+        if file.endswith(".xlsb"):
+            engine = "pyxlsb"
 
         sheet_row_01 = pandas.read_excel(
-            file, header=7, usecols="C:I", nrows=1, engine="pyxlsb"
+            file, header=7, usecols="C:I", nrows=1, engine=engine
         )
         sheet_row_02 = pandas.read_excel(
-            file, header=10, usecols="C:I", nrows=1, engine="pyxlsb"
+            file, header=10, usecols="C:I", nrows=1, engine=engine
         )
         sheet_row_03 = pandas.read_excel(
-            file, header=13, usecols="C:I", nrows=1, engine="pyxlsb"
+            file, header=13, usecols="C:I", nrows=1, engine=engine
         )
         sheet_row_04 = pandas.read_excel(
-            file, header=17, usecols="C:I", nrows=1, engine="pyxlsb"
+            file, header=17, usecols="C:I", nrows=1, engine=engine
         )
         sheet_row_05 = pandas.read_excel(
-            file, header=20, usecols="C:I", nrows=1, engine="pyxlsb"
+            file, header=20, usecols="C:I", nrows=1, engine=engine
         )
 
         lot_name = handle_sheet_row(sheet_row_01["Sub-categoria:"])
