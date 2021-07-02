@@ -106,6 +106,18 @@ class ValeMPVEConverter(SpreadsheetConverter):
             )
         )
 
+        city = ""
+        try:
+            city = location[0]
+        except Exception as error:
+            logger.error(f"Erro {error} ao tentar buscar o município")
+
+        state = ""
+        try:
+            state = location[1]
+        except Exception as error:
+            logger.error(f"Erro {error} ao tentar buscar o estado")
+
         df = pandas.DataFrame(
             {
                 "Nº do lote": handle_sheet_row(sheet_row_01["Lote: "]),
@@ -123,8 +135,8 @@ class ValeMPVEConverter(SpreadsheetConverter):
                     sheet_row_03["Valor de avaliação: "], "", 0
                 ),
                 "Comitente": handle_sheet_row(sheet_row_01["CMD / Mina: "]),
-                "Município": location[0],
-                "UF": location[1],
+                "Município": city,
+                "UF": state,
                 "Assessor": handle_sheet_row(
                     sheet_row_01["Solicitante: "], "", "Vendedor"
                 ),
