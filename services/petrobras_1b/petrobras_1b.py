@@ -390,6 +390,25 @@ try:
         lambda img_name: re.search(r"lt\s*\d+", img_name)[0].replace("lt", ""),
     )
 
+    img_handler.move_images(
+        lambda img_name: img_name.find("LT") != -1,
+        lambda img_name: re.search(r"lt\s*\d+", img_name.lower())[0].replace("lt", ""),
+    )
+
+    img_handler.move_images(
+        lambda img_name: img_name.find("L.") != -1,
+        lambda img_name: re.search(r"lt\s*\d+", img_name.lower().replace("l.", "lt"))[
+            0
+        ].replace("lt", ""),
+    )
+
+    img_handler.move_images(
+        lambda img_name: re.search(r"L\d+", img_name),
+        lambda img_name: re.search(r"lt\s*\d+", img_name.lower().replace("l", "lt"))[
+            0
+        ].replace("lt", ""),
+    )
+
     logger.info("Finalizando processo de separação das imagens")
 except Exception as error:
     logger.error("Ocorreu algum erro inesperado ao mover as imagens")

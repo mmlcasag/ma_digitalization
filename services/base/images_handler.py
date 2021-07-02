@@ -26,7 +26,7 @@ class ImageHandler:
         for img_name in file_list:
             if should_move(img_name):
                 try:
-                    destination_folder_name = create_folder_name(img_name)
+                    destination_folder_name = create_folder_name(img_name).strip()
                     destination_folder = os.path.join(
                         self._output_folder, destination_folder_name
                     )
