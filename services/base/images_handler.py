@@ -1,6 +1,9 @@
 import os
 import utils.os as os_utils
 import shutil
+from .logger import Logger
+
+logger = Logger.__call__().get_logger()
 
 
 class ImageHandler:
@@ -22,10 +25,15 @@ class ImageHandler:
         file_list.sort()
         for img_name in file_list:
             if should_move(img_name):
-                destination_folder_name = create_folder_name(img_name)
-                destination_folder = os.path.join(
-                    self._output_folder, destination_folder_name
-                )
-                os_utils.create_folder(destination_folder)
-                origin_file_src = os.path.join(self._input_folder, img_name)
-                shutil.copy(origin_file_src, destination_folder)
+                try:
+                    destination_folder_name = create_folder_name(img_name)
+                    destination_folder = os.path.join(
+                        self._output_folder, destination_folder_name
+                    )
+                    os_utils.create_folder(destination_folder)
+                    origin_file_src = os.path.join(self._input_folder, img_name)
+                    shutil.copy(origin_file_src, destination_folder)
+                except Exception as error:
+                    logger.error(
+                        f'Erro "{error}" no processamento da imagem "{img_name}"'
+                    )
