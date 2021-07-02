@@ -387,7 +387,7 @@ try:
 
     img_handler.move_images(
         lambda img_name: img_name.find("lt") != -1,
-        lambda img_name: re.search(r"lt\d+", img_name)[0].replace("lt", ""),
+        lambda img_name: re.search(r"lt\s*\d+", img_name)[0].replace("lt", ""),
     )
 
     logger.info("Finalizando processo de separação das imagens")
