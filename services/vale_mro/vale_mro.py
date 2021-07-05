@@ -143,48 +143,58 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             ]
         )
 
-        logger.info("Exportando os produtos do lote para um arquivo HTML")
+        count_products = int(df.count()["Código do Produto"])
+        logger.info("Quantidade de produtos no lote: {}".format(count_products))
 
-        logger.info("Carregando um dataset para geração do arquivo HTML")
-        df_html = df.reindex(
-            columns=[
-                "Código do Produto",
-                "Descrição do Produto",
-                "Referência do Produto",
-                "Centro",
-                "Depósito",
-                "Nome do Fabricante",
-                "Quantidade",
-                "Unidade",
-                "Lote de Referência",
-            ]
-        )
+        if count_products == 1:
+            logger.warning(
+                "Não será gerado arquivo HTML pois lote possui apenas um produto"
+            )
+        else:
+            logger.info("Exportando os produtos do lote para um arquivo HTML")
 
-        logger.info("Gerando código HTML a partir dos dados do dataset")
-        html_content = df_html.to_html(index=False, na_rep="")
+            logger.info("Carregando um dataset para geração do arquivo HTML")
+            df_html = df.reindex(
+                columns=[
+                    "Código do Produto",
+                    "Descrição do Produto",
+                    "Referência do Produto",
+                    "Centro",
+                    "Depósito",
+                    "Nome do Fabricante",
+                    "Quantidade",
+                    "Unidade",
+                    "Lote de Referência",
+                ]
+            )
 
-        logger.info("Concatenando o cabeçalho e o rodapé do arquivo HTML")
-        html_content = html_utils.get_header() + html_content + html_utils.get_footer()
+            logger.info("Gerando código HTML a partir dos dados do dataset")
+            html_content = df_html.to_html(index=False, na_rep="")
 
-        logger.info("Criando o arquivo HTML")
-        html_file = open(
-            os.path.join(
-                output_folder,
-                html_folder,
-                file_name + ".html",
-            ),
-            "w",
-            newline="",
-            encoding="utf-8",
-        )
+            logger.info("Concatenando o cabeçalho e o rodapé do arquivo HTML")
+            html_content = (
+                html_utils.get_header() + html_content + html_utils.get_footer()
+            )
 
-        logger.info("Escrevendo no arquivo HTML")
-        html_file.write(html_content)
+            logger.info("Criando o arquivo HTML")
+            html_file = open(
+                os.path.join(
+                    output_folder,
+                    html_folder,
+                    file_name + ".html",
+                ),
+                "w",
+                newline="",
+                encoding="utf-8",
+            )
 
-        logger.info("Fechando o arquivo HTML")
-        html_file.close()
+            logger.info("Escrevendo no arquivo HTML")
+            html_file.write(html_content)
 
-        logger.info("Exportação do arquivo HTML finalizada com sucesso")
+            logger.info("Fechando o arquivo HTML")
+            html_file.close()
+
+            logger.info("Exportação do arquivo HTML finalizada com sucesso")
 
         logger.info("Montando a linha da planilha colunada")
 
@@ -265,6 +275,13 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             )
             asset_increment_value = 0
 
+        if count_products == 1:
+            asset_full_description = ""
+            asset_html_description = ""
+        else:
+            asset_full_description = "Para maiores informações, clique em ANEXOS"
+            asset_html_description = "Em arquivo separado"
+
         logger.info("Gerando a linha colunada do lote")
         dataset_sheet_1 = dataset_sheet_1.append(
             pandas.Series(
@@ -273,7 +290,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                     "novo",
                     asset_reference_number,
                     asset_description,
-                    "Para maiores informações, clique em ANEXOS",
+                    asset_full_description,
                     asset_initial_value,
                     0,
                     0,
@@ -289,16 +306,22 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                     "",
                     "1",
                     "",
-                    "Em arquivo separado",
+                    asset_html_description,
                 ],
                 index=dataset_sheet_1.columns,
             ),
             ignore_index=True,
         )
-
-        dataset_sheet_2 = dataset_sheet_2.append(df)
-
         logger.info("Linha da planilha colunada montada com sucesso")
+
+        if count_products == 1:
+            logger.warning(
+                "Não serão geradas linhas na planilha de listagem pois lote possui apenas um produto"
+            )
+        else:
+            logger.info("Gerando linhas da planilha de listagem")
+            dataset_sheet_2 = dataset_sheet_2.append(df)
+            logger.info("Linhas da planilha de listagem montadas com sucesso")
     except Exception as error:
         logger.error(
             "{} ao tentar processar o arquivo {}".format(error, excel_file_name)

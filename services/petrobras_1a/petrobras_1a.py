@@ -156,6 +156,27 @@ class PetrobrasConverter(SpreadsheetConverter):
         file_name = os.path.basename(file).replace("xlsm", "xlsx")
         filepath = os.path.join("output", "xlsx", file_name)
 
+        logger.info("Buscando lotes contendo apenas um produto")
+        lots_to_remove = []
+        for i, dataframe_group in listagem_sheet.groupby("Número do Lote"):
+            lot_number = dataframe_group["Número do Lote"].iloc[0]
+
+            count_products = int(dataframe_group["Código do Produto"].count())
+            if count_products == 1:
+                lots_to_remove.append(lot_number)
+
+        logger.info("Ajustando campos da aba colunada para lotes com apenas um produto")
+        for lot_number in lots_to_remove:
+            colunada_sheet.loc[
+                colunada_sheet["Nº do lote"] == lot_number,
+                ["Descrição", "Descrição HTML"],
+            ] = ["", ""]
+
+        logger.info("Removendo da aba de listagem os lotes contendo apenas um produto")
+        listagem_sheet = listagem_sheet[
+            ~listagem_sheet["Número do Lote"].isin(lots_to_remove)
+        ]
+
         logger.info("Criando arquivo xlsx de saída")
         writer = pd.ExcelWriter(filepath, engine="xlsxwriter")
         colunada_sheet.to_excel(writer, sheet_name="Colunada", index=False)
@@ -173,6 +194,7 @@ class PetrobrasConverter(SpreadsheetConverter):
 
         for i, dataframe_group in listagem_sheet.groupby("Número do Lote"):
             lot_number = dataframe_group["Número do Lote"].iloc[0]
+
             filepath = os.path.join("output", "html", f"{lot_number}.html")
             html_file = open(filepath, "w", newline="", encoding="utf-8")
 

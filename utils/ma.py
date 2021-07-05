@@ -16,7 +16,10 @@ def get_closest_value(lst, K):
 
 def get_asset_description(dataframe, description_column, sort_by_column, how_many_rows):
     # gets the total number of rows in the dataframe
-    # total_rows = dataframe.count()[description_column]
+    total_rows = dataframe.count()[description_column]
+
+    if total_rows == 1:
+        return dataframe[description_column][0].upper()
 
     # retains in the dataframe only the first word of the original description
     for index, row in dataframe.iterrows():
