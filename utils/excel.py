@@ -77,5 +77,13 @@ def extract_images_from_xlsx(file, output_folder):
         shutil.rmtree(output_folder, ignore_errors=True)
         tempdir = tempfile.mkdtemp()
         zip_ref.extractall(tempdir)
-        shutil.copytree(os.path.join(tempdir, "xl", "media"), output_folder)
+        origin_folder = os.path.join(tempdir, "xl", "media")
+        files_from_xlsx = os_utils.get_files_list(origin_folder)
+        os_utils.create_folder(output_folder)
+        for idx, file in enumerate(files_from_xlsx):
+            print(file)
+            origin_file = os.path.join(origin_folder, file)
+            destination_file = os.path.join(output_folder, f"imagem_{idx+1}.jpg")
+            shutil.copy(origin_file, destination_file)
+
         shutil.rmtree(tempdir)
