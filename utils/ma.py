@@ -1,3 +1,6 @@
+import re
+
+
 def get_available_increments():
     # increments must be of integer, round values that make sense business-wise
     # defined by William de Andrade Ramos da Silva
@@ -12,6 +15,30 @@ def get_closest_value(lst, K):
     # given value: 27
     # result: 20, because 27 is closest to 20, than it is to 50
     return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
+
+
+def generate_description_from_array(data, max_characters=225, max_items=5):
+    items = []
+    if len(data) > 1:
+        for item in data:
+            description = re.sub(r"\(OBS:[^)]*\)", "", item)
+            items.append(str(description).split(" ")[0].upper())
+
+        unique_items = list(dict.fromkeys(items))
+        others_text = " E OUTROS"
+        description = ", ".join(unique_items[0:max_items])
+
+        if len(unique_items) > max_items:
+            return description[0 : (max_characters - len(others_text))] + others_text
+
+        return description[0:max_characters]
+    else:
+        description = re.sub(r"\(OBS:[^)]*\)", "", data[0])
+
+        if description.startswith("."):
+            return description[1:]
+
+        return description
 
 
 def get_asset_description(dataframe, description_column, sort_by_column, how_many_rows):
