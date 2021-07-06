@@ -57,11 +57,9 @@ class ValeMEConverter(SpreadsheetConverter):
     def process_file(self, file):
         file_name = os.path.basename(file)
 
-        sheet_row_01 = pandas.read_excel(
-            file, header=6, usecols="C:O", nrows=1, engine="pyxlsb"
-        )
+        sheet_row_01 = pandas.read_excel(file, header=6, usecols="C:O", nrows=1)
 
-        sheet_row_02 = pandas.read_excel(file, header=9, usecols="C:O", engine="pyxlsb")
+        sheet_row_02 = pandas.read_excel(file, header=9, usecols="C:O")
 
         lot_name = ma_utils.generate_description_from_array(
             sheet_row_02[CONST.DESCRIPTION].dropna().values
