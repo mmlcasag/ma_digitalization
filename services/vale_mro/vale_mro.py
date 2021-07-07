@@ -34,6 +34,152 @@ dataset_sheet_2 = pandas.DataFrame()
 
 allowed_extensions = ["xlsx", "xlsb"]
 
+
+def get_asset_full_description(dataframe, asset_number):
+    asset_full_description = ""
+
+    asset_full_description = (
+        asset_full_description
+        + "Código do Produto: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Código do Produto"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Descrição do Produto: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Descrição do Produto"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Referência do Produto: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Referência do Produto"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Centro: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number]["Centro"][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Depósito: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number]["Depósito"][
+                0
+            ]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Código do Grupo: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Código do Grupo"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Descrição do Grupo: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Descrição do Grupo"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Nome do Fabricante: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Nome do Fabricante"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Quantidade: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Quantidade"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Unidade: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number]["Unidade"][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Valor Unitário: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Valor Unitário"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Valor Total: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Valor Total"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Responsável: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Responsável"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Empresa: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number]["Empresa"][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Localização: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Localização"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Lote de Referência: {}".format(
+            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
+                "Lote de Referência"
+            ][0]
+        )
+        + "<br>"
+    )
+
+    return asset_full_description
+
+
 for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:
         logger.info('PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
@@ -93,6 +239,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             "Desconsiderando as linhas cujos valores de todas as colunas estão vazios ou inválidos"
         )
         df = df.mask(df.eq("None")).dropna(how="all")
+        df = df.mask(df.eq("None")).fillna("")
 
         logger.info("Ajustando os nomes das colunas")
         df = df.rename(
@@ -142,6 +289,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 "Lote de Referência",
             ]
         )
+
+        logger.info("Ordenando dados pelo número do lote e pelo código do produto")
+        df = df.sort_values(["Lote de Referência", "Código do Produto"], ascending=True)
 
         count_products = int(df.count()["Código do Produto"])
         logger.info("Quantidade de produtos no lote: {}".format(count_products))
@@ -276,7 +426,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             asset_increment_value = 0
 
         if count_products == 1:
-            asset_full_description = ""
+            asset_full_description = get_asset_full_description(
+                df, asset_reference_number
+            )
             asset_html_description = ""
         else:
             asset_full_description = "Para maiores informações, clique em ANEXOS"
@@ -314,14 +466,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
         logger.info("Linha da planilha colunada montada com sucesso")
 
-        if count_products == 1:
-            logger.warning(
-                "Não serão geradas linhas na planilha de listagem pois lote possui apenas um produto"
-            )
-        else:
-            logger.info("Gerando linhas da planilha de listagem")
-            dataset_sheet_2 = dataset_sheet_2.append(df)
-            logger.info("Linhas da planilha de listagem montadas com sucesso")
+        logger.info("Gerando linhas da planilha de listagem")
+        dataset_sheet_2 = dataset_sheet_2.append(df)
+        logger.info("Linhas da planilha de listagem montadas com sucesso")
     except Exception as error:
         logger.error(
             "{} ao tentar processar o arquivo {}".format(error, excel_file_name)
