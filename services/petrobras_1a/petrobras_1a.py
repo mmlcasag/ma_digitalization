@@ -113,24 +113,6 @@ class PetrobrasConverter(SpreadsheetConverter):
         )
         asset_full_description = (
             asset_full_description
-            + "Valor Unitário: {}".format(
-                dataframe.loc[dataframe["Número do Lote"] == asset_number][
-                    "Valor Unitário"
-                ].iloc[0]
-            )
-            + "<br>"
-        )
-        asset_full_description = (
-            asset_full_description
-            + "Valor Total: {}".format(
-                dataframe.loc[dataframe["Número do Lote"] == asset_number][
-                    "Valor Total"
-                ].iloc[0]
-            )
-            + "<br>"
-        )
-        asset_full_description = (
-            asset_full_description
             + "Percentual do Item em Relação ao Lote: {}".format(
                 dataframe.loc[dataframe["Número do Lote"] == asset_number][
                     "Percentual do Item em Relação ao Lote"

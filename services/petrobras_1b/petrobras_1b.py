@@ -103,22 +103,6 @@ def get_asset_full_description(dataframe, asset_number):
     )
     asset_full_description = (
         asset_full_description
-        + "Valor Unitário: {}".format(
-            dataframe.loc[dataframe["Número do Lote"] == asset_number][
-                "Valor Unitário"
-            ][0]
-        )
-        + "<br>"
-    )
-    asset_full_description = (
-        asset_full_description
-        + "Valor Total: {}".format(
-            dataframe.loc[dataframe["Número do Lote"] == asset_number]["Valor Total"][0]
-        )
-        + "<br>"
-    )
-    asset_full_description = (
-        asset_full_description
         + "Número do Lote: {}".format(
             dataframe.loc[dataframe["Número do Lote"] == asset_number][
                 "Número do Lote"
