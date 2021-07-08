@@ -103,8 +103,14 @@ def extract_images_from_xlsx(file, output_folder):
         os_utils.create_folder(output_folder)
         for idx, file in enumerate(files_from_xlsx):
             origin_file = os.path.join(origin_folder, file)
-            destination_file = os.path.join(output_folder, f"imagem_{idx+1}.jpg")
-            shutil.copy(origin_file, destination_file)
-            resize_image(destination_file)
+            destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
+
+            if os.name == "nt":
+                Image.open(origin_file).save(f"{destination_file}.jpg")
+            else:
+                ext = 'jpg'
+                if os_utils.get_file_extension(origin_file) == 'emf':
+                    ext = 'emf'
+                shutil.copy(origin_file, f"{destination_file}.{ext}")
 
         shutil.rmtree(tempdir)
