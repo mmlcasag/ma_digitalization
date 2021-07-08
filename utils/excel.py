@@ -79,15 +79,19 @@ def resize_image(img_src):
     base_width = 400
     base_height = 300
 
+    logger.info("Verificando se a imagem deve ser redimensionada")
+
     if image.size[0] < base_width:
         wpercent = base_width / float(image.size[0])
         hsize = int((float(image.size[1]) * float(wpercent)))
         image = image.resize((base_width, hsize), Image.NEAREST)
+        logger.info("Largura redimensionada")
 
     if image.size[1] < base_height:
         height_percent = base_height / float(image.size[1])
         width_size = int((float(image.size[0]) * float(height_percent)))
         image = image.resize((width_size, base_height), Image.NEAREST)
+        logger.info("Altura redimensionada")
 
     image = image.convert("RGB")
     image.save(img_src)
@@ -108,9 +112,9 @@ def extract_images_from_xlsx(file, output_folder):
             if os.name == "nt":
                 Image.open(origin_file).save(f"{destination_file}.jpg")
             else:
-                ext = 'jpg'
-                if os_utils.get_file_extension(origin_file) == 'emf':
-                    ext = 'emf'
+                ext = "jpg"
+                if os_utils.get_file_extension(origin_file) == "emf":
+                    ext = "emf"
                 shutil.copy(origin_file, f"{destination_file}.{ext}")
 
         shutil.rmtree(tempdir)

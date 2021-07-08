@@ -336,7 +336,38 @@ if __name__ == "__main__":
 
         img_handler.move_images(
             lambda img_name: img_name.find("Lote") != -1,
-            lambda img_name: re.search(r"\d+", img_name)[0],
+            lambda img_name: img_name.replace("Lote", "").strip().split("_")[0],
+        )
+
+        img_handler.move_images(
+            lambda img_name: img_name.find("LOTE") != -1,
+            lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
+        )
+
+        img_handler.move_images(
+            lambda img_name: img_name.find("lt") != -1,
+            lambda img_name: re.search(r"lt\s*\d+", img_name)[0].replace("lt", ""),
+        )
+
+        img_handler.move_images(
+            lambda img_name: img_name.find("LT") != -1,
+            lambda img_name: re.search(r"lt\s*\d+", img_name.lower())[0].replace(
+                "lt", ""
+            ),
+        )
+
+        img_handler.move_images(
+            lambda img_name: img_name.find("L.") != -1,
+            lambda img_name: re.search(
+                r"lt\s*\d+", img_name.lower().replace("l.", "lt")
+            )[0].replace("lt", ""),
+        )
+
+        img_handler.move_images(
+            lambda img_name: re.search(r"L\d+", img_name),
+            lambda img_name: re.search(
+                r"lt\s*\d+", img_name.lower().replace("l", "lt")
+            )[0].replace("lt", ""),
         )
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado ao mover as imagens")

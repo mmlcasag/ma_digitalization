@@ -1,5 +1,6 @@
 import os
 import utils.os as os_utils
+import utils.excel as excel_utils
 import shutil
 from .logger import Logger
 
@@ -16,7 +17,7 @@ class ImageHandler:
 
     # should_move is a function to evaluate if image needs be moved
     # create_folder_name is a function to create name of destination image file
-    def move_images(self, should_move, create_folder_name):
+    def move_images(self, should_move, create_folder_name, resize=True):
         file_list = os_utils.get_files_list(self._input_folder)
 
         if len(file_list) > 0:
@@ -33,6 +34,11 @@ class ImageHandler:
                     os_utils.create_folder(destination_folder)
                     origin_file_src = os.path.join(self._input_folder, img_name)
                     shutil.copy(origin_file_src, destination_folder)
+
+                    if resize:
+                        target_img = os.path.join(destination_folder, img_name)
+                        excel_utils.resize_image(target_img)
+
                 except Exception as error:
                     logger.error(
                         f'Erro "{error}" no processamento da imagem "{img_name}"'
