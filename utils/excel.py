@@ -79,19 +79,19 @@ def resize_image(img_src):
     base_width = 400
     base_height = 300
 
-    logger.info("Verificando se a imagem deve ser redimensionada")
+    logger.info('Verificando dimensões da imagem "{}"'.format(img_src))
 
     if image.size[0] < base_width:
         wpercent = base_width / float(image.size[0])
         hsize = int((float(image.size[1]) * float(wpercent)))
         image = image.resize((base_width, hsize), Image.NEAREST)
-        logger.info("Largura redimensionada")
+        logger.info('Redimensionada largura da imagem "{}"'.format(img_src))
 
     if image.size[1] < base_height:
         height_percent = base_height / float(image.size[1])
         width_size = int((float(image.size[0]) * float(height_percent)))
         image = image.resize((width_size, base_height), Image.NEAREST)
-        logger.info("Altura redimensionada")
+        logger.info('Redimensionada altura da imagem "{}"'.format(img_src))
 
     image = image.convert("RGB")
     image.save(img_src)
