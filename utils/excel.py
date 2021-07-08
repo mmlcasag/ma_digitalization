@@ -3,6 +3,7 @@ import csv
 import zipfile
 import tempfile
 import shutil
+from PIL import Image
 
 if os.name == "nt":
     import win32com.client as win32
@@ -12,6 +13,7 @@ import utils.image as image_utils
 
 from PIL import ImageGrab
 from services.base.logger import Logger
+
 
 logger = Logger.__call__().get_logger()
 
@@ -72,6 +74,24 @@ def extract_images(file_name, output_folder):
         excel.Quit()
 
 
+def resize_image(img_src):
+    image = Image.open(img_src)
+    base_width = 400
+    base_height = 300
+
+    if image.size[0] < base_width:
+        wpercent = base_width / float(image.size[0])
+        hsize = int((float(image.size[1]) * float(wpercent)))
+        image = image.resize((base_width, hsize), Image.NEAREST)
+
+    if image.size[0] < base_height:
+        height_percent = base_height / float(image.size[1])
+        width_size = int((float(image.size[0]) * float(height_percent)))
+        image = image.resize((width_size, base_height), Image.NEAREST)
+
+    image.save(img_src)
+
+
 def extract_images_from_xlsx(file, output_folder):
     with zipfile.ZipFile(file, "r") as zip_ref:
         shutil.rmtree(output_folder, ignore_errors=True)
@@ -84,5 +104,6 @@ def extract_images_from_xlsx(file, output_folder):
             origin_file = os.path.join(origin_folder, file)
             destination_file = os.path.join(output_folder, f"imagem_{idx+1}.jpg")
             shutil.copy(origin_file, destination_file)
+            resize_image(destination_file)
 
         shutil.rmtree(tempdir)
