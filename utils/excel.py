@@ -84,7 +84,7 @@ def resize_image(img_src):
         hsize = int((float(image.size[1]) * float(wpercent)))
         image = image.resize((base_width, hsize), Image.NEAREST)
 
-    if image.size[0] < base_height:
+    if image.size[1] < base_height:
         height_percent = base_height / float(image.size[1])
         width_size = int((float(image.size[0]) * float(height_percent)))
         image = image.resize((width_size, base_height), Image.NEAREST)
