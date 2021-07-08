@@ -42,20 +42,23 @@ def generate_description_from_array(data, max_characters=225, max_items=5):
 
 
 def get_asset_description(dataframe, description_column, sort_by_column, how_many_rows):
+    # creates a local copy in order not to change values in the original dataframe
+    local_dataframe = dataframe.copy(deep=True)
+
     # gets the total number of rows in the dataframe
-    total_rows = dataframe.count()[description_column]
+    total_rows = local_dataframe.count()[description_column]
 
     if total_rows == 1:
-        return dataframe[description_column][0].upper()
+        return local_dataframe[description_column][0].upper()
 
     # retains in the dataframe only the first word of the original description
-    for index, row in dataframe.iterrows():
-        dataframe.at[index, description_column] = str(row[description_column]).split(
-            " "
-        )[0]
+    for index, row in local_dataframe.iterrows():
+        local_dataframe.at[index, description_column] = str(
+            row[description_column]
+        ).split(" ")[0]
 
     # sorts the dataframe by the requested column and retrieves only the unique values
-    assets = dataframe.sort_values([sort_by_column], ascending=False)[
+    assets = local_dataframe.sort_values([sort_by_column], ascending=False)[
         description_column
     ].unique()
 

@@ -31,6 +31,98 @@ os_utils.create_folder(output_folder, excel_folder)
 
 allowed_extensions = ["xlsx", "xlsb", "xlsm"]
 
+
+def get_asset_full_description(dataframe, asset_number):
+    asset_full_description = ""
+
+    asset_full_description = (
+        asset_full_description
+        + "Código do Produto: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Código do Produto"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Descrição do Produto: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Descrição do Produto"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Código do Grupo: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Código do Grupo"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Descrição do Grupo: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Descrição do Grupo"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Nome do Fabricante: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Nome do Fabricante"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Avaliação: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number]["Avaliação"][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Quantidade: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number]["Quantidade"][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Unidade: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number]["Unidade"][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Número do Lote: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Número do Lote"
+            ][0]
+        )
+        + "<br>"
+    )
+    asset_full_description = (
+        asset_full_description
+        + "Descrição do Lote: {}".format(
+            dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                "Descrição do Lote"
+            ][0]
+        )
+        + "<br>"
+    )
+
+    return asset_full_description
+
+
 for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:
         logger.info('PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
@@ -92,6 +184,12 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
         df1 = df1.astype(str)
 
+        logger.info(
+            "Desconsiderando as linhas cujos valores de todas as colunas estão vazios ou inválidos"
+        )
+        df1 = df1.mask(df1.eq("None")).dropna(how="all")
+        df1 = df1.mask(df1.eq("None")).fillna("")
+
         logger.info("Ajustando os nomes das colunas")
         df1 = df1.rename(
             columns={
@@ -130,6 +228,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             ]
         )
 
+        logger.info("Ordenando dados pelo número do lote e pelo código do produto")
+        df1 = df1.sort_values(["Número do Lote", "Código do Produto"], ascending=True)
+
         logger.info("Carregando um dataset com os dados do arquivo CSV da segunda aba")
         df2 = pandas.read_csv(
             os.path.join(output_folder, csv_folder, file_name + "_sheet_2.csv"),
@@ -164,6 +265,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 "Valor Inicial",
             ]
         )
+
+        logger.info("Ordenando dados pelo número do lote")
+        df2 = df2.sort_values("Número do Lote", ascending=True)
 
         logger.info("Varrendo por números de lote únicos no dataset da primeira aba")
         for asset_number in df1["Número do Lote"].unique():
@@ -318,7 +422,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                     asset_increment_value = 0
 
                 if count_products == 1:
-                    asset_full_description = ""
+                    asset_full_description = get_asset_full_description(
+                        local_df1, asset_number
+                    )
                     asset_html_description = ""
                 else:
                     asset_full_description = (
@@ -358,14 +464,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 )
                 logger.info("Linha da planilha colunada montada com sucesso")
 
-                if count_products == 1:
-                    logger.warning(
-                        "Não serão geradas linhas na planilha de listagem pois lote possui apenas um produto"
-                    )
-                else:
-                    logger.info("Gerando linhas da planilha de listagem")
-                    dataset_sheet_2 = dataset_sheet_2.append(local_df1)
-                    logger.info("Linhas da planilha de listagem montadas com sucesso")
+                logger.info("Gerando linhas da planilha de listagem")
+                dataset_sheet_2 = dataset_sheet_2.append(local_df1)
+                logger.info("Linhas da planilha de listagem montadas com sucesso")
             except Exception as error:
                 logger.error(
                     "{} ao tentar processar o lote de número {}".format(

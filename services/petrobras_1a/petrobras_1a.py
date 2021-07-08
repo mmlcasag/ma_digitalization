@@ -63,13 +63,86 @@ class PetrobrasConverter(SpreadsheetConverter):
 
         return product_value_description
 
+    def get_asset_full_description(self, dataframe, asset_number):
+        asset_full_description = ""
+
+        asset_full_description = (
+            asset_full_description
+            + "Código do Produto: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Código do Produto"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+        asset_full_description = (
+            asset_full_description
+            + "Descrição do Produto: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Descrição do Produto"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+        asset_full_description = (
+            asset_full_description
+            + "Avaliação: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Avaliação"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+        asset_full_description = (
+            asset_full_description
+            + "Quantidade: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Quantidade"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+        asset_full_description = (
+            asset_full_description
+            + "Unidade: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Unidade"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+        asset_full_description = (
+            asset_full_description
+            + "Percentual do Item em Relação ao Lote: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Percentual do Item em Relação ao Lote"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+        asset_full_description = (
+            asset_full_description
+            + "Número do Lote: {}".format(
+                dataframe.loc[dataframe["Número do Lote"] == asset_number][
+                    "Número do Lote"
+                ].iloc[0]
+            )
+            + "<br>"
+        )
+
+        return asset_full_description
+
     def process_file(self, file):
         xls = pd.ExcelFile(file)
         df1 = pd.read_excel(xls, "RESUMO - LOTES E VMA", header=1, usecols="A")
         df2 = pd.read_excel(xls, "RESUMO - LOTES E VMA", header=1, usecols="F:K")
 
-        first_colum_data = df1.to_dict("list")
+        first_column_data = df1.to_dict("list")
         values_columns_data = df2.to_dict("list")
+
+        lot_list = []
+        for lot_number in first_column_data["LOTES"]:
+            lot_list.append(str(lot_number).replace(".0", ""))
 
         vi = []
         increment = []
@@ -82,13 +155,13 @@ class PetrobrasConverter(SpreadsheetConverter):
             increment.append(new_increment)
 
         colunada = dict()
-        colunada["Nº do lote"] = first_colum_data["LOTES"]
+        colunada["Nº do lote"] = lot_list
         colunada["Status"] = "novo"
-        colunada["Lote Ref. / Ativo-Frota"] = first_colum_data["LOTES"]
+        colunada["Lote Ref. / Ativo-Frota"] = lot_list
         colunada["Nome do Lote (SEMPRE MAIUSCULA)"] = ""
         colunada[
             "Descrição"
-        ] = "No anexo, consta a coluna Percentual de representação do item no Lote, pois será previsto no edital o desconto do percentual caso o item não estiver disponível para venda."
+        ] = "No anexo, consta a coluna Percentual de representação do item no Lote, pois será previsto no edital o desconto do percentual caso o item não estiver disponível para venda.<br>Para maiores informações, clique em ANEXOS."
         colunada["VI"] = vi
         colunada["VMV"] = "0"
         colunada["VER"] = "0"
@@ -109,7 +182,27 @@ class PetrobrasConverter(SpreadsheetConverter):
         colunada["Descrição HTML"] = "Em arquivo separado"
 
         items_df = pd.read_excel(xls, "LISTA DOS ITENS")
-        items_df["Lote"] = items_df["Lote"].apply(lambda n: n if n % 1 else int(n))
+
+        logger.info("Convertendo tipos de dados para texto")
+        items_df = items_df.astype(str)
+
+        logger.info("Arredondando de campos numéricos e padronização de casas decimais")
+        items_df["Lote"] = items_df["Lote"].apply(lambda n: str(n).replace(".0", ""))
+        items_df["Material"] = items_df["Material"].apply(
+            lambda n: str(n).replace(".0", "")
+        )
+        items_df["Quantidade"] = items_df["Quantidade"].apply(
+            lambda n: str("{:.2f}".format(round(float(n), 2)))
+        )
+        items_df["VMA - Unitário"] = items_df["VMA - Unitário"].apply(
+            lambda n: str("{:.2f}".format(round(float(n), 2)))
+        )
+        items_df["VMA - Total"] = items_df["VMA - Total"].apply(
+            lambda n: str("{:.2f}".format(round(float(n), 2)))
+        )
+        items_df["Percentual do Item em Relação ao Lote"] = items_df[
+            "Percentual do Item em Relação ao Lote"
+        ].apply(lambda n: str("{:.2%}".format(round(float(n), 4))))
 
         mapper_lote_city = self.create_city_mapper(items_df)
         mapper_lote_state = self.create_state_mapper(items_df)
@@ -130,21 +223,16 @@ class PetrobrasConverter(SpreadsheetConverter):
         listagem["Número do Lote"] = items_dc["Lote"]
 
         colunada_sheet = pd.DataFrame(colunada)
+
         logger.info("Aplicando mapper de cidade")
         colunada_sheet["Município"] = colunada_sheet["Nº do lote"].map(mapper_lote_city)
 
         logger.info("Aplicando mapper de estado")
         colunada_sheet["UF"] = colunada_sheet["Nº do lote"].map(mapper_lote_state)
+
         colunada_sheet.drop(colunada_sheet.tail(1).index, inplace=True)
 
         listagem_sheet = pd.DataFrame(listagem)
-        listagem_sheet["Percentual do Item em Relação ao Lote"] = pd.Series(
-            [
-                "{0:.2f}%".format(val * 100)
-                for val in listagem_sheet["Percentual do Item em Relação ao Lote"]
-            ],
-            index=listagem_sheet.index,
-        )
 
         logger.info("Aplicando mapper para nome do lote")
         product_value_name = self.create_lot_name_mapper(listagem_sheet)
@@ -156,26 +244,41 @@ class PetrobrasConverter(SpreadsheetConverter):
         file_name = os.path.basename(file).replace("xlsm", "xlsx")
         filepath = os.path.join("output", "xlsx", file_name)
 
+        logger.info("Ordenando aba colunada pelo número do lote")
+        colunada_sheet = colunada_sheet.sort_values("Nº do lote", ascending=True)
+
+        logger.info("Ordenando aba listagem pelo número do lote e código do produto")
+        listagem_sheet = listagem_sheet.sort_values(
+            ["Número do Lote", "Código do Produto"], ascending=True
+        )
+
         logger.info("Buscando lotes contendo apenas um produto")
-        lots_to_remove = []
+        single_product_lots = []
         for i, dataframe_group in listagem_sheet.groupby("Número do Lote"):
             lot_number = dataframe_group["Número do Lote"].iloc[0]
 
             count_products = int(dataframe_group["Código do Produto"].count())
             if count_products == 1:
-                lots_to_remove.append(lot_number)
+                single_product_lots.append(lot_number)
 
         logger.info("Ajustando campos da aba colunada para lotes com apenas um produto")
-        for lot_number in lots_to_remove:
+        for lot_number in single_product_lots:
             colunada_sheet.loc[
-                colunada_sheet["Nº do lote"] == lot_number,
-                ["Descrição", "Descrição HTML"],
-            ] = ["", ""]
+                colunada_sheet["Nº do lote"] == lot_number, "Descrição"
+            ] = self.get_asset_full_description(listagem_sheet, lot_number)
+            colunada_sheet.loc[
+                colunada_sheet["Nº do lote"] == lot_number, "Descrição HTML"
+            ] = ""
 
-        logger.info("Removendo da aba de listagem os lotes contendo apenas um produto")
-        listagem_sheet = listagem_sheet[
-            ~listagem_sheet["Número do Lote"].isin(lots_to_remove)
-        ]
+        logger.info(
+            "Arredondando de campos numéricos e padronização de casas decimais da aba colunada"
+        )
+        colunada_sheet["VI"] = colunada_sheet["VI"].apply(
+            lambda n: str("{:.2f}".format(round(float(n), 2)))
+        )
+        colunada_sheet["Valor de Referência do Vendedor (Contábil)"] = colunada_sheet[
+            "Valor de Referência do Vendedor (Contábil)"
+        ].apply(lambda n: str("{:.2f}".format(round(float(n), 2))))
 
         logger.info("Criando arquivo xlsx de saída")
         writer = pd.ExcelWriter(filepath, engine="xlsxwriter")
@@ -186,24 +289,23 @@ class PetrobrasConverter(SpreadsheetConverter):
         logger.info("Xlsx criado com sucesso")
 
         logger.info("Criando o arquivos HTML")
-        listagem_sheet["Código do Produto"] = listagem_sheet[
-            "Código do Produto"
-        ].astype(int)
         del listagem_sheet["Valor Unitário"]
         del listagem_sheet["Valor Total"]
 
         for i, dataframe_group in listagem_sheet.groupby("Número do Lote"):
             lot_number = dataframe_group["Número do Lote"].iloc[0]
 
-            filepath = os.path.join("output", "html", f"{lot_number}.html")
-            html_file = open(filepath, "w", newline="", encoding="utf-8")
+            count_products = int(dataframe_group["Código do Produto"].count())
+            if count_products > 1:
+                filepath = os.path.join("output", "html", f"{lot_number}.html")
+                html_file = open(filepath, "w", newline="", encoding="utf-8")
 
-            html_content = dataframe_group.to_html(index=False, na_rep="")
-            html_content = (
-                html_utils.get_header() + html_content + html_utils.get_footer()
-            )
-            html_file.write(html_content)
-            html_file.close()
+                html_content = dataframe_group.to_html(index=False, na_rep="")
+                html_content = (
+                    html_utils.get_header() + html_content + html_utils.get_footer()
+                )
+                html_file.write(html_content)
+                html_file.close()
 
         logger.info("Arquivos HTML criados com sucesso")
 
