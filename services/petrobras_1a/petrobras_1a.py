@@ -120,15 +120,6 @@ class PetrobrasConverter(SpreadsheetConverter):
             )
             + "<br>"
         )
-        asset_full_description = (
-            asset_full_description
-            + "Número do Lote: {}".format(
-                dataframe.loc[dataframe["Número do Lote"] == asset_number][
-                    "Número do Lote"
-                ].iloc[0]
-            )
-            + "<br>"
-        )
 
         return asset_full_description
 

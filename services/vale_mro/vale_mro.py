@@ -149,15 +149,6 @@ def get_asset_full_description(dataframe, asset_number):
         )
         + "<br>"
     )
-    asset_full_description = (
-        asset_full_description
-        + "Lote de Referência: {}".format(
-            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
-                "Lote de Referência"
-            ][0]
-        )
-        + "<br>"
-    )
 
     return asset_full_description
 

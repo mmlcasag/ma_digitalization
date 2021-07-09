@@ -2,7 +2,6 @@ import os
 import pandas
 from services.base.spreadsheet_converter import SpreadsheetConverter
 from services.base.logger import Logger
-import utils.os as os_utils
 import utils.ma as ma_utils
 import utils.excel as excel_utils
 
@@ -187,16 +186,5 @@ if __name__ == "__main__":
         logger.exception(error)
 
     logger.info("Processo de conversão da planilha finalizado com sucesso.")
-
-    input_folder = os.path.join("input", "images")
-    output_folder = os.path.join("output", "images")
-
-    try:
-        logger.info("Iniciando processo de separação das imagens")
-        os_utils.move_files_by_regex_name(input_folder, output_folder, r"\d+")
-        logger.info("Finalizando processo de separação das imagens")
-    except Exception as error:
-        logger.error("Ocorreu algum erro inesperado ao mover as imagens")
-        logger.exception(error)
 
     done = str(input("Pressione ENTER para encerrar..."))

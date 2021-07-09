@@ -1,5 +1,4 @@
 import os
-import re
 
 import pandas
 
@@ -20,11 +19,11 @@ def handle_sheet_row(row, index=0, prefix="", empty_value="", as_type=str):
         else:
             return ""
     else:
-        return  f"{prefix}{row.fillna(empty_value).astype(as_type).values[index]}"
+        return f"{prefix}{row.fillna(empty_value).astype(as_type).values[index]}"
 
 
 def format_to_decimal(value):
-    return '{:.2f}'.format(float(value))
+    return "{:.2f}".format(float(value))
 
 
 class CONST:
@@ -83,19 +82,35 @@ class ValeMEConverter(SpreadsheetConverter):
 
         total_items = sheet_row_02["Qte"].dropna()
 
-        description = handle_sheet_row(sheet_row_02[CONST.STARTED_WITH_1000], 0, "Código do Produto: ", "", int)
-        description += handle_sheet_row(sheet_row_02[CONST.STARTED_WITH_8000], 0, "<br>Referência do Produto: ", "", int)
-        description += handle_sheet_row(sheet_row_02[CONST.DESCRIPTION], 0, "<br>Descrição do Produto: ", "")
-        description += handle_sheet_row(sheet_row_02[CONST.SUBCATEGORY], 0, "<br>Descrição do Grupo: ", "")
-        description += handle_sheet_row(sheet_row_02[CONST.QTD], 0, "<br>Quantidade: ", "")
+        description = handle_sheet_row(
+            sheet_row_02[CONST.STARTED_WITH_1000], 0, "Código do Produto: ", "", int
+        )
+        description += handle_sheet_row(
+            sheet_row_02[CONST.STARTED_WITH_8000],
+            0,
+            "<br>Referência do Produto: ",
+            "",
+            int,
+        )
+        description += handle_sheet_row(
+            sheet_row_02[CONST.DESCRIPTION], 0, "<br>Descrição do Produto: ", ""
+        )
+        description += handle_sheet_row(
+            sheet_row_02[CONST.SUBCATEGORY], 0, "<br>Descrição do Grupo: ", ""
+        )
+        description += handle_sheet_row(
+            sheet_row_02[CONST.QTD], 0, "<br>Quantidade: ", ""
+        )
         description += handle_sheet_row(sheet_row_02[CONST.UN], 0, "<br>Unidade: ", "")
-        description += handle_sheet_row(sheet_row_02[CONST.WEIGHT], 0, "<br>Peso Estimado: ", "")
-        description += handle_sheet_row(sheet_row_01[CONST.LOT], 0, "<br>Lote de Referência: ", "")
+        description += handle_sheet_row(
+            sheet_row_02[CONST.WEIGHT], 0, "<br>Peso Estimado: ", ""
+        )
+        description += handle_sheet_row(
+            sheet_row_01[CONST.LOT], 0, "<br>Lote de Referência: ", ""
+        )
 
         html_description = ""
-        lot_name = re.sub(r"\(OBS:[^)]*\)", "", handle_sheet_row(sheet_row_02[CONST.DESCRIPTION]))
-        if lot_name.startswith("."):
-            lot_name = lot_name[1:]
+        lot_name = handle_sheet_row(sheet_row_02[CONST.DESCRIPTION])
 
         if len(total_items) > 1:
             lot_name = ma_utils.generate_description_from_array(
@@ -172,13 +187,19 @@ class ValeMEConverter(SpreadsheetConverter):
                 "Descrição do Grupo": handle_sheet_row(
                     sheet_row_02[CONST.SUBCATEGORY], index
                 ),
-                "Quantidade": format_to_decimal(handle_sheet_row(sheet_row_02[CONST.QTD], index)),
+                "Quantidade": format_to_decimal(
+                    handle_sheet_row(sheet_row_02[CONST.QTD], index)
+                ),
                 "Unidade": handle_sheet_row(sheet_row_02[CONST.UN], index),
-                "Valor Unitário": format_to_decimal(handle_sheet_row(sheet_row_02[CONST.UNIT_PRICE], index)),
-                "Valor Total": format_to_decimal(handle_sheet_row(sheet_row_02[CONST.TOTAL_AMOUNT], index)),
-                "Peso Estimado": format_to_decimal(handle_sheet_row(
-                    sheet_row_02[CONST.WEIGHT], index
-                )),
+                "Valor Unitário": format_to_decimal(
+                    handle_sheet_row(sheet_row_02[CONST.UNIT_PRICE], index)
+                ),
+                "Valor Total": format_to_decimal(
+                    handle_sheet_row(sheet_row_02[CONST.TOTAL_AMOUNT], index)
+                ),
+                "Peso Estimado": format_to_decimal(
+                    handle_sheet_row(sheet_row_02[CONST.WEIGHT], index)
+                ),
                 "Lote de Referência": handle_sheet_row(sheet_row_01[CONST.LOT]),
             }
             temp_list.append(append_data)
@@ -192,11 +213,13 @@ class ValeMEConverter(SpreadsheetConverter):
 
                 logger.info("Concatenando o cabeçalho e o rodapé do arquivo HTML")
                 html_content = (
-                        html_utils.get_header() + html_content + html_utils.get_footer()
+                    html_utils.get_header() + html_content + html_utils.get_footer()
                 )
 
                 html_file = open(
-                    os.path.join("output", "html", os_utils.get_file_name(file_name) + ".html"),
+                    os.path.join(
+                        "output", "html", os_utils.get_file_name(file_name) + ".html"
+                    ),
                     "w",
                     newline="",
                     encoding="utf-8",
@@ -224,10 +247,13 @@ class ValeMEConverter(SpreadsheetConverter):
 
         writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
 
-        df.sort_values("Nº do lote", ascending=True).to_excel(writer, sheet_name="Colunada", index=False)
-        df_list.sort_values(["Lote de Referência", "Código do Produto"], ascending=True).to_excel(writer,
-                                                                                                  sheet_name="Listagem",
-                                                                                                  index=False)
+        df.sort_values("Nº do lote", ascending=True).to_excel(
+            writer, sheet_name="Colunada", index=False
+        )
+
+        df_list.sort_values(
+            ["Lote de Referência", "Código do Produto"], ascending=True
+        ).to_excel(writer, sheet_name="Listagem", index=False)
 
         writer.save()
 
@@ -251,16 +277,5 @@ if __name__ == "__main__":
         logger.exception(error)
 
     logger.info("Processo de conversão da planilha finalizado com sucesso.")
-
-    input_folder = os.path.join("input", "images")
-    output_folder = os.path.join("output", "images")
-
-    try:
-        logger.info("Iniciando processo de separação das imagens")
-        os_utils.move_files_by_regex_name(input_folder, output_folder, r"\d+")
-        logger.info("Finalizando processo de separação das imagens")
-    except Exception as error:
-        logger.error("Ocorreu algum erro inesperado ao mover as imagens")
-        logger.exception(error)
 
     done = str(input("Pressione ENTER para encerrar..."))

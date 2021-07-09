@@ -35,6 +35,13 @@ class ImageHandler:
                     origin_file_src = os.path.join(self._input_folder, img_name)
                     shutil.copy(origin_file_src, destination_folder)
 
+                    if os_utils.get_file_extension(origin_file_src) == "jpeg":
+                        old_file_name = os.path.join(destination_folder, img_name)
+                        new_file_name = old_file_name.replace(".jpeg", ".jpg")
+                        os.rename(old_file_name, new_file_name)
+                        logger.info('Convertendo imagem "{}" para JPG'.format(img_name))
+                        img_name = img_name.replace(".jpeg", ".jpg")
+
                     if resize:
                         target_img = os.path.join(destination_folder, img_name)
                         excel_utils.resize_image(target_img)
