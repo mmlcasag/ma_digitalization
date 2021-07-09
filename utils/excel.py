@@ -74,24 +74,56 @@ def extract_images(file_name, output_folder):
         excel.Quit()
 
 
+def resize_by_height(image, height):
+    img_width = image.size[0]
+    img_height = image.size[1]
+
+    height_percent = height / float(img_height)
+    width_size = int((float(img_width) * float(height_percent)))
+
+    return image.resize((width_size, height), Image.NEAREST)
+
+
+def resize_by_width(image, width):
+    img_width = image.size[0]
+    img_height = image.size[1]
+
+    width_percent = width / float(img_width)
+    height_size = int((float(img_height) * float(width_percent)))
+
+    return image.resize((width, height_size), Image.NEAREST)
+
+
 def resize_image(img_src):
     image = Image.open(img_src)
     base_width = 400
     base_height = 300
+    max_long_side = 800
 
     logger.info('Verificando dimensões da imagem "{}"'.format(img_src))
+    img_width = image.size[0]
+    img_height = image.size[1]
 
-    if image.size[0] < base_width:
-        wpercent = base_width / float(image.size[0])
-        hsize = int((float(image.size[1]) * float(wpercent)))
-        image = image.resize((base_width, hsize), Image.NEAREST)
-        logger.info('Redimensionando largura da imagem "{}"'.format(img_src))
+    if img_width < base_width:
+        image = resize_by_width(image, base_width)
+        logger.info('Redimensionada largura da imagem "{}"'.format(img_src))
 
-    if image.size[1] < base_height:
-        height_percent = base_height / float(image.size[1])
-        width_size = int((float(image.size[0]) * float(height_percent)))
-        image = image.resize((width_size, base_height), Image.NEAREST)
-        logger.info('Redimensionando altura da imagem "{}"'.format(img_src))
+    if img_height < base_height:
+        image = resize_by_height(image, base_height)
+        logger.info('Redimensionada altura da imagem "{}"'.format(img_src))
+
+    long_side = max(img_height, img_width)
+
+    if long_side > max_long_side:
+        logger.info("Maior lado da imagem supera o máximo permitido")
+
+        if long_side == img_height:
+            logger.info('Redimensionada altura da imagem "{}"'.format(img_src))
+            image = resize_by_height(image, max_long_side)
+
+        if long_side == img_width:
+            logger.info('Redimensionada largura da imagem "{}"'.format(img_src))
+            image = resize_by_width(image, max_long_side)
 
     image = image.convert("RGB")
     image.save(img_src)
