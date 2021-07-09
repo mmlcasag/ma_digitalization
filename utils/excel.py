@@ -114,7 +114,8 @@ def extract_images_from_xlsx(file, output_folder):
                 ext = "emf"
             if os_utils.get_file_extension(origin_file) == "wmf":
                 ext = "wmf"
-                
+
             shutil.copy(origin_file, f"{destination_file}.{ext}")
+            resize_image(destination_file)
 
         shutil.rmtree(tempdir)
