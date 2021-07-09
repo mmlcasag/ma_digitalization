@@ -1,11 +1,14 @@
 import os
+import re
+
 import pandas
-from services.base.spreadsheet_converter import SpreadsheetConverter
-from services.base.logger import Logger
-import utils.os as os_utils
-import utils.ma as ma_utils
+
 import utils.excel as excel_utils
 import utils.html as html_utils
+import utils.ma as ma_utils
+import utils.os as os_utils
+from services.base.logger import Logger
+from services.base.spreadsheet_converter import SpreadsheetConverter
 
 logger = Logger.__call__().get_logger()
 
@@ -90,7 +93,10 @@ class ValeMEConverter(SpreadsheetConverter):
         description += handle_sheet_row(sheet_row_01[CONST.LOT], 0, "<br>Lote de Referência: ", "")
 
         html_description = ""
-        lot_name = handle_sheet_row(sheet_row_02[CONST.DESCRIPTION])
+        lot_name = re.sub(r"\(OBS:[^)]*\)", "", handle_sheet_row(sheet_row_02[CONST.DESCRIPTION]))
+        if lot_name.startswith("."):
+            lot_name = lot_name[1:]
+
         if len(total_items) > 1:
             lot_name = ma_utils.generate_description_from_array(
                 sheet_row_02[CONST.DESCRIPTION].dropna().values
