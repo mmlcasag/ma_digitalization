@@ -124,31 +124,6 @@ def get_asset_full_description(dataframe, asset_number):
         )
         + "<br>"
     )
-    asset_full_description = (
-        asset_full_description
-        + "Responsável: {}".format(
-            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
-                "Responsável"
-            ][0]
-        )
-        + "<br>"
-    )
-    asset_full_description = (
-        asset_full_description
-        + "Empresa: {}".format(
-            dataframe.loc[dataframe["Lote de Referência"] == asset_number]["Empresa"][0]
-        )
-        + "<br>"
-    )
-    asset_full_description = (
-        asset_full_description
-        + "Localização: {}".format(
-            dataframe.loc[dataframe["Lote de Referência"] == asset_number][
-                "Localização"
-            ][0]
-        )
-        + "<br>"
-    )
 
     return asset_full_description
 
