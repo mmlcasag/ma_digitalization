@@ -9,3 +9,4 @@ services/*/log
 **.egg-info
 *.spec
 .idea/
+.DS_Store
