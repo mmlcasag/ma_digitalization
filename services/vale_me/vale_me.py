@@ -103,9 +103,6 @@ class ValeMEConverter(SpreadsheetConverter):
         )
         description += handle_sheet_row(sheet_row_02[CONST.UN], 0, "<br>Unidade: ", "")
         description += handle_sheet_row(
-            sheet_row_02[CONST.WEIGHT], 0, "<br>Peso Estimado: ", ""
-        )
-        description += handle_sheet_row(
             sheet_row_01[CONST.LOT], 0, "<br>Lote de Referência: ", ""
         )
 
@@ -207,6 +204,10 @@ class ValeMEConverter(SpreadsheetConverter):
             if len(total_items) > 1:
                 logger.info("Carregando um dataset para geração do arquivo HTML")
                 df_html = pandas.DataFrame(temp_list, columns=df_columns)
+
+                del df_html["Valor Unitário"]
+                del df_html["Valor Total"]
+                del df_html["Peso Estimado"]
 
                 logger.info("Gerando código HTML a partir dos dados do dataset")
                 html_content = df_html.to_html(index=False, na_rep="")
