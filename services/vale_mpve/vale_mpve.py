@@ -217,7 +217,7 @@ class ValeMPVEConverter(SpreadsheetConverter):
                         "value": sheet_row_02[CONST.SERIAL_NUMBER],
                     },
                     {"key": "KMS", "value": sheet_row_03[CONST.KMS]},
-                    {"key": "TAG", "value": sheet_row_03[CONST.TAG]},
+                    {"key": "TAG", "value": sheet_row_02[CONST.TAG]},
                     {
                         "key": "STARTED_WITH_8000",
                         "value": sheet_row_03[CONST.STARTED_WITH_8000],
