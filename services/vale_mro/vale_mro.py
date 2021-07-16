@@ -32,7 +32,7 @@ os_utils.create_folder(output_folder, images_folder)
 dataset_sheet_1 = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns())
 dataset_sheet_2 = pandas.DataFrame()
 
-allowed_extensions = ["xlsx", "xlsb"]
+allowed_extensions = ["xlsx", "xlsb", "xlsm", "xls"]
 
 
 def get_asset_full_description(dataframe, asset_number):
@@ -137,14 +137,17 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.info('Nome do arquivo sem extensão "{}"'.format(file_name))
 
         logger.info("Extraindo imagens do arquivo Excel")
-        input_path = os.path.join(absolute_path, input_folder, excel_file_name)
-        output_path = os.path.join(
-            absolute_path,
-            output_folder,
-            images_folder,
-            file_name,
-        )
-        excel_utils.extract_images_from_xlsx(input_path, output_path)
+        try:
+            input_path = os.path.join(absolute_path, input_folder, excel_file_name)
+            output_path = os.path.join(
+                absolute_path,
+                output_folder,
+                images_folder,
+                file_name,
+            )
+            excel_utils.extract_images_from_xlsx(input_path, output_path)
+        except Exception as error:
+            logger.info("{} ao tentar extrair imagens do arquivo Excel".format(error))
 
         logger.info("Abrindo o arquivo Excel")
         workbook = openpyxl.load_workbook(

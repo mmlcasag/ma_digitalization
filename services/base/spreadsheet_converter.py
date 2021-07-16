@@ -12,7 +12,7 @@ class SpreadsheetConverter:
     _input_folders = []
     _output_folders = []
     _output_xlsx_file = []
-    _allowed_extensions = ["xlsx", "xlsb"]
+    _allowed_extensions = ["xlsx", "xlsb", "xlsm", "xls"]
 
     def __init__(
         self,

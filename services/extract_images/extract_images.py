@@ -15,7 +15,7 @@ os_utils.create_folder(input_folder)
 os_utils.create_folder(output_folder)
 os_utils.create_folder(output_folder, images_folder)
 
-allowed_extensions = ["xlsx", "xlsb", "xlsm"]
+allowed_extensions = ["xlsx", "xlsb", "xlsm", "xls"]
 
 for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:

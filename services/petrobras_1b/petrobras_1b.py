@@ -29,7 +29,7 @@ os_utils.create_folder(output_folder, csv_folder)
 os_utils.create_folder(output_folder, html_folder)
 os_utils.create_folder(output_folder, excel_folder)
 
-allowed_extensions = ["xlsx", "xlsb", "xlsm"]
+allowed_extensions = ["xlsx", "xlsb", "xlsm", "xls"]
 
 
 def get_asset_full_description(dataframe, asset_number):
