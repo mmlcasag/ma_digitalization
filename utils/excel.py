@@ -3,6 +3,7 @@ import csv
 import zipfile
 import tempfile
 import shutil
+import subprocess
 from PIL import Image
 
 if os.name == "nt":
@@ -130,26 +131,21 @@ def resize_image(img_src):
 
 
 def extract_images_from_xlsx(file, output_folder):
-    with zipfile.ZipFile(file, "r") as zip_ref:
-        shutil.rmtree(output_folder, ignore_errors=True)
-        tempdir = tempfile.mkdtemp()
+
+    shutil.rmtree(output_folder, ignore_errors=True)
+    tempdir = tempfile.mkdtemp()
+    subprocess.call(["unoconv", "-f", "ods", "-o", f"{tempdir}/temp.ods", file])
+
+    with zipfile.ZipFile(f"{tempdir}/temp.ods", "r") as zip_ref:
         zip_ref.extractall(tempdir)
-        origin_folder = os.path.join(tempdir, "xl", "media")
+        origin_folder = os.path.join(tempdir, "Pictures")
         files_from_xlsx = os_utils.get_files_list(origin_folder)
         os_utils.create_folder(output_folder)
         for idx, file in enumerate(files_from_xlsx):
             origin_file = os.path.join(origin_folder, file)
             destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
-
-            ext = "jpg"
-            if os_utils.get_file_extension(origin_file) == "emf":
-                ext = "emf"
-            if os_utils.get_file_extension(origin_file) == "wmf":
-                ext = "wmf"
-
-            shutil.copy(origin_file, f"{destination_file}.{ext}")
-
-            if ext == "jpg":
-                resize_image(f"{destination_file}.{ext}")
+            if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
+                shutil.copy(origin_file, f"{destination_file}.jpg")
+                resize_image(f"{destination_file}.jpg")
 
         shutil.rmtree(tempdir)

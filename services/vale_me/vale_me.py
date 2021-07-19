@@ -231,10 +231,12 @@ class ValeMEConverter(SpreadsheetConverter):
 
         df_list = pandas.DataFrame(temp_list, columns=df_columns)
 
+        logger.info("Rodando o processo de extração de imagens")
         excel_utils.extract_images_from_xlsx(
             file,
             os.path.join("output", "images", handle_sheet_row(sheet_row_01[CONST.LOT])),
         )
+        logger.info("Processo de extração de imagens finalizado")
 
         if os.path.isfile(self._output_xlsx_file):
             append_data = pandas.read_excel(
