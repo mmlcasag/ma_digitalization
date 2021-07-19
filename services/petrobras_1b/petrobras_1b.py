@@ -185,7 +185,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         df1 = df1.astype(str)
 
         logger.info(
-            "Desconsiderando as linhas cujos valores de todas as colunas estão vazios ou inválidos"
+            "Desconsiderando linhas cujos valores de todas as colunas estão vazios ou inválidos"
         )
         df1 = df1.mask(df1.eq("None")).dropna(how="all")
         df1 = df1.mask(df1.eq("None")).fillna("")
@@ -501,7 +501,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             if xls_to_exclude:
                 if os.path.isfile(xls_to_exclude):
                     f = open(xls_to_exclude, "wb")
-                    f.close
+                    f.close()
                     os.remove(xls_to_exclude)
 
             logger.info("Arquivo da temporário conversão excluído com sucesso")
