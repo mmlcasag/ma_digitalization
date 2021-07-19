@@ -125,6 +125,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 df.to_excel(writer, sheet_name=sheet, index=False)
 
             writer.save()
+            writer.close()
             excel_file_name = excel_file_name.replace("xlsb", "xlsx")
             xls_to_exclude = input_path.replace("xlsb", "xlsx")
 
@@ -498,7 +499,11 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         try:
             logger.info("Excluindo arquivo temporário gerado da conversão do xlsb")
             if xls_to_exclude:
-                os.remove(xls_to_exclude)
+                if os.path.isfile(xls_to_exclude):
+                    f = open(xls_to_exclude, "wb")
+                    f.close
+                    os.remove(xls_to_exclude)
+
             logger.info("Arquivo da temporário conversão excluído com sucesso")
         except Exception as error:
             logger.error("Erro ao tentar excluir o arquivo temporário da conversão")
