@@ -105,11 +105,28 @@ def get_asset_full_description(dataframe, asset_number):
     return asset_full_description
 
 
+# flake8: noqa: C901
 for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions):
     try:
         logger.info('PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
 
         file_name = os_utils.get_file_name(excel_file_name)
+        xls_to_exclude = None
+
+        if excel_file_name.endswith("xlsb"):
+            input_path = os.path.join(input_folder, excel_file_name)
+            xls = pandas.ExcelFile(input_path, engine="pyxlsb")
+            writer = pandas.ExcelWriter(
+                input_path.replace("xlsb", "xlsx"), engine="xlsxwriter"
+            )
+
+            for sheet in xls.sheet_names:
+                df = pandas.read_excel(xls, sheet_name=sheet)
+                df.to_excel(writer, sheet_name=sheet, index=False)
+
+            writer.save()
+            excel_file_name = excel_file_name.replace("xlsb", "xlsx")
+            xls_to_exclude = input_path.replace("xlsb", "xlsx")
 
         logger.info('Nome do arquivo sem extensão "{}"'.format(file_name))
 
@@ -269,6 +286,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                     "Carregando um dataset apenas com os valores totais desse lote"
                 )
                 local_df2 = df2.loc[df2["Número do Lote"] == asset_number]
+                local_df2 = local_df2.fillna("")
                 local_df2 = local_df2.reset_index(drop=True)
                 local_df2_cols = list(local_df2.columns.values)
 
@@ -349,19 +367,21 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
                 logger.info("Buscando o município e o estado do lote")
                 try:
+                    asset_location_city = ""
+                    asset_location_state = ""
                     asset_location = ma_utils.split_city_and_state(
                         local_df2.at[0, "Localização"]
                     )
-                    asset_location_city = asset_location[0]
-                    asset_location_state = asset_location[1]
+                    if len(asset_location) > 0:
+                        asset_location_city = asset_location[0]
+                        asset_location_state = asset_location[1]
+
                 except Exception as error:
                     logger.error(
                         "{} ao tentar buscar o município e o estado do lote".format(
                             error
                         )
                     )
-                    asset_location_city = ""
-                    asset_location_state = ""
 
                 logger.info("Buscando o valor de referência do lote")
                 try:
@@ -474,6 +494,15 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Salvando e fechando o arquivo Excel resultante")
         excel_file.save()
+
+        try:
+            logger.info("Excluindo arquivo temporário gerado da conversão do xlsb")
+            if xls_to_exclude:
+                os.remove(xls_to_exclude)
+            logger.info("Arquivo da temporário conversão excluído com sucesso")
+        except Exception as error:
+            logger.error("Erro ao tentar excluir o arquivo temporário da conversão")
+            logger.error(error)
 
         logger.info("Arquivo Excel gerado com sucesso")
     except Exception as error:
