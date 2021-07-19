@@ -4,7 +4,9 @@ import zipfile
 import tempfile
 import shutil
 import subprocess
+import random
 from PIL import Image
+from pathlib import Path
 
 if os.name == "nt":
     import win32com.client as win32
@@ -134,9 +136,15 @@ def extract_images_from_xlsx(file, output_folder):
 
     shutil.rmtree(output_folder, ignore_errors=True)
     tempdir = tempfile.mkdtemp()
-    subprocess.call(["unoconv", "-f", "ods", "-o", f"{tempdir}/temp.ods", file])
+    file_name = f"{random.randint(1, 10000)}.ods"
+    unoconv_dir = os.path.abspath(os.path.join(os.getcwd(), "../../utils", "unoconv"))
 
-    with zipfile.ZipFile(f"{tempdir}/temp.ods", "r") as zip_ref:
+    if os.name == "nt":
+        subprocess.call(["python", unoconv_dir, "-f", "ods", "-o", f"{tempdir}/{file_name}", file])
+    else:
+        subprocess.call(["unoconv", "-f", "ods", "-o", f"{tempdir}/{file_name}", file])
+
+    with zipfile.ZipFile(f"{tempdir}/{file_name}", "r") as zip_ref:
         zip_ref.extractall(tempdir)
         origin_folder = os.path.join(tempdir, "Pictures")
         files_from_xlsx = os_utils.get_files_list(origin_folder)
@@ -148,4 +156,5 @@ def extract_images_from_xlsx(file, output_folder):
                 shutil.copy(origin_file, f"{destination_file}.jpg")
                 resize_image(f"{destination_file}.jpg")
 
-        shutil.rmtree(tempdir)
+
+    shutil.rmtree(tempdir)
