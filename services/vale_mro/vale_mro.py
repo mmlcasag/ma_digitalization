@@ -137,17 +137,30 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.info('Nome do arquivo sem extensão "{}"'.format(file_name))
 
         logger.info("Extraindo imagens do arquivo Excel")
-        try:
-            input_path = os.path.join(absolute_path, input_folder, excel_file_name)
-            output_path = os.path.join(
-                absolute_path,
-                output_folder,
-                images_folder,
-                file_name,
+        input_path = os.path.join(absolute_path, input_folder, excel_file_name)
+        output_path = os.path.join(
+            absolute_path,
+            output_folder,
+            images_folder,
+            file_name,
+        )
+
+        if excel_file_name.endswith("xlsb"):
+            input_path = os.path.join(input_folder, excel_file_name)
+            xls = pandas.ExcelFile(input_path, engine="pyxlsb")
+            writer = pandas.ExcelWriter(
+                input_path.replace("xlsb", "xlsx"), engine="xlsxwriter"
             )
-            excel_utils.extract_images_from_xlsx(input_path, output_path)
-        except Exception as error:
-            logger.info("{} ao tentar extrair imagens do arquivo Excel".format(error))
+
+            for sheet in xls.sheet_names:
+                df = pandas.read_excel(xls, sheet_name=sheet)
+                df.to_excel(writer, sheet_name=sheet, index=False)
+
+            writer.save()
+            excel_file_name = excel_file_name.replace("xlsb", "xlsx")
+            xls_to_exclude = input_path.replace("xlsb", "xlsx")
+
+        excel_utils.extract_images_from_xlsx(input_path, output_path)
 
         logger.info("Abrindo o arquivo Excel")
         workbook = openpyxl.load_workbook(
@@ -155,7 +168,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
 
         logger.info("Selecionando a aba ativa da planilha")
-        sheet = workbook.active
+        sheet = workbook["Anexo 1"]
 
         logger.info(
             'Deletando linhas até que a primeira linha seja "Cód", "Descrição" ou algo do gênero'
@@ -177,8 +190,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Carregando um dataset com os dados do arquivo CSV")
         df = pandas.read_csv(
-            os.path.join(output_folder, csv_folder, file_name + ".csv"),
-            delimiter=";",
+            os.path.join(output_folder, csv_folder, file_name + ".csv"), delimiter=";"
         )
 
         logger.info(
@@ -445,6 +457,13 @@ logger.info("Salvando e fechando o arquivo Excel resultante")
 excel_file.save()
 
 logger.info("Arquivo Excel gerado com sucesso")
+
+if xls_to_exclude:
+    if os.path.isfile(xls_to_exclude):
+        f = open(xls_to_exclude, "wb")
+        f.close
+        os.remove(xls_to_exclude)
+
 
 logger.info("Processo finalizado com sucesso.")
 done = str(input("Pressione ENTER para encerrar..."))
