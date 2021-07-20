@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import random
 from PIL import Image
-from pathlib import Path
 
 if os.name == "nt":
     import win32com.client as win32
@@ -110,10 +109,14 @@ def resize_image(img_src):
     if img_width < base_width:
         image = resize_by_width(image, base_width)
         logger.info('Redimensionada largura da imagem "{}"'.format(img_src))
+        img_width = image.size[0]
+        img_height = image.size[1]
 
     if img_height < base_height:
         image = resize_by_height(image, base_height)
         logger.info('Redimensionada altura da imagem "{}"'.format(img_src))
+        img_width = image.size[0]
+        img_height = image.size[1]
 
     long_side = max(img_height, img_width)
 
@@ -140,7 +143,9 @@ def extract_images_from_xlsx(file, output_folder):
     unoconv_dir = os.path.abspath(os.path.join(os.getcwd(), "../../utils", "unoconv"))
 
     if os.name == "nt":
-        subprocess.call(["python", unoconv_dir, "-f", "ods", "-o", f"{tempdir}/{file_name}", file])
+        subprocess.call(
+            ["python", unoconv_dir, "-f", "ods", "-o", f"{tempdir}/{file_name}", file]
+        )
     else:
         subprocess.call(["unoconv", "-f", "ods", "-o", f"{tempdir}/{file_name}", file])
 
@@ -155,6 +160,5 @@ def extract_images_from_xlsx(file, output_folder):
             if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
                 shutil.copy(origin_file, f"{destination_file}.jpg")
                 resize_image(f"{destination_file}.jpg")
-
 
     shutil.rmtree(tempdir)
