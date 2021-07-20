@@ -157,6 +157,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 df.to_excel(writer, sheet_name=sheet, index=False)
 
             writer.save()
+            writer.close()
             excel_file_name = excel_file_name.replace("xlsb", "xlsx")
             xls_to_exclude = input_path.replace("xlsb", "xlsx")
 
@@ -461,7 +462,7 @@ logger.info("Arquivo Excel gerado com sucesso")
 if xls_to_exclude:
     if os.path.isfile(xls_to_exclude):
         f = open(xls_to_exclude, "wb")
-        f.close
+        f.close()
         os.remove(xls_to_exclude)
 
 
