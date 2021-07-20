@@ -14,6 +14,7 @@ from services.base.logger import Logger
 logger = Logger.__call__().get_logger()
 
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
+warnings.filterwarnings("ignore", category=UserWarning, module="xlsxwriter")
 
 absolute_path = os.getcwd()
 
@@ -111,9 +112,10 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.info('PROCESSANDO O ARQUIVO "{}"'.format(excel_file_name))
 
         file_name = os_utils.get_file_name(excel_file_name)
-        xls_to_exclude = None
 
+        xls_to_exclude = ""
         if excel_file_name.endswith("xlsb"):
+            logger.info("Convertendo arquivo XLSB em XLSX")
             input_path = os.path.join(input_folder, excel_file_name)
             xls = pandas.ExcelFile(input_path, engine="pyxlsb")
             writer = pandas.ExcelWriter(
@@ -172,6 +174,21 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Fechando o arquivo Excel")
         workbook.close()
+
+        try:
+            logger.info("Excluindo arquivo XLSX gerado da conversão do XLSB")
+            if xls_to_exclude:
+                if os.path.isfile(xls_to_exclude):
+                    f = open(xls_to_exclude, "wb")
+                    f.close()
+                    os.remove(xls_to_exclude)
+            logger.info("Arquivo XLSX gerado da conversão do XLSB excluído com sucesso")
+        except Exception as error:
+            logger.error(
+                "Erro {} ao tentar excluir o arquivo XLSX gerado da conversão do XLSB".format(
+                    error
+                )
+            )
 
         logger.info("Carregando um dataset com os dados do arquivo CSV da primeira aba")
         df1 = pandas.read_csv(
@@ -445,8 +462,8 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                             asset_description,
                             asset_full_description,
                             asset_initial_value,
-                            0,
-                            0,
+                            "",
+                            "",
                             asset_increment_value,
                             asset_reference_value,
                             asset_owner_name,
@@ -495,19 +512,6 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Salvando e fechando o arquivo Excel resultante")
         excel_file.save()
-
-        try:
-            logger.info("Excluindo arquivo temporário gerado da conversão do xlsb")
-            if xls_to_exclude:
-                if os.path.isfile(xls_to_exclude):
-                    f = open(xls_to_exclude, "wb")
-                    f.close()
-                    os.remove(xls_to_exclude)
-
-            logger.info("Arquivo da temporário conversão excluído com sucesso")
-        except Exception as error:
-            logger.error("Erro ao tentar excluir o arquivo temporário da conversão")
-            logger.error(error)
 
         logger.info("Arquivo Excel gerado com sucesso")
     except Exception as error:
