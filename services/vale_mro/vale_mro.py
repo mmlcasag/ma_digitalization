@@ -173,7 +173,14 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
 
         logger.info("Selecionando a aba ativa da planilha")
-        sheet = workbook["Anexo 1"]
+
+        sheets_to_remove = ["Principal", "Lista CMD", "Relação Grupo Mercadorias"]
+        sheet_names = workbook.sheetnames
+        for element in sheets_to_remove:
+            if element in sheet_names:
+                sheet_names.remove(element)
+
+        sheet = workbook[sheet_names[0]]
 
         logger.info(
             'Deletando linhas até que a primeira linha seja "Cód", "Descrição" ou algo do gênero'
@@ -381,6 +388,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Buscando o valor de referência do lote")
         try:
+            df["Valor Total"] = df["Valor Total"].apply(
+                lambda n: float(n.replace(",", ".") if n else 0)
+            )
             asset_reference_value = round(df["Valor Total"].astype(float).sum(), 2)
         except Exception as error:
             logger.error(
