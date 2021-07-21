@@ -138,18 +138,26 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info('Nome do arquivo sem extensão "{}"'.format(file_name))
 
-        logger.info("Extraindo imagens do arquivo Excel")
-        input_path = os.path.join(absolute_path, input_folder, excel_file_name)
-        output_path = os.path.join(
-            absolute_path,
-            output_folder,
-            images_folder,
-            file_name,
-        )
+        try:
+            logger.info("Extraindo imagens do arquivo Excel")
+
+            input_path = os.path.join(absolute_path, input_folder, excel_file_name)
+            output_path = os.path.join(
+                absolute_path,
+                output_folder,
+                images_folder,
+                file_name,
+            )
+
+            excel_utils.extract_images_from_xlsx(input_path, output_path)
+        except Exception as error:
+            logger.error(
+                "Erro {} ao tentar extrair as imagens do arquivo Excel".format(error)
+            )
 
         xls_to_exclude = ""
         if excel_file_name.endswith("xlsb"):
-            logger.info("Convertendo arquivo XLSB em XLSX")
+            logger.info("Convertendo arquivo de XLSB para XLSX")
             input_path = os.path.join(input_folder, excel_file_name)
             xls = pandas.ExcelFile(input_path, engine="pyxlsb")
             writer = pandas.ExcelWriter(
@@ -164,8 +172,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             writer.close()
             excel_file_name = excel_file_name.replace("xlsb", "xlsx")
             xls_to_exclude = input_path.replace("xlsb", "xlsx")
-
-        excel_utils.extract_images_from_xlsx(input_path, output_path)
+            logger.info("Conversão de XLSB para XLSX concluída com sucesso")
 
         logger.info("Abrindo o arquivo Excel")
         workbook = openpyxl.load_workbook(
