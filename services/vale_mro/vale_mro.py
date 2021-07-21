@@ -193,21 +193,6 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.info("Fechando o arquivo Excel")
         workbook.close()
 
-        try:
-            logger.info("Excluindo arquivo XLSX gerado da conversão do XLSB")
-            if xls_to_exclude:
-                if os.path.isfile(xls_to_exclude):
-                    f = open(xls_to_exclude, "wb")
-                    f.close()
-                    os.remove(xls_to_exclude)
-            logger.info("Arquivo XLSX gerado da conversão do XLSB excluído com sucesso")
-        except Exception as error:
-            logger.error(
-                "Erro {} ao tentar excluir o arquivo XLSX gerado da conversão do XLSB".format(
-                    error
-                )
-            )
-
         logger.info("Carregando um dataset com os dados do arquivo CSV")
         df = pandas.read_csv(
             os.path.join(output_folder, csv_folder, file_name + ".csv"), delimiter=";"
@@ -456,6 +441,21 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         logger.error(
             "{} ao tentar processar o arquivo {}".format(error, excel_file_name)
         )
+    finally:
+        try:
+            logger.info("Excluindo arquivo XLSX gerado da conversão do XLSB")
+            if xls_to_exclude:
+                if os.path.isfile(xls_to_exclude):
+                    file = open(xls_to_exclude, "wb")
+                    file.close()
+                    os.remove(xls_to_exclude)
+            logger.info("Arquivo XLSX gerado da conversão do XLSB excluído com sucesso")
+        except Exception as error:
+            logger.error(
+                "Erro {} ao tentar excluir o arquivo XLSX gerado da conversão do XLSB".format(
+                    error
+                )
+            )
 
 logger.info("Gerando o arquivo Excel resultante")
 
