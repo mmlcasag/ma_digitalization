@@ -5,6 +5,8 @@ import tempfile
 import shutil
 import subprocess
 import random
+import sys
+import pathlib
 
 if os.name == "nt":
     import win32com.client as win32
@@ -142,13 +144,13 @@ def extract_images_from_xlsx(file, output_folder):
     tempdir = tempfile.mkdtemp()
     file_name = f"{random.randint(1, 10000)}.ods"
 
-    unoconv_dir = os.path.abspath(os.path.join(os.getcwd(), "../../utils", "unoconv"))
-
     if os.name == "nt":
+        drive = pathlib.Path.home().drive
+        unoconv = os.path.join(drive, os.sep, "ma-importer", "unoconv")
         subprocess.call(
             [
                 "python",
-                unoconv_dir,
+                unoconv,
                 "-f",
                 "ods",
                 "-o",
@@ -169,8 +171,19 @@ def extract_images_from_xlsx(file, output_folder):
         for idx, file in enumerate(files_from_xlsx):
             origin_file = os.path.join(origin_folder, file)
             destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
-            if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
-                shutil.copy(origin_file, f"{destination_file}.jpg")
-                image_utils.resize_image(f"{destination_file}.jpg")
+            # if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
+            shutil.copy(origin_file, f"{destination_file}.jpg")
+            image_utils.resize_image(f"{destination_file}.jpg")
 
     shutil.rmtree(tempdir)
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
