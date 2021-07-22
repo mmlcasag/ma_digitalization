@@ -32,7 +32,7 @@ for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
         logger.info('Arquivo de entrada "{}"'.format(input_path))
         logger.info('Diretório de saída "{}"'.format(output_path))
 
-        excel_utils.extract_images_from_xlsx(input_path, output_path)
+        excel_utils.extract_images(input_path, output_path)
 
         logger.info("Arquivo {} processado com sucesso".format(file_name))
     except Exception as error:

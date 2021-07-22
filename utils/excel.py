@@ -36,44 +36,96 @@ def export_to_csv(sheet, csv_file_name, delimiter=",", replacement="."):
 
 
 def extract_images(file_name, output_folder):
+    # If errors are found, do this
+    # clear contents of C:\Users\<username>\AppData\Local\Temp\gen_py
+    # that should fix it
+
+    if "~$" in file_name:
+        logger.warning("O programa encontrou um arquivo temporário e irá ignorá-lo")
+        return
+
     if os.name != "nt":
-        logger.warning("Importação de imagem não implementada para ambientes linux")
+        logger.warning(
+            "A extração de imagens de planilhas Excel não foi implementada em ambientes Linux"
+        )
         return
 
     image_count = 0
+    close_excel = True
     os_utils.create_folder(output_folder)
 
     try:
-        excel = win32.gencache.EnsureDispatch("Excel.Application")
+        logger.info("Verificando a instância do Excel")
+        try:
+            excel = win32.GetActiveObject("Excel.Application")
+            close_excel = False
+            logger.info(
+                "Já havia uma instância do Excel aberta. A mesma foi utilizada."
+            )
+        except Exception:
+            excel = win32.gencache.EnsureDispatch("Excel.Application")
+            close_excel = True
+            logger.info(
+                "Não havia nenhuma instância do Excel aberta. Uma nova foi iniciada."
+            )
+
+        logger.info("Abrindo o arquivo Excel")
         workbook = excel.Workbooks.Open(file_name)
 
+        logger.info("Procurando por imagens em todas as abas do arquivo")
         for sheet in workbook.Worksheets:
             for i, shape in enumerate(sheet.Shapes):
                 if shape.Name.startswith("Picture") or shape.Name.startswith("Image"):
-                    try:
-                        image_count = image_count + 1
-                        image_name = os.path.join(
-                            output_folder, "image_{}.png".format(image_count)
-                        )
+                    image_count = image_count + 1
+                    image_name = os.path.join(
+                        output_folder, "image_{}.png".format(image_count)
+                    )
 
+                    try:
                         logger.info('Extraindo a imagem "{}"'.format(image_name))
                         shape.Copy()
                         image = ImageGrab.grabclipboard()
                         image.save(image_name, "png")
+                    except Exception as error:
+                        logger.error(
+                            "{} ao tentar extrair a imagem {}".format(error, image_name)
+                        )
 
-                        logger.info("Convertendo de PNG para JPG")
+                    try:
+                        logger.info("Convertendo imagem de PNG para JPG")
                         image_utils.convert_from_png_to_jpg(
                             image_name, output_folder, False
                         )
                     except Exception as error:
                         logger.error(
-                            "{} ao tentar extrair a imagem {}".format(error, image_name)
+                            "{} ao tentar converter a imagem {}".format(
+                                error, image_name
+                            )
                         )
     except Exception as error:
-        logger.error("{} ao tentar abrir o Excel {}".format(error, file_name))
+        logger.error(
+            "{} ao tentar extrair imagens de planilha Excel {}".format(error, file_name)
+        )
     finally:
-        workbook.Close()
-        excel.Quit()
+
+        try:
+            logger.info("Fechando o arquivo Excel")
+            workbook.Close()
+        except Exception as error:
+            logger.error("{} ao tentar fechar workbook".format(error))
+
+        if close_excel:
+            logger.info(
+                "Fechando a instância do Excel pois ela foi aberta unicamente para esse processo"
+            )
+            try:
+                excel.Application.Quit()
+            except Exception as error:
+                logger.error("{} ao tentar fechar excel".format(error))
+        else:
+            logger.info(
+                "Não irá fechar a instância do Excel pois ela já estava aberta antes desse processo"
+            )
 
 
 def resize_by_height(image, height):
