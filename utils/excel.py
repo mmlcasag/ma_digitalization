@@ -171,9 +171,9 @@ def extract_images_from_xlsx(file, output_folder):
         for idx, file in enumerate(files_from_xlsx):
             origin_file = os.path.join(origin_folder, file)
             destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
-            # if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
-            shutil.copy(origin_file, f"{destination_file}.jpg")
-            image_utils.resize_image(f"{destination_file}.jpg")
+            if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
+                shutil.copy(origin_file, f"{destination_file}.jpg")
+                image_utils.resize_image(f"{destination_file}.jpg")
 
     shutil.rmtree(tempdir)
 
