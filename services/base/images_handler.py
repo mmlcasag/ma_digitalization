@@ -1,6 +1,6 @@
 import os
 import utils.os as os_utils
-import utils.excel as excel_utils
+import utils.image as image_utils
 import shutil
 from .logger import Logger
 
@@ -44,7 +44,7 @@ class ImageHandler:
 
                     if resize:
                         target_img = os.path.join(destination_folder, img_name)
-                        excel_utils.resize_image(target_img)
+                        image_utils.resize_image(target_img)
 
                 except Exception as error:
                     logger.error(

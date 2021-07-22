@@ -105,7 +105,7 @@ def extract_images(file_name, output_folder):
                         )
 
                     try:
-                        logger.info("Redimensionando e/ou compactando imagem")
+                        logger.info("Redimensionando imagem")
                         image_utils.resize_image(image_name.replace("png", "jpg"))
                     except Exception as error:
                         logger.error(
@@ -179,7 +179,7 @@ def extract_images_from_xlsx(file, output_folder):
 
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
