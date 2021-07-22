@@ -5,7 +5,6 @@ import tempfile
 import shutil
 import subprocess
 import random
-import sys
 import pathlib
 
 if os.name == "nt":
@@ -177,14 +176,3 @@ def extract_images_from_xlsx(file, output_folder):
                 image_utils.resize_image(f"{destination_file}.jpg")
 
     shutil.rmtree(tempdir)
-
-
-def resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller"""
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
