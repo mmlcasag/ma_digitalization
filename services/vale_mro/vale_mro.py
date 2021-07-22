@@ -180,14 +180,21 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
 
         logger.info("Selecionando a aba ativa da planilha")
+        if "Anexo 1" in workbook.sheetnames:
+            sheet = workbook["Anexo 1"]
+        else:
+            sheets_to_remove = [
+                "Principal",
+                "Lista CMD",
+                "Linha Status",
+                "Relação Grupo Mercadorias",
+            ]
+            sheet_names = workbook.sheetnames
+            for element in sheets_to_remove:
+                if element in sheet_names:
+                    sheet_names.remove(element)
 
-        sheets_to_remove = ["Principal", "Lista CMD", "Relação Grupo Mercadorias"]
-        sheet_names = workbook.sheetnames
-        for element in sheets_to_remove:
-            if element in sheet_names:
-                sheet_names.remove(element)
-
-        sheet = workbook[sheet_names[0]]
+            sheet = workbook[sheet_names[0]]
 
         logger.info(
             'Deletando linhas até que a primeira linha seja "Cód", "Descrição" ou algo do gênero'

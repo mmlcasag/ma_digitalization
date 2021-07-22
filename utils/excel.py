@@ -146,7 +146,8 @@ def extract_images_from_xlsx(file, output_folder):
 
     if os.name == "nt":
         drive = pathlib.Path.home().drive
-        unoconv = os.path.join(drive, os.sep, "ma-importer", "unoconv")
+        unoconv = os.path.join(drive, os.sep, "utils", "unoconv")
+
         subprocess.call(
             [
                 "python",
