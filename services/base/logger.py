@@ -48,7 +48,7 @@ class Logger(object, metaclass=SingletonType):
         print("Generate new instance of logger")
 
         print("Suppress logs from third-party modules")
-        disable_loggers = ["PIL"]
+        disable_loggers = ["PIL", "requests", "urllib3"]
         for logger_name in disable_loggers:
             logging.getLogger(logger_name).setLevel(logging.INFO)
 
