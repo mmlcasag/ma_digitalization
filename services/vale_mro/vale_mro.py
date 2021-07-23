@@ -149,7 +149,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 file_name,
             )
 
-            excel_utils.extract_images_from_xlsx(input_path, output_path)
+            excel_utils.extract_images(input_path, output_path)
         except Exception as error:
             logger.error(
                 "Erro {} ao tentar extrair as imagens do arquivo Excel".format(error)

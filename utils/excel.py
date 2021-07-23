@@ -35,7 +35,7 @@ def export_to_csv(sheet, csv_file_name, delimiter=",", replacement="."):
     csv_file.close()
 
 
-def extract_images(file_name, output_folder):
+def extract_images_excel(file_name, output_folder):
     # If errors are found, do this
     # clear contents of C:\Users\<username>\AppData\Local\Temp\gen_py
     # that should fix it
@@ -138,7 +138,7 @@ def extract_images(file_name, output_folder):
             )
 
 
-def extract_images_from_xlsx(file, output_folder):
+def extract_images_libreoffice(file, output_folder):
     shutil.rmtree(output_folder, ignore_errors=True)
     tempdir = tempfile.mkdtemp()
     file_name = f"{random.randint(1, 10000)}.ods"
@@ -176,3 +176,33 @@ def extract_images_from_xlsx(file, output_folder):
                 image_utils.resize_image(f"{destination_file}.jpg")
 
     shutil.rmtree(tempdir)
+
+
+def extract_images(file, output_folder):
+    with zipfile.ZipFile(file, "r") as zip_ref:
+        shutil.rmtree(output_folder, ignore_errors=True)
+
+        tempdir = tempfile.mkdtemp()
+        zip_ref.extractall(tempdir)
+
+        origin_folder = os.path.join(tempdir, "xl", "media")
+        os_utils.create_folder(output_folder)
+
+        files_from_xlsx = os_utils.get_files_list(origin_folder)
+
+        for idx, file in enumerate(files_from_xlsx):
+            origin_file = os.path.join(origin_folder, file)
+            destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
+
+            ext = "jpg"
+            if os_utils.get_file_extension(origin_file) == "emf":
+                ext = "emf"
+            if os_utils.get_file_extension(origin_file) == "wmf":
+                ext = "wmf"
+
+            shutil.copy(origin_file, f"{destination_file}.{ext}")
+
+            if ext == "jpg":
+                image_utils.resize_image(f"{destination_file}.{ext}")
+
+        shutil.rmtree(tempdir)
