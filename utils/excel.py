@@ -93,8 +93,8 @@ def extract_images_excel(file_name, output_folder):
 
                     try:
                         logger.info("Convertendo imagem de PNG para JPG")
-                        image_utils.convert_from_png_to_jpg(
-                            image_name, output_folder, False
+                        image_utils.convert_to_jpg(
+                            image_name, "png", output_folder, False
                         )
                     except Exception as error:
                         logger.error(
@@ -178,31 +178,53 @@ def extract_images_libreoffice(file, output_folder):
     shutil.rmtree(tempdir)
 
 
-def extract_images(file, output_folder):
-    with zipfile.ZipFile(file, "r") as zip_ref:
-        shutil.rmtree(output_folder, ignore_errors=True)
+def extract_images(input_file, output_folder):
+    os_utils.create_folder(output_folder)
+    os_utils.create_folder(output_folder, "tmp")
 
-        tempdir = tempfile.mkdtemp()
-        zip_ref.extractall(tempdir)
+    with zipfile.ZipFile(input_file, "r") as zip_ref:
+        logger.info("Extraindo imagens do arquivo Excel para um diretório temporário")
+        zip_ref.extractall(os.path.join(output_folder, "tmp"))
 
-        origin_folder = os.path.join(tempdir, "xl", "media")
-        os_utils.create_folder(output_folder)
+        origin_folder = os.path.join(output_folder, "tmp", "xl", "media")
 
-        files_from_xlsx = os_utils.get_files_list(origin_folder)
+        logger.info(
+            "Copiando as imagens do diretório temporário para o diretório de saída"
+        )
+        for image_name in os_utils.get_files_list(origin_folder):
+            origin_file = os.path.join(origin_folder, image_name)
+            destination_file = os.path.join(output_folder, image_name)
 
-        for idx, file in enumerate(files_from_xlsx):
-            origin_file = os.path.join(origin_folder, file)
-            destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
+            shutil.copy(origin_file, destination_file)
 
-            ext = "jpg"
-            if os_utils.get_file_extension(origin_file) == "emf":
-                ext = "emf"
-            if os_utils.get_file_extension(origin_file) == "wmf":
-                ext = "wmf"
+    logger.info("Excluindo o diretório temporário")
+    shutil.rmtree(os.path.join(output_folder, "tmp"))
 
-            shutil.copy(origin_file, f"{destination_file}.{ext}")
+    logger.info("Convertendo imagens com extensão diferente de JPG")
+    for image_file in os_utils.get_files_list(output_folder):
+        if os_utils.get_file_extension(image_file) != "jpg":
+            try:
+                logger.info('Convertendo a imagem "{}" para JPG'.format(image_file))
+                image_utils.convert_to_jpg(
+                    os.path.join(output_folder, image_file),
+                    os_utils.get_file_extension(image_file),
+                    output_folder,
+                    False,
+                )
+            except Exception as error:
+                logger.error(
+                    '"{}" ao tentar converter a imagem "{}"'.format(error, image_file)
+                )
 
-            if ext == "jpg":
-                image_utils.resize_image(f"{destination_file}.{ext}")
-
-        shutil.rmtree(tempdir)
+    logger.info("Redimensionando imagens com extensão JPG")
+    for image_file in os_utils.get_files_list(output_folder):
+        if os_utils.get_file_extension(image_file) == "jpg":
+            try:
+                logger.info('Redimensionando a imagem "{}"'.format(image_file))
+                image_utils.resize_image(os.path.join(output_folder, image_file))
+            except Exception as error:
+                logger.error(
+                    '"{}" ao tentar redimensionar a imagem "{}"'.format(
+                        error, image_file
+                    )
+                )

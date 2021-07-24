@@ -234,7 +234,12 @@ class ValeMEConverter(SpreadsheetConverter):
         logger.info("Rodando o processo de extração de imagens")
         excel_utils.extract_images(
             file,
-            os.path.join("output", "images", handle_sheet_row(sheet_row_01[CONST.LOT])),
+            os.path.join(
+                os.getcwd(),
+                "output",
+                "images",
+                handle_sheet_row(sheet_row_01[CONST.LOT]),
+            ),
         )
         logger.info("Processo de extração de imagens finalizado")
 

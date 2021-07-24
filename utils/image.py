@@ -7,18 +7,25 @@ from services.base.logger import Logger
 logger = Logger.__call__().get_logger()
 
 
-def convert_from_png_to_jpg(png_file_name, output_folder, keep_original=True):
-    if os_utils.get_file_extension(png_file_name) != "png":
-        raise ValueError("Only PNG images are supported by this function")
+def convert_to_jpg(image_name, image_extension, output_folder, keep_original=True):
+    if os_utils.get_file_extension(image_name) == "jpg":
+        logger.warning("A imagem já possui extensão JPG. Nada será feito.")
+        return
 
-    jpg_file_name = png_file_name.replace("png", "jpg")
+    if os_utils.get_file_extension(image_name) == "wmf":
+        logger.warning(
+            "O programa não consegue converter imagens com extensão WMF. Nada será feito."
+        )
+        return
 
-    png_image = Image.open(png_file_name)
-    jpg_image = png_image.convert("RGB")
+    jpg_file_name = image_name.replace(image_extension, "jpg")
+
+    image_file = Image.open(image_name)
+    jpg_image = image_file.convert("RGB")
     jpg_image.save(jpg_file_name)
 
     if not keep_original:
-        os.remove(png_file_name)
+        os.remove(image_name)
 
 
 def resize_by_height(image, height):

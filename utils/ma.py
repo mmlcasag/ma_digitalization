@@ -143,28 +143,9 @@ def get_spreadsheet_columns():
 
 
 def get_spreadsheet_columns_with_categories():
-    return [
-        "Nº do lote",
-        "Status",
-        "Lote Ref. / Ativo-Frota",
-        "Nome do Lote (SEMPRE MAIUSCULA)",
-        "Descrição",
-        "VI",
-        "VMV",
-        "VER",
-        "Incremento",
-        "Valor de Referência do Vendedor (Contábil)",
-        "Comitente",
-        "Município",
-        "UF",
-        "Assessor",
-        "Pendências",
-        "Restrições",
-        "Débitos (Total)",
-        "Unid. Métrica",
-        "Fator Multiplicativo",
-        "Alteração/Adicionado",
-        "Descrição HTML",
-        "Categoria",
-        "Subcategoria",
-    ]
+    columns = get_spreadsheet_columns()
+
+    columns.append("Categoria")
+    columns.append("Subcategoria")
+
+    return columns

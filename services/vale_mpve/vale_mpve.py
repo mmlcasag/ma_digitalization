@@ -338,7 +338,12 @@ class ValeMPVEConverter(SpreadsheetConverter):
 
         excel_utils.extract_images(
             file,
-            os.path.join("output", "images", handle_sheet_row(sheet_row_01[CONST.LOT])),
+            os.path.join(
+                os.getcwd(),
+                "output",
+                "images",
+                handle_sheet_row(sheet_row_01[CONST.LOT]),
+            ),
         )
 
         if os.path.isfile(self._output_xlsx_file):
