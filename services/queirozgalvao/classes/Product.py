@@ -16,6 +16,7 @@ class Product:
         self.__model_year = self.__scrape_model_year()
         self.__engine = self.__scrape_engine()
         self.__fuel_type = self.__scrape_fuel_type()
+        self.__hours_used = self.__scrape_hours_used()
         self.__mileage = self.__scrape_mileage()
         self.__location = self.__scrape_location()
         self.__plant = self.__scrape_plant()
@@ -195,6 +196,21 @@ class Product:
         finally:
             return fuel_type
 
+    def __scrape_hours_used(self):
+        try:
+            hours_used = ""
+            elements = self.html.find_all("div", attrs={"class": "field-label"})
+            for element in elements:
+                if "Horímetro" in element.string:
+                    hours_used = element.parent.find(
+                        "div", attrs={"class": "field-value"}
+                    ).string
+            hours_used = str(hours_used)
+        except Exception:
+            hours_used = ""
+        finally:
+            return hours_used
+
     def __scrape_mileage(self):
         try:
             mileage = ""
@@ -357,7 +373,14 @@ class Product:
         return self.__serial_number
 
     def get_plate_number(self):
-        return self.__plate_number
+        plate_parts = self.__plate_number.split("-")
+
+        if len(plate_parts) == 3:
+            return plate_parts[0] + "-" + plate_parts[1] + " (" + plate_parts[2] + ")"
+        elif len(plate_parts) == 2:
+            return plate_parts[0] + "-" + plate_parts[1]
+        else:
+            return ""
 
     def get_make_model(self):
         return self.__make_model
@@ -373,6 +396,9 @@ class Product:
 
     def get_fuel_type(self):
         return self.__fuel_type
+
+    def get_hours_used(self):
+        return self.__hours_used
 
     def get_mileage(self):
         return self.__mileage
@@ -401,12 +427,21 @@ class Product:
     def get_observations(self):
         return self.__observations
 
+    def __is_special_case(self):
+        special_subcategories = ["Veículos", "Caminhões", "Ônibus", "Guindastes"]
+
+        if (
+            self.get_subcategory() in special_subcategories
+            and len(self.get_plate_number()) > 0
+        ):
+            return True
+
+        return False
+
     def get_short_description(self):
         short_description = ""
 
-        special_cases = ["Veículos", "Caminhões", "Ônibus", "Guindastes"]
-
-        if self.get_subcategory() in special_cases:
+        if self.__is_special_case():
             if self.get_name():
                 short_description = short_description + self.get_name()
 
@@ -431,9 +466,6 @@ class Product:
                 short_description = (
                     short_description + ", PL.: " + self.get_plate_number()
                 )
-
-            if self.get_state():
-                short_description = short_description + " (" + self.get_state() + ")"
 
             if self.get_serial_number():
                 short_description = (
@@ -470,9 +502,7 @@ class Product:
     def get_full_description(self):
         full_description = ""
 
-        special_cases = ["Veículos", "Caminhões", "Ônibus", "Guindastes"]
-
-        if self.get_subcategory() in special_cases:
+        if self.__is_special_case():
             if self.get_name():
                 full_description = (
                     full_description + "Nome: " + self.get_name() + "<br>"
@@ -481,11 +511,6 @@ class Product:
             if self.get_plate_number():
                 full_description = (
                     full_description + "Placa: " + self.get_plate_number() + "<br>"
-                )
-
-            if self.get_state():
-                full_description = (
-                    full_description + " (" + self.get_state() + ")" + "<br>"
                 )
 
             if self.get_serial_number():
@@ -514,6 +539,14 @@ class Product:
                     full_description
                     + "Ano Modelo: "
                     + str(self.get_model_year())
+                    + "<br>"
+                )
+
+            if self.get_hours_used():
+                full_description = (
+                    full_description
+                    + "Horímetro acumulado: "
+                    + self.get_hours_used()
                     + "<br>"
                 )
 
@@ -584,12 +617,17 @@ class Product:
                     + "<br>"
                 )
 
-            if self.get_mileage():
+            if self.get_hours_used():
                 full_description = (
                     full_description
                     + "Horímetro acumulado: "
-                    + self.get_mileage()
+                    + self.get_hours_used()
                     + "<br>"
+                )
+
+            if self.get_mileage():
+                full_description = (
+                    full_description + "Km acima de: " + self.get_mileage() + "<br>"
                 )
 
             if self.get_observations():
@@ -603,7 +641,7 @@ class Product:
         return full_description
 
     def to_string(self):
-        return "Produto: ID: {} - Referência: {} - Nome: {} - Preço: R$ {:.2f} - Categorias: {} - Categoria: {} - Subcategoria: {} - Número de Série: {} - Placa: {} - Marca e Modelo: {} - Ano de Fabricação: {} - Ano do Modelo: {} - Motor: {} - Combustível: {} - Quilometragem: {} - Localização: {} - Unidade: {} - Cidade: {} - Estado: {} - Responsável: {} - URL: {} - Qtd de Fotos: {} - Observações: {}".format(
+        return "Produto: ID: {} - Referência: {} - Nome: {} - Preço: R$ {:.2f} - Categorias: {} - Categoria: {} - Subcategoria: {} - Número de Série: {} - Placa: {} - Marca e Modelo: {} - Ano de Fabricação: {} - Ano do Modelo: {} - Motor: {} - Combustível: {} - Horímetro acumulado: {} - Quilometragem: {} - Localização: {} - Unidade: {} - Cidade: {} - Estado: {} - Responsável: {} - URL: {} - Qtd de Fotos: {} - Observações: {}".format(
             self.get_id(),
             self.get_reference(),
             self.get_name(),
@@ -618,6 +656,7 @@ class Product:
             self.get_model_year(),
             self.get_engine(),
             self.get_fuel_type(),
+            self.get_hours_used(),
             self.get_mileage(),
             self.get_location(),
             self.get_plant(),
