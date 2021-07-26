@@ -55,13 +55,20 @@ try:
     input_folder = os.path.join("input", "images")
     output_folder = os.path.join("output", "images")
 
-    logger.info('Diretório de entrada "{}"'.format(input_path))
-    logger.info('Diretório de saída "{}"'.format(output_path))
+    logger.info('Diretório de entrada "{}"'.format(input_folder))
+    logger.info('Diretório de saída "{}"'.format(output_folder))
 
     img_handler = ImageHandler(input_folder, output_folder)
 
-    logger.info("Iniciando a separação das imagens")
+    logger.info("Iniciando o processo de separação das imagens")
 
+    # dedalo
+    img_handler.move_images(
+        lambda img_name: re.search(r"\d+", img_name),
+        lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
+    )
+
+    # petrobras
     img_handler.move_images(
         lambda img_name: img_name.find("Lote") != -1,
         lambda img_name: img_name.replace("Lote", "").strip().split("_")[0],
@@ -96,7 +103,7 @@ try:
         ].replace("lt", ""),
     )
 
-    logger.info("Separação das imagens finalizada")
+    logger.info("Processo de separação das imagens finalizado")
 except Exception as error:
     logger.error("{} ao tentar separar as imagens".format(error))
 

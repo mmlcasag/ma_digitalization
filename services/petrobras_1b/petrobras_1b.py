@@ -524,10 +524,14 @@ try:
     input_folder = os.path.join("input", "images")
     output_folder = os.path.join("output", "images")
 
-    logger.info("Iniciando processo de separação das imagens")
+    logger.info('Diretório de entrada "{}"'.format(input_folder))
+    logger.info('Diretório de saída "{}"'.format(output_folder))
 
     img_handler = ImageHandler(input_folder, output_folder)
 
+    logger.info("Iniciando o processo de separação das imagens")
+
+    # petrobras
     img_handler.move_images(
         lambda img_name: img_name.find("Lote") != -1,
         lambda img_name: img_name.replace("Lote", "").strip().split("_")[0],
@@ -562,11 +566,9 @@ try:
         ].replace("lt", ""),
     )
 
-    logger.info("Finalizando processo de separação das imagens")
+    logger.info("Processo de separação das imagens finalizado")
 except Exception as error:
-    logger.error("Ocorreu algum erro inesperado ao mover as imagens")
-    logger.exception(error)
-
+    logger.error("{} ao tentar separar as imagens".format(error))
 
 logger.info("Processo finalizado com sucesso.")
 done = str(input("Pressione ENTER para encerrar..."))

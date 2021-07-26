@@ -83,37 +83,43 @@ class DedaloConverter(SpreadsheetConverter):
 
 
 if __name__ == "__main__":
-    logger.info("Iniciando a conversão")
-    dedaloConverter = DedaloConverter(
-        ".",
-        ["input"],
-        [
-            "output",
-            os.path.join("output", "xlsx"),
-        ],
-    )
     try:
+        logger.info("Iniciando a conversão")
+        dedaloConverter = DedaloConverter(
+            ".",
+            ["input"],
+            [
+                "output",
+                os.path.join("output", "xlsx"),
+            ],
+        )
         dedaloConverter.execute()
+        logger.info("Processo de conversão da planilha finalizado com sucesso.")
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado no processamento da planilha")
         logger.exception(error)
 
-    logger.info("Processo de conversão da planilha finalizado com sucesso.")
-
-    input_folder = os.path.join("input", "images")
-    output_folder = os.path.join("output", "images")
-
     try:
-        logger.info("Iniciando processo de separação das imagens")
+        input_folder = os.path.join("input", "images")
+        output_folder = os.path.join("output", "images")
+
+        logger.info('Diretório de entrada "{}"'.format(input_folder))
+        logger.info('Diretório de saída "{}"'.format(output_folder))
+
         img_handler = ImageHandler(input_folder, output_folder)
+
+        logger.info("Iniciando o processo de separação das imagens")
+
+        # dedalo
         img_handler.move_images(
             lambda img_name: re.search(r"\d+", img_name),
             lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
         )
 
-        logger.info("Finalizando processo de separação das imagens")
+        logger.info("Processo de separação das imagens finalizado")
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado ao mover as imagens")
         logger.exception(error)
 
+    logger.info("Processo finalizado com sucesso.")
     done = str(input("Pressione ENTER para encerrar..."))

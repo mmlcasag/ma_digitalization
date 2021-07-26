@@ -302,29 +302,34 @@ class PetrobrasConverter(SpreadsheetConverter):
 
 
 if __name__ == "__main__":
-    logger.info("Iniciando a conversão")
-    petrobras_converter = PetrobrasConverter(
-        ".",
-        ["input"],
-        [
-            "output",
-            os.path.join("output", "xlsx"),
-            os.path.join("output", "html"),
-        ],
-    )
-
     try:
+        logger.info("Iniciando a conversão")
+        petrobras_converter = PetrobrasConverter(
+            ".",
+            ["input"],
+            [
+                "output",
+                os.path.join("output", "xlsx"),
+                os.path.join("output", "html"),
+            ],
+        )
         petrobras_converter.execute()
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado no processamento da planilha")
         logger.exception(error)
 
-    input_folder = os.path.join("input", "images")
-    output_folder = os.path.join("output", "images")
-
     try:
+        input_folder = os.path.join("input", "images")
+        output_folder = os.path.join("output", "images")
+
+        logger.info('Diretório de entrada "{}"'.format(input_folder))
+        logger.info('Diretório de saída "{}"'.format(output_folder))
+
         img_handler = ImageHandler(input_folder, output_folder)
 
+        logger.info("Iniciando o processo de separação das imagens")
+
+        # petrobras
         img_handler.move_images(
             lambda img_name: img_name.find("Lote") != -1,
             lambda img_name: img_name.replace("Lote", "").strip().split("_")[0],
@@ -360,8 +365,10 @@ if __name__ == "__main__":
                 r"lt\s*\d+", img_name.lower().replace("l", "lt")
             )[0].replace("lt", ""),
         )
-    except Exception as error:
-        logger.error("Ocorreu algum erro inesperado ao mover as imagens")
-        logger.exception(error)
 
+        logger.info("Processo de separação das imagens finalizado")
+    except Exception as error:
+        logger.error("{} ao tentar separar as imagens".format(error))
+
+    logger.info("Processo finalizado com sucesso.")
     done = str(input("Pressione ENTER para encerrar..."))
