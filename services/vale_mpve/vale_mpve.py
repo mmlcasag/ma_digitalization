@@ -309,8 +309,8 @@ class ValeMPVEConverter(SpreadsheetConverter):
                 "Nome do Lote (SEMPRE MAIUSCULA)": lot_name.strip().upper(),
                 "Descrição": description,
                 "VI": vi,
-                "VMV": 0,
-                "VER": 0,
+                "VMV": "",
+                "VER": "",
                 "Incremento": ma_utils.get_closest_value(
                     ma_utils.get_available_increments(), vi / 10
                 ),
@@ -358,22 +358,21 @@ class ValeMPVEConverter(SpreadsheetConverter):
 
 
 if __name__ == "__main__":
-    logger.info("Iniciando a conversão")
-    valeMPVEConverter = ValeMPVEConverter(
-        ".",
-        ["input"],
-        [
-            "output",
-            os.path.join("output", "xlsx"),
-        ],
-        os.path.join("output", "xlsx", "resulting_spreadsheet.xlsx"),
-    )
     try:
+        logger.info("Iniciando a conversão")
+        valeMPVEConverter = ValeMPVEConverter(
+            ".",
+            ["input"],
+            [
+                "output",
+                os.path.join("output", "xlsx"),
+            ],
+            os.path.join("output", "xlsx", "resulting_spreadsheet.xlsx"),
+        )
         valeMPVEConverter.execute()
     except Exception as error:
         logger.error("Ocorreu algum erro inesperado no processamento da planilha")
         logger.exception(error)
 
-    logger.info("Processo de conversão da planilha finalizado com sucesso.")
-
+    logger.info("Processo finalizado com sucesso.")
     done = str(input("Pressione ENTER para encerrar..."))

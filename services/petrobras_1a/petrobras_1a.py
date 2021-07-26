@@ -154,8 +154,8 @@ class PetrobrasConverter(SpreadsheetConverter):
             "Descrição"
         ] = "No anexo, consta a coluna Percentual de representação do item no Lote, pois será previsto no edital o desconto do percentual caso o item não estiver disponível para venda.<br>Para maiores informações, clique em ANEXOS."
         colunada["VI"] = vi
-        colunada["VMV"] = "0"
-        colunada["VER"] = "0"
+        colunada["VMV"] = ""
+        colunada["VER"] = ""
         colunada["Incremento"] = increment
         colunada["Valor de Referência do Vendedor (Contábil)"] = values_columns_data[
             "VMA Total do Lote"
