@@ -202,7 +202,7 @@ def extract_images(input_file, output_folder):
 
     logger.info("Convertendo imagens com extensão diferente de JPG")
     for image_file in os_utils.get_files_list(output_folder):
-        if os_utils.get_file_extension(image_file) != "jpg":
+        if os_utils.get_file_extension(image_file).lower() != "jpg":
             try:
                 logger.info('Convertendo a imagem "{}" para JPG'.format(image_file))
                 image_utils.convert_to_jpg(
@@ -218,7 +218,7 @@ def extract_images(input_file, output_folder):
 
     logger.info("Redimensionando imagens com extensão JPG")
     for image_file in os_utils.get_files_list(output_folder):
-        if os_utils.get_file_extension(image_file) == "jpg":
+        if os_utils.get_file_extension(image_file).lower() == "jpg":
             try:
                 logger.info('Redimensionando a imagem "{}"'.format(image_file))
                 image_utils.resize_image(os.path.join(output_folder, image_file))
@@ -228,3 +228,11 @@ def extract_images(input_file, output_folder):
                         error, image_file
                     )
                 )
+
+    logger.info("Desconsiderando imagens WMF que parecem ser o logotipo da Vale")
+    for image_file in os_utils.get_files_list(output_folder):
+        if os_utils.get_file_extension(image_file).lower() == "wmf":
+            file_path = os.path.join(output_folder, image_file)
+            if os_utils.get_file_size(file_path) == 436082:
+                logger.info('Desconsiderando a imagem "{}"'.format(image_file))
+                os.remove(file_path)

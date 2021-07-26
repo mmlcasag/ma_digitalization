@@ -15,6 +15,10 @@ def get_file_extension(file_name):
     return os.path.splitext(file_name)[1].replace(".", "")
 
 
+def get_file_size(file_name):
+    return os.stat(file_name).st_size
+
+
 def create_folder(folder_name, subfolder_name=""):
     if not subfolder_name:
         if not os.path.exists(folder_name):

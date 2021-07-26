@@ -9,13 +9,11 @@ logger = Logger.__call__().get_logger()
 
 def convert_to_jpg(image_name, image_extension, output_folder, keep_original=True):
     if os_utils.get_file_extension(image_name) == "jpg":
-        logger.warning("A imagem já possui extensão JPG. Nada será feito.")
+        logger.warning("A imagem já possui extensão JPG")
         return
 
     if os_utils.get_file_extension(image_name) == "wmf":
-        logger.warning(
-            "O programa não consegue converter imagens com extensão WMF. Nada será feito."
-        )
+        logger.warning("O programa não consegue converter imagens com extensão WMF")
         return
 
     jpg_file_name = image_name.replace(image_extension, "jpg")
