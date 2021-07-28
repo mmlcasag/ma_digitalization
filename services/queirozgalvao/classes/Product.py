@@ -376,9 +376,9 @@ class Product:
         plate_parts = self.__plate_number.split("-")
 
         if len(plate_parts) == 3:
-            return plate_parts[0] + "-" + plate_parts[1] + " (" + plate_parts[2] + ")"
+            return plate_parts[0] + plate_parts[1] + " (" + plate_parts[2] + ")"
         elif len(plate_parts) == 2:
-            return plate_parts[0] + "-" + plate_parts[1]
+            return plate_parts[0] + plate_parts[1]
         else:
             return ""
 

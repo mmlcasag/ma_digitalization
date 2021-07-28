@@ -4,6 +4,7 @@ import requests
 
 import utils.os as os_utils
 import utils.ma as ma_utils
+import utils.image as image_utils
 
 from classes.Crawler import Crawler
 from classes.Category import Category
@@ -80,23 +81,48 @@ for category in categories:
             ignore_index=True,
         )
 
-        for image_remote_path in product.get_images():
-            os_utils.create_folder(
-                os.path.join("output", "images", product.get_reference())
+        for remote_image_url in product.get_images():
+            relative_output_path = os.path.join(
+                "output", "images", product.get_reference()
+            )
+            relative_image_path = os.path.join(
+                relative_output_path, os.path.basename(remote_image_url)
             )
 
-            image_local_path = os.path.join(
-                "output",
-                "images",
-                product.get_reference(),
-                os.path.basename(image_remote_path),
-            )
+            os_utils.create_folder(relative_output_path)
 
-            logger.info(f'Extraindo a imagem "{image_local_path}"')
-            image_data = requests.get(image_remote_path).content
-
-            with open(image_local_path, "wb") as handler:
+            logger.info(f'Extraindo a imagem para "{relative_image_path}"')
+            image_data = requests.get(remote_image_url).content
+            with open(relative_image_path, "wb") as handler:
                 handler.write(image_data)
+
+            try:
+                logger.info('Redimensionando a imagem "{}"'.format(relative_image_path))
+                image_utils.resize_image(os.path.join(os.getcwd(), relative_image_path))
+            except Exception as error:
+                logger.error(
+                    '"{}" ao tentar redimensionar a imagem "{}"'.format(
+                        error, relative_image_path
+                    )
+                )
+
+            if os_utils.get_file_extension(relative_image_path).lower() != "jpg":
+                try:
+                    logger.info(
+                        'Convertendo a imagem "{}" para JPG'.format(relative_image_path)
+                    )
+                    image_utils.convert_to_jpg(
+                        os.path.join(os.getcwd(), relative_image_path),
+                        os_utils.get_file_extension(relative_image_path),
+                        relative_output_path,
+                        False,
+                    )
+                except Exception as error:
+                    logger.error(
+                        '"{}" ao tentar converter a imagem "{}"'.format(
+                            error, relative_image_path
+                        )
+                    )
 
 logger.info("Ordenando dados pelo número do lote")
 dataset = dataset.sort_values("Nº do lote")
