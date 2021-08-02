@@ -230,6 +230,11 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         df = df.mask(df.eq("None")).dropna(how="all")
         df = df.mask(df.eq("None")).fillna("")
 
+        logger.info(
+            'Desconsiderando as linhas cujo campo "Descrição" estiver nulo ou vazio'
+        )
+        df = df.loc[df["Descrição"].map(len) > 0]
+
         logger.info("Ajustando os nomes das colunas")
         df = df.rename(
             columns={
