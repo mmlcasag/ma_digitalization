@@ -1,9 +1,10 @@
 import os
 import pandas
+
+import utils.image as image_utils
+
 from services.base.spreadsheet_converter import SpreadsheetConverter
 from services.base.logger import Logger
-from services.base.images_handler import ImageHandler
-import re
 
 logger = Logger.__call__().get_logger()
 
@@ -100,26 +101,19 @@ if __name__ == "__main__":
         logger.exception(error)
 
     try:
+        logger.info("Iniciando o processo de separação das imagens")
+
         input_folder = os.path.join("input", "images")
         output_folder = os.path.join("output", "images")
 
         logger.info('Diretório de entrada "{}"'.format(input_folder))
         logger.info('Diretório de saída "{}"'.format(output_folder))
 
-        img_handler = ImageHandler(input_folder, output_folder)
-
-        logger.info("Iniciando o processo de separação das imagens")
-
-        # dedalo
-        img_handler.move_images(
-            lambda img_name: re.search(r"\d+", img_name),
-            lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
-        )
+        image_utils.organize_images(input_folder, output_folder)
 
         logger.info("Processo de separação das imagens finalizado")
     except Exception as error:
-        logger.error("Ocorreu algum erro inesperado ao mover as imagens")
-        logger.exception(error)
+        logger.error("{} ao tentar separar as imagens".format(error))
 
     logger.info("Processo finalizado com sucesso.")
     done = str(input("Pressione ENTER para encerrar..."))

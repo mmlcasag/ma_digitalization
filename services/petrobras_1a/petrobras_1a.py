@@ -1,11 +1,12 @@
 import os
 import pandas as pd
-from services.base.spreadsheet_converter import SpreadsheetConverter
-from services.base.images_handler import ImageHandler
-from services.base.logger import Logger
-import re
+
 import utils.ma as ma_utils
 import utils.html as html_utils
+import utils.image as image_utils
+
+from services.base.spreadsheet_converter import SpreadsheetConverter
+from services.base.logger import Logger
 
 logger = Logger.__call__().get_logger()
 
@@ -319,52 +320,15 @@ if __name__ == "__main__":
         logger.exception(error)
 
     try:
+        logger.info("Iniciando o processo de separação das imagens")
+
         input_folder = os.path.join("input", "images")
         output_folder = os.path.join("output", "images")
 
         logger.info('Diretório de entrada "{}"'.format(input_folder))
         logger.info('Diretório de saída "{}"'.format(output_folder))
 
-        img_handler = ImageHandler(input_folder, output_folder)
-
-        logger.info("Iniciando o processo de separação das imagens")
-
-        # petrobras
-        img_handler.move_images(
-            lambda img_name: img_name.find("Lote") != -1,
-            lambda img_name: img_name.replace("Lote", "").strip().split("_")[0],
-        )
-
-        img_handler.move_images(
-            lambda img_name: img_name.find("LOTE") != -1,
-            lambda img_name: re.search(r"\d+", img_name)[0].lstrip("0"),
-        )
-
-        img_handler.move_images(
-            lambda img_name: img_name.find("lt") != -1,
-            lambda img_name: re.search(r"lt\s*\d+", img_name)[0].replace("lt", ""),
-        )
-
-        img_handler.move_images(
-            lambda img_name: img_name.find("LT") != -1,
-            lambda img_name: re.search(r"lt\s*\d+", img_name.lower())[0].replace(
-                "lt", ""
-            ),
-        )
-
-        img_handler.move_images(
-            lambda img_name: img_name.find("L.") != -1,
-            lambda img_name: re.search(
-                r"lt\s*\d+", img_name.lower().replace("l.", "lt")
-            )[0].replace("lt", ""),
-        )
-
-        img_handler.move_images(
-            lambda img_name: re.search(r"L\d+", img_name),
-            lambda img_name: re.search(
-                r"lt\s*\d+", img_name.lower().replace("l", "lt")
-            )[0].replace("lt", ""),
-        )
+        image_utils.organize_images(input_folder, output_folder)
 
         logger.info("Processo de separação das imagens finalizado")
     except Exception as error:
