@@ -6,7 +6,7 @@ from services.base.logger import Logger
 
 logger = Logger.__call__().get_logger()
 
-image_extensions = [".jpg", ".jpeg", ".jfif", ".gif", ".png"]
+image_extensions = ["jpg", "jpeg", "jfif", "gif", "png"]
 input_folder = "input"
 output_folder = "output"
 
@@ -40,6 +40,13 @@ for i in range(int(initial_number), int(last_number) + 1):
         logger.info(f"Copiando o arquivo {file_name} para pasta de destino")
         shutil.copy(file_origin, folder_name)
 
-        extension = os.path.splitext(file_name)[1]
+        image_info = os.path.splitext(file_name)
+        extension = image_info[1].replace(".", "")
+
         if any(extension in s for s in image_extensions):
-            image_utils.resize_image(os.path.join(folder_name, file_name))
+            image_destination = os.path.join(folder_name, file_name)
+            image_utils.convert_to_jpg(
+                image_destination, extension, output_folder, False
+            )
+
+            image_utils.resize_image(image_destination.replace(extension, "jpg"))
