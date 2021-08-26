@@ -1,4 +1,5 @@
 import os
+import re
 
 import pandas
 import requests
@@ -19,7 +20,8 @@ class RGAutomovelConverter(SpreadsheetConverter):
     def calculate_debts(self, values):
         total = 0
         for value in values:
-            total += float(value.replace(".", "").replace(",", "."))
+            val = re.sub("[^0-9,.]", "", value)
+            total += float(val.replace(".", "").replace(",", "."))
 
         return total
 
