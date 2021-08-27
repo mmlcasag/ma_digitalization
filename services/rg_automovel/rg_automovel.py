@@ -26,7 +26,6 @@ class RGAutomovelConverter(SpreadsheetConverter):
         return total
 
     def get_vehicle_data(self, plate, serial_number, check_fipe):
-
         base_url = "http://ws.rgdoautomovel.com.br"
         request_params = {
             "pstrFormat": "json",
@@ -36,24 +35,34 @@ class RGAutomovelConverter(SpreadsheetConverter):
         }
 
         if plate != "null":
+            logger.info(
+                "Buscando informações do veículo de placa {}".format(str(plate))
+            )
             request_params["pstrPlaca"] = plate
 
         if serial_number != "null":
+            logger.info(
+                "Buscando informações do veículo de chassi {}".format(
+                    str(serial_number)
+                )
+            )
             request_params["pstrChassi"] = serial_number
-
-        logger.info("Aguarde, buscando informaçōes no RG Automovel...")
 
         bin_estadual_response = requests.get(
             f"{base_url}/binestadual", params=request_params
         )
+        logger.info("OK")
+
         precificador_json = {
             "struct_RespostaRst": {"Resposta": {"struct_ResultadoPrecificador": False}}
         }
         if check_fipe:
+            logger.info("Buscando valores na tabela Fipe")
             precificador_response = requests.get(
                 f"{base_url}/precificador", params=request_params
             )
             precificador_json = precificador_response.json()
+            logger.info("OK")
 
         bin_estadual_json = bin_estadual_response.json()
 
