@@ -43,7 +43,7 @@ for i in range(int(initial_number), int(last_number) + 1):
         image_info = os.path.splitext(file_name)
         extension = image_info[1].replace(".", "")
 
-        if any(extension in s for s in image_extensions):
+        if any(extension.lower() in s for s in image_extensions):
             image_destination = os.path.join(folder_name, file_name)
             image_utils.convert_to_jpg(
                 image_destination, extension, output_folder, False
