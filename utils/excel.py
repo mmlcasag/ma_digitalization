@@ -1,4 +1,5 @@
 import os
+import re
 import csv
 import zipfile
 import tempfile
@@ -15,7 +16,6 @@ import utils.image as image_utils
 
 from PIL import ImageGrab
 from services.base.logger import Logger
-
 
 logger = Logger.__call__().get_logger()
 
@@ -170,7 +170,7 @@ def extract_images_libreoffice(file, output_folder):
         os_utils.create_folder(output_folder)
         for idx, file in enumerate(files_from_xlsx):
             origin_file = os.path.join(origin_folder, file)
-            destination_file = os.path.join(output_folder, f"imagem_{idx+1}")
+            destination_file = os.path.join(output_folder, f"imagem_{idx + 1}")
             if not origin_file.endswith("emf") and not origin_file.endswith("wmf"):
                 shutil.copy(origin_file, f"{destination_file}.jpg")
                 image_utils.resize_image(f"{destination_file}.jpg")
@@ -236,3 +236,17 @@ def extract_images(input_file, output_folder):
             if os_utils.get_file_size(file_path) == 436082:
                 logger.info('Desconsiderando a imagem "{}"'.format(image_file))
                 os.remove(file_path)
+
+
+def convert_to_currency(v):
+    print(v)
+    val = v
+    if isinstance(v, str):
+        val = re.sub("[^0-9,.]", "", v)
+        if "," in val and "." in val:
+            val = val.replace(".", "").replace(",", ".")
+        if "," in val and "." not in val:
+            val = val.replace(",", ".")
+
+    amount = "{:,.2f}".format(float(val))
+    return amount.replace(",", "X").replace(".", ",").replace("X", ".")

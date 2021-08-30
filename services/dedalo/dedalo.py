@@ -2,6 +2,7 @@ import os
 import pandas
 
 import utils.image as image_utils
+import utils.excel as excel_utils
 
 from services.base.spreadsheet_converter import SpreadsheetConverter
 from services.base.logger import Logger
@@ -77,7 +78,10 @@ class DedaloConverter(SpreadsheetConverter):
         writer = pandas.ExcelWriter(filepath, engine="xlsxwriter")
 
         df = pandas.DataFrame(data_to_output)
-        df["VI"] = pandas.to_numeric(df["VI"])
+        df["VI"] = df["VI"].apply(lambda x: excel_utils.convert_to_currency(x))
+        df["Incremento"] = df["Incremento"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
         df.to_excel(writer, sheet_name="Colunada", index=False)
         writer.save()
         logger.info(f"Arquivo processado com sucesso: {filepath}")

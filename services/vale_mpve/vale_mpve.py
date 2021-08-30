@@ -336,6 +336,14 @@ class ValeMPVEConverter(SpreadsheetConverter):
             index=[0],
         )
 
+        df["VI"] = df["VI"].apply(lambda x: excel_utils.convert_to_currency(x))
+        df["Incremento"] = df["Incremento"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        df["Valor de Referência do Vendedor (Contábil)"] = df[
+            "Valor de Referência do Vendedor (Contábil)"
+        ].apply(lambda x: excel_utils.convert_to_currency(x))
+
         excel_utils.extract_images(
             file,
             os.path.join(

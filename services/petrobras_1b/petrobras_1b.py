@@ -490,10 +490,30 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Escrevendo na primeira aba da planilha o conteúdo da colunada")
         dataframe_sheet_1 = pandas.DataFrame(dataset_sheet_1)
+
+        dataframe_sheet_1["VI"] = dataframe_sheet_1["VI"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        dataframe_sheet_1["Incremento"] = dataframe_sheet_1["Incremento"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        dataframe_sheet_1[
+            "Valor de Referência do Vendedor (Contábil)"
+        ] = dataframe_sheet_1["Valor de Referência do Vendedor (Contábil)"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+
         dataframe_sheet_1.to_excel(excel_file, sheet_name="Colunada", index=False)
 
         logger.info("Escrevendo na segunda aba da planilha o conteúdo da listagem")
         dataframe_sheet_2 = pandas.DataFrame(dataset_sheet_2)
+
+        dataframe_sheet_2["Valor Unitário"] = dataframe_sheet_2["Valor Unitário"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        dataframe_sheet_2["Valor Total"] = dataframe_sheet_2["Valor Total"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
         dataframe_sheet_2.to_excel(excel_file, sheet_name="Listagem", index=False)
 
         logger.info("Salvando e fechando o arquivo Excel resultante")

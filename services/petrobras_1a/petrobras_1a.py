@@ -4,6 +4,7 @@ import pandas as pd
 import utils.ma as ma_utils
 import utils.html as html_utils
 import utils.image as image_utils
+import utils.excel as excel_utils
 
 from services.base.spreadsheet_converter import SpreadsheetConverter
 from services.base.logger import Logger
@@ -266,11 +267,21 @@ class PetrobrasConverter(SpreadsheetConverter):
             "Arredondando de campos numéricos e padronização de casas decimais da aba colunada"
         )
         colunada_sheet["VI"] = colunada_sheet["VI"].apply(
-            lambda n: str("{:.2f}".format(round(float(n), 2)))
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        colunada_sheet["Incremento"] = colunada_sheet["Incremento"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
         )
         colunada_sheet["Valor de Referência do Vendedor (Contábil)"] = colunada_sheet[
             "Valor de Referência do Vendedor (Contábil)"
-        ].apply(lambda n: str("{:.2f}".format(round(float(n), 2))))
+        ].apply(lambda x: excel_utils.convert_to_currency(x))
+
+        listagem_sheet["Valor Unitário"] = listagem_sheet["Valor Unitário"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        listagem_sheet["Valor Total"] = listagem_sheet["Valor Total"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
 
         logger.info("Criando arquivo xlsx de saída")
         writer = pd.ExcelWriter(filepath, engine="xlsxwriter")

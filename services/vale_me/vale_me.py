@@ -156,6 +156,14 @@ class ValeMEConverter(SpreadsheetConverter):
             index=[0],
         )
 
+        df["VI"] = df["VI"].apply(lambda x: excel_utils.convert_to_currency(x))
+        df["Incremento"] = df["Incremento"].apply(
+            lambda x: excel_utils.convert_to_currency(x)
+        )
+        df["Valor de Referência do Vendedor (Contábil)"] = df[
+            "Valor de Referência do Vendedor (Contábil)"
+        ].apply(lambda x: excel_utils.convert_to_currency(x))
+
         temp_list = []
         df_columns = [
             "Código do Produto",
@@ -188,11 +196,15 @@ class ValeMEConverter(SpreadsheetConverter):
                     handle_sheet_row(sheet_row_02[CONST.QTD], index)
                 ),
                 "Unidade": handle_sheet_row(sheet_row_02[CONST.UN], index),
-                "Valor Unitário": format_to_decimal(
-                    handle_sheet_row(sheet_row_02[CONST.UNIT_PRICE], index)
+                "Valor Unitário": excel_utils.convert_to_currency(
+                    format_to_decimal(
+                        handle_sheet_row(sheet_row_02[CONST.UNIT_PRICE], index)
+                    )
                 ),
-                "Valor Total": format_to_decimal(
-                    handle_sheet_row(sheet_row_02[CONST.TOTAL_AMOUNT], index)
+                "Valor Total": excel_utils.convert_to_currency(
+                    format_to_decimal(
+                        handle_sheet_row(sheet_row_02[CONST.TOTAL_AMOUNT], index)
+                    )
                 ),
                 "Peso Estimado": format_to_decimal(
                     handle_sheet_row(sheet_row_02[CONST.WEIGHT], index)
