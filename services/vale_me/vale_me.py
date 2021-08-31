@@ -221,6 +221,10 @@ class ValeMEConverter(SpreadsheetConverter):
                 del df_html["Valor Total"]
                 del df_html["Peso Estimado"]
 
+                df_html["Quantidade"] = df_html["Quantidade"].apply(
+                    lambda x: excel_utils.convert_to_numeric(x)
+                )
+
                 logger.info("Gerando código HTML a partir dos dados do dataset")
                 html_content = df_html.to_html(index=False, na_rep="")
 
@@ -242,6 +246,13 @@ class ValeMEConverter(SpreadsheetConverter):
                 html_file.close()
 
         df_list = pandas.DataFrame(temp_list, columns=df_columns)
+        df_list["Quantidade"] = df_list["Quantidade"].apply(
+            lambda x: excel_utils.convert_to_numeric(x)
+        )
+
+        df_list["Peso Estimado"] = df_list["Peso Estimado"].apply(
+            lambda x: excel_utils.convert_to_numeric(x)
+        )
 
         logger.info("Rodando o processo de extração de imagens")
         excel_utils.extract_images(

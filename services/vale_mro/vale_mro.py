@@ -312,6 +312,10 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 ]
             )
 
+            df_html["Quantidade"] = df_html["Quantidade"].apply(
+                lambda x: excel_utils.convert_to_numeric(x)
+            )
+
             logger.info("Gerando código HTML a partir dos dados do dataset")
             html_content = df_html.to_html(index=False, na_rep="")
 
@@ -465,6 +469,9 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         logger.info("Gerando linhas da planilha de listagem")
         dataset_sheet_2 = dataset_sheet_2.append(df)
+        dataset_sheet_2["Quantidade"] = dataset_sheet_2["Quantidade"].apply(
+            lambda x: excel_utils.convert_to_numeric(x)
+        )
         logger.info("Linhas da planilha de listagem montadas com sucesso")
     except Exception as error:
         logger.error(

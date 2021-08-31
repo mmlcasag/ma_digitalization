@@ -249,3 +249,11 @@ def convert_to_currency(v):
 
     amount = "{:,.2f}".format(float(val))
     return amount.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def convert_to_numeric(v):
+    return "{:_.2f}".format(float(v)).replace(".", ",").replace("_", ".")
+
+
+def convert_to_percent(v):
+    return str("{:_.2%}".format(round(float(v), 4))).replace(".", ",").replace("_", ".")

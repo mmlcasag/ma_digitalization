@@ -195,7 +195,7 @@ class PetrobrasConverter(SpreadsheetConverter):
         )
         items_df["Percentual do Item em Relação ao Lote"] = items_df[
             "Percentual do Item em Relação ao Lote"
-        ].apply(lambda n: str("{:.2%}".format(round(float(n), 4))))
+        ].apply(lambda n: excel_utils.convert_to_percent(n))
 
         mapper_lote_city = self.create_city_mapper(items_df)
         mapper_lote_state = self.create_state_mapper(items_df)
@@ -281,6 +281,10 @@ class PetrobrasConverter(SpreadsheetConverter):
         )
         listagem_sheet["Valor Total"] = listagem_sheet["Valor Total"].apply(
             lambda x: excel_utils.convert_to_currency(x)
+        )
+
+        listagem_sheet["Quantidade"] = listagem_sheet["Quantidade"].apply(
+            lambda x: excel_utils.convert_to_numeric(x)
         )
 
         logger.info("Criando arquivo xlsx de saída")

@@ -319,6 +319,10 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                         ]
                     )
 
+                    html_df["Quantidade"] = html_df["Quantidade"].apply(
+                        lambda x: excel_utils.convert_to_numeric(x)
+                    )
+
                     logger.info("Gerando código HTML a partir dos dados do dataset")
                     html_content = html_df.to_html(index=False, na_rep="")
 
@@ -514,6 +518,11 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         dataframe_sheet_2["Valor Total"] = dataframe_sheet_2["Valor Total"].apply(
             lambda x: excel_utils.convert_to_currency(x)
         )
+
+        dataframe_sheet_2["Quantidade"] = dataframe_sheet_2["Quantidade"].apply(
+            lambda x: excel_utils.convert_to_numeric(x)
+        )
+
         dataframe_sheet_2.to_excel(excel_file, sheet_name="Listagem", index=False)
 
         logger.info("Salvando e fechando o arquivo Excel resultante")
