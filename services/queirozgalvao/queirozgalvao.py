@@ -4,6 +4,7 @@ import requests
 
 import utils.os as os_utils
 import utils.ma as ma_utils
+import utils.excel as excel_utils
 import utils.image as image_utils
 
 from classes.Crawler import Crawler
@@ -58,10 +59,10 @@ for category in categories:
                     product.get_short_description(),
                     product.get_full_description(),
                     "",
-                    product.get_price(),
+                    excel_utils.convert_to_currency(product.get_price()),
                     "",
-                    50,
-                    product.get_price(),
+                    excel_utils.convert_to_currency(50),
+                    excel_utils.convert_to_currency(product.get_price()),
                     product.get_owner(),
                     product.get_city(),
                     product.get_state(),

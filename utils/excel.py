@@ -239,7 +239,6 @@ def extract_images(input_file, output_folder):
 
 
 def convert_to_currency(v):
-    print(v)
     val = v
     if isinstance(v, str):
         val = re.sub("[^0-9,.]", "", v)
