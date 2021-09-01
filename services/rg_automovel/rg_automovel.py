@@ -49,28 +49,33 @@ class RGAutomovelConverter(SpreadsheetConverter):
             request_params["pstrChassi"] = serial_number
 
         bin_estadual_response = requests.get(
-            f"{base_url}/binestadual", params=request_params
+            f"{base_url}/binestadual", params=request_params, timeout=300
         )
         logger.info("OK")
 
-        precificador_json = {
+        precificador = {
             "struct_RespostaRst": {"Resposta": {"struct_ResultadoPrecificador": False}}
         }
         if check_fipe:
             logger.info("Buscando valores na tabela Fipe")
             precificador_response = requests.get(
-                f"{base_url}/precificador", params=request_params
+                f"{base_url}/precificador", params=request_params, timeout=300
             )
             precificador_json = precificador_response.json()
+            precificador = precificador_json["struct_RespostaRst"]["Resposta"][
+                "struct_ResultadoPrecificador"
+            ]
+
+            if isinstance(precificador, list):
+                precificador = precificador[0]
+
             logger.info("OK")
 
         bin_estadual_json = bin_estadual_response.json()
 
         return {
             "bin_estadual": bin_estadual_json["struct_RespostaRst"]["Resposta"],
-            "precificador": precificador_json["struct_RespostaRst"]["Resposta"][
-                "struct_ResultadoPrecificador"
-            ],
+            "precificador": precificador,
         }
 
     def execute(self):
@@ -149,7 +154,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
             if plate != "null" or serial_number != "null":
                 response = self.get_vehicle_data(plate, serial_number, check_fipe)
 
-                if check_fipe:
+                if check_fipe and len(response["precificador"]) > 0:
                     fipe_val = response["precificador"]["PrecoFipe"]
 
                 restricoes = ""
