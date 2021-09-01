@@ -223,11 +223,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
                     "Marca (SEMPRE MAIUSCULA)": response["bin_estadual"]["Marca"],
                     "Modelo (SEMPRE MAIUSCULA)": response["bin_estadual"]["Modelo"],
                     "Ano Fab/Modelo": response["bin_estadual"]["AnoFabricacao"],
-                    "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": response[
-                        "bin_estadual"
-                    ][
-                        "Placa"
-                    ].upper(),
+                    "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": f"{response['bin_estadual']['Placa'].upper()} ({response['bin_estadual']['UF'].upper()})",
                     "Chassi (SEMPRE MAIUSCULA)": response["bin_estadual"][
                         "Chassi"
                     ].upper(),
