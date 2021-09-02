@@ -222,7 +222,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
                     "Tipo": response["bin_estadual"]["Tipo"],
                     "Marca (SEMPRE MAIUSCULA)": response["bin_estadual"]["Marca"],
                     "Modelo (SEMPRE MAIUSCULA)": response["bin_estadual"]["Modelo"],
-                    "Ano Fab/Modelo": response["bin_estadual"]["AnoFabricacao"],
+                    "Ano Fab/Modelo": f"{response['bin_estadual']['AnoFabricacao']}/{response['bin_estadual']['AnoModelo']}",
                     "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": f"{response['bin_estadual']['Placa'].upper()} ({response['bin_estadual']['UF'].upper()})",
                     "Chassi (SEMPRE MAIUSCULA)": response["bin_estadual"][
                         "Chassi"
@@ -263,10 +263,17 @@ class RGAutomovelConverter(SpreadsheetConverter):
 
                 temp_list.append(append_data)
 
-        df_list = pandas.DataFrame(temp_list, columns=df_columns)
+        df = pandas.DataFrame(temp_list, columns=df_columns)
+
+        if os.path.isfile(self._output_xlsx_file):
+            append_data = pandas.read_excel(
+                self._output_xlsx_file, sheet_name="Listagem"
+            )
+            df = pandas.concat([append_data, df])
+
         writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
 
-        df_list.to_excel(writer, sheet_name="Listagem", index=False)
+        df.to_excel(writer, sheet_name="Listagem", index=False)
         writer.save()
 
 
