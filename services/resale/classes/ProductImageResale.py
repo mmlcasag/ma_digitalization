@@ -33,9 +33,4 @@ class ProductImageResale:
         self.__url = url
     
     def to_string(self):
-        return f"""
-            ID: {self.get_id()}\n
-            Nome: {self.get_nome()}\n
-            MimeType: {self.get_mimetype()}\n
-            URL: {self.get_url()}\n
-        """
+        return f"[Imagem] - ID: {self.get_id()} - Nome: {self.get_nome()} - MimeType: {self.get_mimetype()} - URL: {self.get_url()}"

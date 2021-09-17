@@ -33,9 +33,4 @@ class ProductFileResale:
         self.__url = url
     
     def to_string(self):
-        return f"""
-            ID: {self.get_id()}\n
-            Nome: {self.get_nome()}\n
-            Tipo: {self.get_tipo()}\n
-            URL: {self.get_url()}\n
-        """
+        return f"[Documento] - ID: {self.get_id()} - Nome: {self.get_nome()} - Tipo: {self.get_tipo()} - URL: {self.get_url()}"

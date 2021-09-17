@@ -61,13 +61,4 @@ class ProductLocationResale:
         self.__regiao_id = regiao_id
     
     def to_string(self):
-        return f"""
-            ID: {self.get_id()}\n
-            Endereço: {self.get_endereco()}\n
-            Cidade: {self.get_cidade()}\n
-            Cidade ID: {self.get_cidade_id()}\n
-            Estado: {self.get_estado()}\n
-            Latitude: {self.get_latitude()}\n
-            Longitude: {self.get_longitude()}\n
-            Região ID: {self.get_regiao_id()}\n
-        """
+        return f"[Local] - ID: {self.get_id()} - Endereço: {self.get_endereco()} - Cidade: {self.get_cidade()} - Cidade ID: {self.get_cidade_id()} - Estado: {self.get_estado()} - Latitude: {self.get_latitude()} - Longitude: {self.get_longitude()} - Região ID: {self.get_regiao_id()}"
