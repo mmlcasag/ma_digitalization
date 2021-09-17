@@ -23,7 +23,7 @@ def call_api_resale(page, offset):
         
         return response.json()
     except Exception as error:
-        print(f'Erro "{error}" ao tentar chamar a API da Resale')
+        print(f"Erro ao tentar chamar a API da Resale: {error}")
 
         raise
 
@@ -46,17 +46,17 @@ def call_api_auth():
         
         return response.json()
     except Exception as error:
-        print(f'Erro "{error}" ao tentar chamar a API Core de autenticação')
+        print(f"Erro ao tentar chamar a API Core de Autenticação: {error}")
 
         raise
 
 
-def call_api_get_product(token, product_ref):
+def call_api_get_product(token, product_ref, start=0, limit=1):
     try:
         print("Chamando o GET produto da API Core")
         
         response = requests.get(
-            url = f"https://stgapi.s4bdigital.net/auction-lotting/productV2/?q=productYourRef:[{product_ref}]&limit=1",
+            url = f"https://stgapi.s4bdigital.net/auction-lotting/productV2/?q=productYourRef:[{product_ref}]&start={start}&limit={limit}&sort=productId%20desc",
             headers = { "Authorization": f"Bearer {token}" },
             timeout = 30
         )
@@ -68,7 +68,7 @@ def call_api_get_product(token, product_ref):
         
         return response.json()
     except Exception as error:
-        print(f'Erro "{error}" ao tentar chamar o GET produto da API Core')
+        print(f"Erro ao tentar chamar o GET produto da API Core: {error}")
 
         raise
 
@@ -179,8 +179,6 @@ def to_product_resale_object(response):
         product_resale_object_locais.append(product_location_resale_object)
     product_resale_object.set_locais(product_resale_object_locais)
 
-    print(product_resale_object.to_string())
-
     return product_resale_object
 
 
@@ -206,14 +204,66 @@ def get_token():
     return token
 
 
+def filter_products_with_no_auctionId(products):
+    sanitized_products = []
+
+    for product in products:
+        try:
+            activeOffer = product["activeOffer"]
+            auctionId = product["activeOffer"]["auctionId"]
+            sanitized_products.append(product)
+        except:
+            pass
+    
+    return sanitized_products
+
 def get_total_products_by_ref(token, product_ref):
     print(f"Buscando o total de produtos na API Core pela referência {product_ref}")
 
-    response = call_api_get_product(token, product_ref)
+    page = 0
+    start = 0
+    limit = 25
+    total = 999
     
-    total_products = response["total"]
+    products = []
 
-    print(f"Total de produtos: {total_products}")
+    while(start < total):
+        response = call_api_get_product(token, product_ref, start, limit)
+        
+        total = response["total"]
+        
+        if "products" not in response:
+            break
+        
+        elements = len(response['products'])
+        
+        for product in response['products']:
+            products.append(product)
 
-    return int(total_products)
+        page = page + 1
+        start = page * limit
+
+    print(f"Total de produtos com essa referência: {len(products)}")
     
+    if len(products) == 0:
+        return []
+    else:
+        print(f"Filtrando registros não associados a nenhum evento")
+        valid_products = filter_products_with_no_auctionId(products)
+        
+        print(f"Total de produtos após aplicar o filtro: {len(valid_products)}")
+
+        if len(products) > 0 and len(valid_products) == 0:
+            print("Como não encontrou nenhum registro, consideraremos o produto mais recente como o correto")
+            valid_products.append(products[0])
+
+        print(f"Total de produtos retornados pela função: {len(valid_products)}")
+
+        return valid_products
+
+
+def update_product(product_api_core, product_resale):
+    print("Em desenvolvimento")
+
+def create_product(product_resale):
+    print("Em desenvolvimento")
