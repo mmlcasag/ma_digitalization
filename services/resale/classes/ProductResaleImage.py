@@ -1,8 +1,8 @@
-class ProductFileResale:
+class ProductResaleImage:
     
     __id = None
     __nome = None
-    __tipo = None
+    __mimetype = None
     __url = None
     
     def __init__(self):
@@ -20,11 +20,11 @@ class ProductFileResale:
     def set_nome(self, nome):
         self.__nome = nome
 
-    def get_tipo(self):
-        return self.__tipo
+    def get_mimetype(self):
+        return self.__mimetype
 
-    def set_tipo(self, tipo):
-        self.__tipo = tipo
+    def set_mimetype(self, mimetype):
+        self.__mimetype = mimetype
     
     def get_url(self):
         return self.__url
@@ -33,4 +33,4 @@ class ProductFileResale:
         self.__url = url
     
     def to_string(self):
-        return f"[Documento] - ID: {self.get_id()} - Nome: {self.get_nome()} - Tipo: {self.get_tipo()} - URL: {self.get_url()}"
+        return f"[Imagem] - ID: {self.get_id()} - Nome: {self.get_nome()} - MimeType: {self.get_mimetype()} - URL: {self.get_url()}"

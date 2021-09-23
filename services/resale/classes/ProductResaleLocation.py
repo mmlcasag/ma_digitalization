@@ -1,4 +1,4 @@
-class ProductLocationResale:
+class ProductResaleLocation:
     
     __id = None
     __endereco = None

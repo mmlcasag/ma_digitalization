@@ -1,10 +1,10 @@
 import json
 import requests
 
-from classes.ProductFileResale import ProductFileResale
-from classes.ProductImageResale import ProductImageResale
-from classes.ProductLocationResale import ProductLocationResale
 from classes.ProductResale import ProductResale
+from classes.ProductResaleFile import ProductResaleFile
+from classes.ProductResaleImage import ProductResaleImage
+from classes.ProductResaleLocation import ProductResaleLocation
 
 def call_api_resale(page, offset):
     try:
@@ -28,9 +28,9 @@ def call_api_resale(page, offset):
         raise
 
 
-def call_api_auth():
+def call_api_auth_sbws():
     try:
-        print("Chamando a API Core de Autenticação")
+        print("Chamando a API de Autenticação da Superbid")
         
         response = requests.post(
             url = "https://stgapi.s4bdigital.net/account/oauth/token",
@@ -40,20 +40,20 @@ def call_api_auth():
         )
 
         if response.status_code == 200:
-            print("A API Core respondeu corretamente")
+            print("A API de Autenticação da Superbid respondeu corretamente")
         else:
-            raise Exception(f"A API Core respondeu com um código diferente do esperado: {response.status_code}")
+            raise Exception(f"A API de Autenticação da Superbid respondeu com um código diferente do esperado: {response.status_code}")
         
         return response.json()
     except Exception as error:
-        print(f"Erro ao tentar chamar a API Core de Autenticação: {error}")
+        print(f"Erro ao tentar chamar a API de Autenticação da Superbid: {error}")
 
         raise
 
 
-def call_api_get_product(token, product_ref, start=0, limit=1):
+def call_api_get_product_sbws(token, product_ref, start=0, limit=1):
     try:
-        print("Chamando o GET produto da API Core")
+        print("Chamando o GET produto da Superbid")
         
         response = requests.get(
             url = f"https://stgapi.s4bdigital.net/auction-lotting/productV2/?q=productYourRef:[{product_ref}]&start={start}&limit={limit}&sort=productId%20desc",
@@ -62,13 +62,13 @@ def call_api_get_product(token, product_ref, start=0, limit=1):
         )
 
         if response.status_code == 200:
-            print("A API Core respondeu corretamente")
+            print("O GET produto da Superbid respondeu corretamente")
         else:
-            raise Exception(f"A API Core respondeu com um código diferente do esperado: {response.status_code}")
+            raise Exception(f"O GET produto da Superbid respondeu com um código diferente do esperado: {response.status_code}")
         
         return response.json()
     except Exception as error:
-        print(f"Erro ao tentar chamar o GET produto da API Core: {error}")
+        print(f"Erro ao tentar chamar o GET produto da Superbid: {error}")
 
         raise
 
@@ -141,7 +141,7 @@ def to_product_resale_object(response):
     
     product_resale_object_imagens = []
     for imagem in response['imoveis'][0]['imagens']:
-        product_image_resale_object = ProductImageResale()
+        product_image_resale_object = ProductResaleImage()
         
         product_image_resale_object.set_id(imagem['id'])
         product_image_resale_object.set_nome(imagem['nome'])
@@ -153,7 +153,7 @@ def to_product_resale_object(response):
 
     product_resale_object_documentos = []
     for documento in response['imoveis'][0]['documentos']:
-        product_file_resale_object = ProductFileResale()
+        product_file_resale_object = ProductResaleFile()
         
         product_file_resale_object.set_id(documento['id'])
         product_file_resale_object.set_nome(documento['nome'])
@@ -165,7 +165,7 @@ def to_product_resale_object(response):
 
     product_resale_object_locais = []
     for local in response['imoveis'][0]['locais']:
-        product_location_resale_object = ProductLocationResale()
+        product_location_resale_object = ProductResaleLocation()
         
         product_location_resale_object.set_id(local['id'])
         product_location_resale_object.set_endereco(local['endereco'])
@@ -192,10 +192,10 @@ def get_product_resale_by_index(product_index):
     return product_resale_object
 
 
-def get_token():
-    print("Buscando o token de autenticação da API Core")
+def get_token_sbws():
+    print("Buscando o token de autenticação da Superbid")
 
-    response = call_api_auth()
+    response = call_api_auth_sbws()
 
     token = response['access_token']
     
@@ -217,8 +217,8 @@ def filter_products_with_no_auctionId(products):
     
     return sanitized_products
 
-def get_total_products_by_ref(token, product_ref):
-    print(f"Buscando o total de produtos na API Core pela referência {product_ref}")
+def get_products_sbws_by_ref(token, product_ref):
+    print(f'Buscando todos os produtos na Superbid com código de referência "{product_ref}"')
 
     page = 0
     start = 0
@@ -228,27 +228,25 @@ def get_total_products_by_ref(token, product_ref):
     products = []
 
     while(start < total):
-        response = call_api_get_product(token, product_ref, start, limit)
+        response = call_api_get_product_sbws(token, product_ref, start, limit)
         
         total = response["total"]
         
         if "products" not in response:
             break
         
-        elements = len(response['products'])
-        
-        for product in response['products']:
+        for product in response["products"]:
             products.append(product)
 
         page = page + 1
         start = page * limit
 
-    print(f"Total de produtos com essa referência: {len(products)}")
+    print(f"Total de produtos na Superbid com este código de referência: {len(products)}")
     
     if len(products) == 0:
         return []
     else:
-        print(f"Filtrando registros não associados a nenhum evento")
+        print(f"Filtrando produtos não associados a nenhum evento")
         valid_products = filter_products_with_no_auctionId(products)
         
         print(f"Total de produtos após aplicar o filtro: {len(valid_products)}")
@@ -257,7 +255,7 @@ def get_total_products_by_ref(token, product_ref):
             print("Como não encontrou nenhum registro, consideraremos o produto mais recente como o correto")
             valid_products.append(products[0])
 
-        print(f"Total de produtos retornados pela função: {len(valid_products)}")
+        print(f"Total de produtos válidos na Superbid com este código de referência: {len(valid_products)}")
 
         return valid_products
 
