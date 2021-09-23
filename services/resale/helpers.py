@@ -6,6 +6,8 @@ from classes.ProductResaleFile import ProductResaleFile
 from classes.ProductResaleImage import ProductResaleImage
 from classes.ProductResaleLocation import ProductResaleLocation
 
+from classes.ProductSBWS import ProductSBWS
+
 def call_api_resale(page, offset):
     try:
         print("Chamando a API da Resale")
@@ -28,7 +30,7 @@ def call_api_resale(page, offset):
         raise
 
 
-def call_api_auth_sbws():
+def call_api_sbws_auth():
     try:
         print("Chamando a API de Autenticação da Superbid")
         
@@ -51,9 +53,9 @@ def call_api_auth_sbws():
         raise
 
 
-def call_api_get_product_sbws(token, product_ref, start=0, limit=1):
+def call_api_sbws_get_product(token, product_ref, start=0, limit=1):
     try:
-        print("Chamando o GET produto da Superbid")
+        print("Chamando o GET de produto da Superbid")
         
         response = requests.get(
             url = f"https://stgapi.s4bdigital.net/auction-lotting/productV2/?q=productYourRef:[{product_ref}]&start={start}&limit={limit}&sort=productId%20desc",
@@ -62,16 +64,52 @@ def call_api_get_product_sbws(token, product_ref, start=0, limit=1):
         )
 
         if response.status_code == 200:
-            print("O GET produto da Superbid respondeu corretamente")
+            print("O GET de produto da Superbid respondeu corretamente")
         else:
-            raise Exception(f"O GET produto da Superbid respondeu com um código diferente do esperado: {response.status_code}")
+            raise Exception(f"O GET de produto da Superbid respondeu com um código diferente do esperado: {response.status_code}")
         
         return response.json()
     except Exception as error:
-        print(f"Erro ao tentar chamar o GET produto da Superbid: {error}")
+        print(f"Erro ao tentar chamar o GET de produto da Superbid: {error}")
 
         raise
 
+
+def call_api_sbws_post_product(token, product_sbws_object):
+    try:
+        print("Chamando o POST de produto da Superbid")
+        
+        response = requests.post(
+            url = f"https://stgapi.s4bdigital.net/auction-lotting/product/",
+            headers = { "Authorization": f"Bearer {token}" },
+            json = {
+                "productYourRef": f"{product_sbws_object.get_productYourRef()}",
+                "externalId": f"{product_sbws_object.get_externalId()}",
+                "shortDesc": f"{product_sbws_object.get_shortDesc()}",
+                "detailedDesc": f"{product_sbws_object.get_detailedDesc()}",
+                "status": "3",
+                "statusId": "3",
+                "sellerId": "501101",
+                "productTypeId": "13",
+                "parentCategoryId": "10109",
+                "categoryId": "10109",
+                "subCategoryId": "10110",
+                "partnerIntegrationId": "2",
+                "eventManagerId": "9"
+            },
+            timeout = 30
+        )
+
+        if response.status_code == 200:
+            print("O POST de produto da Superbid respondeu corretamente")
+        else:
+            raise Exception(f"O POST de produto da Superbid respondeu com um código diferente do esperado: {response.status_code}")
+        
+        return response.json()
+    except Exception as error:
+        print(f"Erro ao tentar chamar o POST de produto da Superbid: {error}")
+
+        raise
 
 def get_total_products_resale():
     print("Buscando o total de produtos na Resale")
@@ -88,9 +126,7 @@ def get_total_products_resale():
 def to_product_resale_object(response):
     product_resale_object = ProductResale()
 
-    #TODO: esse ID está mockado apenas para testar corretamente em STG
-    #product_resale_object.set_id(response['imoveis'][0]['id'])
-    product_resale_object.set_id("d52f007d-7736-7fee-402c-5f91e8d4d5c0")
+    product_resale_object.set_id(response['imoveis'][0]['id'])
     product_resale_object.set_nome(response['imoveis'][0]['nome'])
     product_resale_object.set_descricao(response['imoveis'][0]['descricao'])
     product_resale_object.set_dossie(response['imoveis'][0]['id_banco'])
@@ -182,6 +218,69 @@ def to_product_resale_object(response):
     return product_resale_object
 
 
+def to_product_sbws_object(product):
+    product_sbws_object = ProductSBWS()
+    
+    if "productId" in product:
+        product_sbws_object.set_productId(product["productId"])
+    if "productYourRef" in product:
+        product_sbws_object.set_productYourRef(product["productYourRef"])
+    if "externalId" in product:
+        product_sbws_object.set_externalId(product["externalId"])
+    if "shortDesc" in product:
+        product_sbws_object.set_shortDesc(product["shortDesc"])
+    if "detailedDesc" in product:
+        product_sbws_object.set_detailedDesc(product["detailedDesc"])
+    if "status" in product:
+        product_sbws_object.set_statusId(product["status"])
+    if "statusId" in product:
+        product_sbws_object.set_statusId(product["statusId"])
+    if "statusDesc" in product:
+        product_sbws_object.set_statusDesc(product["statusDesc"])
+    if "productTypeId" in product:
+        product_sbws_object.set_productTypeId(product["productTypeId"])
+    if "parentCategoryId" in product:
+        product_sbws_object.set_parentCategoryId(product["parentCategoryId"])
+    if "categoryId" in product:
+        product_sbws_object.set_categoryId(product["categoryId"])
+    if "subCategoryId" in product:
+        product_sbws_object.set_subCategoryId(product["subCategoryId"])
+    if "partnerIntegrationId" in product:
+        product_sbws_object.set_partnerIntegrationId(product["partnerIntegrationId"])
+    if "createdAt" in product:
+        product_sbws_object.set_createdAt(product["createdAt"])
+    if "locationId" in product:
+        product_sbws_object.set_locationId(product["locationId"])
+    if "placeId" in product:
+        product_sbws_object.set_placeId(product["placeId"])
+    if "cityId" in product:
+        product_sbws_object.set_cityId(product["cityId"])
+    if "latitude" in product:
+        product_sbws_object.set_latitude(product["latitude"])
+    if "longitude" in product:
+        product_sbws_object.set_longitude(product["longitude"])
+    if "eventManagerId" in product:
+        product_sbws_object.set_eventManagerId(product["eventManagerId"])
+    if "hasPhotoAttachment" in product:
+        product_sbws_object.set_hasPhotoAttachment(product["hasPhotoAttachment"])
+    if "photoIllustrative" in product:
+        product_sbws_object.set_photoIllustrative(product["photoIllustrative"])
+    if "pendingStatus" in product:
+        product_sbws_object.set_pendingStatus(product["pendingStatus"])
+    if "pendingStatusDesc" in product:
+        product_sbws_object.set_pendingStatusDesc(product["pendingStatusDesc"])
+    if "inConditions" in product:
+        product_sbws_object.set_inConditions(product["inConditions"])
+    if "hasOffers" in product:
+        product_sbws_object.set_hasOffers(product["hasOffers"])
+    if "hasActiveOffer" in product:
+        product_sbws_object.set_hasActiveOffer(product["hasActiveOffer"])
+    if "activeOfferId" in product:
+        product_sbws_object.set_activeOfferId(product["activeOfferId"])
+
+    return product_sbws_object
+
+
 def get_product_resale_by_index(product_index):
     print(f"Buscando na Resale o produto de índice {product_index}")
 
@@ -195,9 +294,9 @@ def get_product_resale_by_index(product_index):
 def get_token_sbws():
     print("Buscando o token de autenticação da Superbid")
 
-    response = call_api_auth_sbws()
+    response = call_api_sbws_auth()
 
-    token = response['access_token']
+    token = response["access_token"]
     
     print(f"Token de autenticação: {token}")
 
@@ -228,7 +327,7 @@ def get_products_sbws_by_ref(token, product_ref):
     products = []
 
     while(start < total):
-        response = call_api_get_product_sbws(token, product_ref, start, limit)
+        response = call_api_sbws_get_product(token, product_ref, start, limit)
         
         total = response["total"]
         
@@ -247,21 +346,38 @@ def get_products_sbws_by_ref(token, product_ref):
         return []
     else:
         print(f"Filtrando produtos não associados a nenhum evento")
-        valid_products = filter_products_with_no_auctionId(products)
+        filtered_products = filter_products_with_no_auctionId(products)
         
-        print(f"Total de produtos após aplicar o filtro: {len(valid_products)}")
+        print(f"Total de produtos após aplicar o filtro: {len(filtered_products)}")
 
-        if len(products) > 0 and len(valid_products) == 0:
+        if len(products) > 0 and len(filtered_products) == 0:
             print("Como não encontrou nenhum registro, consideraremos o produto mais recente como o correto")
-            valid_products.append(products[0])
+            filtered_products.append(products[0])
 
-        print(f"Total de produtos válidos na Superbid com este código de referência: {len(valid_products)}")
+        print(f"Total de produtos válidos na Superbid com este código de referência: {len(filtered_products)}")
+
+        valid_products = []
+        for product in filtered_products:
+            product_sbws_object = to_product_sbws_object(product)
+            valid_products.append(product_sbws_object)
 
         return valid_products
 
 
-def update_product(product_api_core, product_resale):
+def update_product_sbws(token, product_resale, product_sbws):
+    print(f'Para o produto da Resale de referência "{product_resale.get_id()}" vamos alterar o produto de ID "{product_sbws.get_productId()}" na Superbid')
     print("Em desenvolvimento")
 
-def create_product(product_resale):
-    print("Em desenvolvimento")
+def create_product_sbws(token, product_resale):
+    print(f'Cadastrando o produto "{product_resale.get_id()}" como um produto novo na Superbid')
+    
+    product_sbws_object = ProductSBWS()
+    
+    product_sbws_object.set_productYourRef(product_resale.get_id())
+    product_sbws_object.set_externalId(product_resale.get_dossie())
+    product_sbws_object.set_shortDesc(product_resale.get_nome())
+    product_sbws_object.set_detailedDesc(product_resale.get_descricao())
+    
+    response = call_api_sbws_post_product(token, product_sbws_object)
+    
+    print(f"Resposta: {response}")

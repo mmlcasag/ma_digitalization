@@ -14,18 +14,18 @@ while product_resale_index <= total_products_resale:
     print("--")
 
     print(f"Verificando se o produto existe na Superbid")
-    products_by_ref = helpers.get_products_sbws_by_ref(token, product_resale_object.get_id())
+    products_sbws_array_objects = helpers.get_products_sbws_by_ref(token, product_resale_object.get_id())
     
     print("--")
     
-    if len(products_by_ref) > 0:
-        for product in products_by_ref:
+    if len(products_sbws_array_objects) > 0:
+        for product_sbws_object in products_sbws_array_objects:
             print(f"Atualizando o cadastro do produto na Superbid")
-            helpers.update_product(product, product_resale_object)
+            helpers.update_product_sbws(token, product_resale_object, product_sbws_object)
             print("--")
     else:
         print(f"Inserindo um novo produto na Superbid")
-        helpers.create_product(product_resale_object)
+        helpers.create_product_sbws(token, product_resale_object)
         print("--")
     
     product_resale_index = product_resale_index + 1
