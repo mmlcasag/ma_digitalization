@@ -366,7 +366,12 @@ def get_products_sbws_by_ref(token, product_ref):
 
 def update_product_sbws(token, product_resale, product_sbws):
     print(f'Para o produto da Resale de referência "{product_resale.get_id()}" vamos alterar o produto de ID "{product_sbws.get_productId()}" na Superbid')
-    print("Em desenvolvimento")
+    
+    if not product_sbws.get_activeOfferId():
+        print("activeOfferId is null")
+        
+        call_api_sbws_post_offer(token, product_resale, product_sbws)
+
 
 def create_product_sbws(token, product_resale):
     print(f'Cadastrando o produto "{product_resale.get_id()}" como um produto novo na Superbid')
