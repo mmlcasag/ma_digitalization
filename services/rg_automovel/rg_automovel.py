@@ -85,10 +85,13 @@ class RGAutomovelConverter(SpreadsheetConverter):
                 
                 precificador_json = precificador_response.json()
                 
-                precificador = precificador_json["struct_RespostaRst"]["Resposta"][
-                    "struct_ResultadoPrecificador"
-                ]
-
+                if "struct_RespostaRst" in precificador_json.keys():
+                    precificador_json = precificador_json["struct_RespostaRst"]
+                    if "Resposta" in precificador_json.keys():
+                        precificador_json = precificador_json["Resposta"]
+                        if "struct_ResultadoPrecificador" in precificador_json.keys():
+                            precificador = precificador_json["struct_ResultadoPrecificador"]
+                
                 if isinstance(precificador, list):
                     precificador = precificador[0]
 
@@ -158,10 +161,11 @@ class RGAutomovelConverter(SpreadsheetConverter):
                 try:
                     response = self.get_vehicle_data(plate, serial_number, check_fipe)
 
-                    if check_fipe and len(response["precificador"]) > 0:
-                        fipe_val = response["precificador"]["PrecoFipe"]
-
-                    restricoes = ""
+                    if check_fipe:
+                        if "PrecoFipe" in response["precificador"].keys():
+                            fipe_val = response["precificador"]["PrecoFipe"]
+                        else:
+                            logger.warning("RG do Automóvel não encontrou valor de Fipe para esse veículo")
 
                     restricao_1 = response["bin_estadual"]["Restricao1"]
                     restricao_2 = response["bin_estadual"]["Restricao2"]
@@ -174,7 +178,8 @@ class RGAutomovelConverter(SpreadsheetConverter):
                     restricao_9 = response["bin_estadual"]["Restricao9"]
                     restricao_10 = response["bin_estadual"]["Restricao10"]
                     restricao_11 = response["bin_estadual"]["Restricao11"]
-
+                    
+                    restricoes = ""
                     if restricao_1:
                         restricoes += restricao_1
                     if restricao_2:
@@ -198,6 +203,19 @@ class RGAutomovelConverter(SpreadsheetConverter):
                     if restricao_11:
                         restricoes += f", {restricao_11}"
 
+                    logger.debug(f'Restrição 1: {restricao_1}')
+                    logger.debug(f'Restrição 2: {restricao_2}')
+                    logger.debug(f'Restrição 3: {restricao_3}')
+                    logger.debug(f'Restrição 4: {restricao_4}')
+                    logger.debug(f'Restrição 5: {restricao_5}')
+                    logger.debug(f'Restrição 6: {restricao_6}')
+                    logger.debug(f'Restrição 7: {restricao_7}')
+                    logger.debug(f'Restrição 8: {restricao_8}')
+                    logger.debug(f'Restrição 9: {restricao_9}')
+                    logger.debug(f'Restrição 10: {restricao_10}')
+                    logger.debug(f'Restrição 11: {restricao_11}')
+                    logger.debug(f'Restrições: {restricoes}')
+
                     debts = self.calculate_debts(
                         [
                             response["bin_estadual"]["ValorDebitoDpvat"],
@@ -214,6 +232,25 @@ class RGAutomovelConverter(SpreadsheetConverter):
                         ]
                     )
 
+                    logger.debug(f'Débitos Municipais: {response["bin_estadual"]["ValorDebitoMunicipais"]}')
+                    logger.debug(f'Licenciamento: {response["bin_estadual"]["ValorDebitoLicenc"]}')
+                    logger.debug(f'Multas: {response["bin_estadual"]["ValorDebitoMultas"]}')
+                    logger.debug(f'IPVA: {response["bin_estadual"]["ValorDebitoIpva"]}')
+                    logger.debug(f'DPVAT: {response["bin_estadual"]["ValorDebitoDpvat"]}')
+                    logger.debug(f'DETRAN: {response["bin_estadual"]["ValorDebitoDetran"]}')
+                    logger.debug(f'PRF: {response["bin_estadual"]["ValorDebitoPrf"]}')
+                    logger.debug(f'DER: {response["bin_estadual"]["ValorDebitoDer"]}')
+                    logger.debug(f'DERSA: {response["bin_estadual"]["ValorDebitoDersa"]}')
+                    logger.debug(f'CETESB: {response["bin_estadual"]["ValorDebitoCetesb"]}')
+                    logger.debug(f'RENAINF: {response["bin_estadual"]["ValorDebitoRenainf"]}')
+
+                    logger.debug(f'Total de Débitos: {debts}')
+                    
+                    logger.debug(f'Placa: {response["bin_estadual"]["Placa"]}')
+                    logger.debug(f'Chassi: {response["bin_estadual"]["Chassi"]}')
+                    logger.debug(f'Proprietário: {response["bin_estadual"]["Proprietario"]}')
+                    logger.debug(f'Estado: {response["bin_estadual"]["UF"]}')
+
                     append_data = {
                         "Lote Ref. / Ativo-Frota": "",
                         "Tabela Molicar": "",
@@ -227,10 +264,10 @@ class RGAutomovelConverter(SpreadsheetConverter):
                         "Marca (SEMPRE MAIUSCULA)": response["bin_estadual"]["Marca"],
                         "Modelo (SEMPRE MAIUSCULA)": response["bin_estadual"]["Modelo"],
                         "Ano Fab/Modelo": f"{response['bin_estadual']['AnoFabricacao']}/{response['bin_estadual']['AnoModelo']}",
-                        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": f"{response['bin_estadual']['Placa'].upper()} ({response['bin_estadual']['UF'].upper()})",
-                        "Chassi (SEMPRE MAIUSCULA)": response["bin_estadual"][
+                        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": f"{str(response['bin_estadual']['Placa'].upper())} ({response['bin_estadual']['UF'].upper()})",
+                        "Chassi (SEMPRE MAIUSCULA)": str(response["bin_estadual"][
                             "Chassi"
-                        ].upper(),
+                        ]).upper(),
                         "Renavam": response["bin_estadual"]["Renavam"],
                         "Cor": response["bin_estadual"]["Cor"],
                         "Combustível": response["bin_estadual"]["Combustivel"],
