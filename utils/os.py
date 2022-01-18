@@ -3,6 +3,10 @@ import shutil
 import re
 
 
+def get_absolute_path():
+    return os.getcwd()
+
+
 # from a file name like "foobar.txt"
 # returns "foobar"
 def get_file_name(file_name):
@@ -26,6 +30,11 @@ def create_folder(folder_name, subfolder_name=""):
     else:
         if not os.path.exists(os.path.join(folder_name, subfolder_name)):
             os.makedirs(os.path.join(folder_name, subfolder_name))
+
+
+def delete_folder(folder_name):
+    if os.path.exists(folder_name):
+        shutil.rmtree(folder_name)
 
 
 def get_files_list(folder_name, file_extension_list=[]):
@@ -61,3 +70,7 @@ def move_files_by_regex_name(input_folder, output_folder, regex):
             create_folder(destination_folder)
             origin_file_src = os.path.join(input_folder, img_name)
             shutil.copy(origin_file_src, destination_folder)
+
+
+def copy_file(full_source_path, full_destination_path):
+    shutil.copyfile(full_source_path, full_destination_path)

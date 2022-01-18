@@ -1,115 +1,343 @@
 import os
 import re
 import pandas
-import shutil
 import utils.os as os_utils
 import utils.image as image_utils
+
+
 from services.base.logger import Logger
 logger = Logger.__call__().get_logger()
 
 
-absolute_path = os.getcwd()
 input_folder = 'input'
 output_folder = 'output'
 images_folder = 'images'
 
-os_utils.create_folder(input_folder)
-os_utils.create_folder(input_folder, images_folder)
-os_utils.create_folder(output_folder)
 
-allowed_extensions = ['xlsx', 'xlsb', 'xlsm', 'xls']
+def delete_output_folder():
+    logger.info('Removendo diretório de saída')
+    
+    os_utils.delete_folder(output_folder)
 
-logger.info('PROCESSO DE EXTRAÇÃO DE IMAGENS DAS PLANILHAS EXCEL DO MEMENTO')
-logger.info('Procurando por planilhas excel no diretório de entrada')
+    logger.info('Diretório de saída removido com sucesso')
 
 
-def get_image_name(image_path):
+def create_output_folder():
+    logger.info('Criando diretório de saída')
+
+    os_utils.create_folder(output_folder)
+    os_utils.create_folder(os.path.join(output_folder, images_folder))
+    
+    logger.info('Diretório de saída criado com sucesso')
+
+
+def create_input_folder():
+    logger.info('Criando diretório de entrada')
+
+    os_utils.create_folder(input_folder)
+    os_utils.create_folder(os.path.join(input_folder, images_folder))
+    
+    logger.info('Diretório de entrada criado com sucesso')
+
+
+def get_input_files():
+    logger.info('Buscando arquivos no diretório de entrada')
+
+    allowed_extensions = ['xlsx', 'xlsb', 'xlsm', 'xls']
+    input_files = os_utils.get_files_list(input_folder, allowed_extensions)
+
+    logger.info('Retornados arquivos no diretório de entrada com sucesso')
+    logger.debug(input_files)
+
+    return input_files
+
+
+def get_full_file_path(file_name):
+    logger.info('Montando o endereço completo do arquivo')
+
+    full_file_path = os.path.join(os_utils.get_absolute_path(), input_folder, input_file)
+    
+    logger.info('Endereço completo do arquivo montado com sucesso')
+    logger.debug(full_file_path)
+    
+    return full_file_path
+
+
+def create_folder_for_file(file_name):
+    logger.info('Criando pasta para o arquivo no diretório de saída')
+
+    file_folder = os_utils.get_file_name(file_name)
+    os_utils.create_folder(os.path.join(output_folder, images_folder, file_folder))
+    
+    logger.info('Pasta para o arquivo criada com sucesso')
+
+
+def read_file(full_file_path):
+    logger.info('Abrindo o arquivo para processá-lo')
+    
+    dataframe = pandas.read_excel(full_file_path)
+
+    logger.info('Arquivo aberto com sucesso')
+    
+    return dataframe
+
+
+def get_column_names(dataframe):
+    logger.info('Obtendo colunas do arquivo')
+
+    columns = dataframe.columns
+    
+    logger.info('Colunas do arquivo obtidas com sucesso')
+    logger.debug(columns)
+
+    return columns
+
+
+def get_column_count(columns):
+    logger.info('Contando colunas do arquivo')
+
+    qty_columns = len(columns)
+    
+    logger.info('Colunas do arquivo contadas com sucesso')
+    logger.debug(qty_columns)
+
+    return qty_columns
+    
+
+def get_key_columns_names(columns):
+    logger.info('Obtendo nomes das colunas-chave do arquivo')
+    
+    key_columns_names = []
+    if 'Lote Ref. / Ativo-Frota' in columns:
+        key_columns_names.append('Lote Ref. / Ativo-Frota')
+    if 'Etiqueta (Lote Ref.)' in columns:
+        key_columns_names.append('Etiqueta (Lote Ref.)')
+    if 'Etiqueta (Lote Ref.) - Inicio' in columns:
+        key_columns_names.append('Etiqueta (Lote Ref.) - Inicio')
+    if 'Etiqueta (Lote Ref.) - Fim' in columns:
+        key_columns_names.append('Etiqueta (Lote Ref.) - Fim')
+    
+    logger.info('Nomes das colunas-chave do arquivo obtidas com sucesso')
+    logger.debug(key_columns_names)
+
+    return key_columns_names
+
+
+def get_key_columns_indexes(columns):
+    logger.info('Obtendo índices das colunas-chave do arquivo')
+    
+    key_columns_indexes = []
+    if 'Lote Ref. / Ativo-Frota' in columns:
+        key_columns_indexes.append(columns.get_loc('Lote Ref. / Ativo-Frota'))
+    if 'Etiqueta (Lote Ref.)' in columns:
+        key_columns_indexes.append(columns.get_loc('Etiqueta (Lote Ref.)'))
+    if 'Etiqueta (Lote Ref.) - Inicio' in columns:
+        key_columns_indexes.append(columns.get_loc('Etiqueta (Lote Ref.) - Inicio'))
+    if 'Etiqueta (Lote Ref.) - Fim' in columns:
+        key_columns_indexes.append(columns.get_loc('Etiqueta (Lote Ref.) - Fim'))
+    
+    logger.info('Índices das colunas-chave do arquivo obtidas com sucesso')
+    logger.debug(key_columns_indexes)
+
+    return key_columns_indexes
+
+
+def replace_nan_values(dataframe, key_columns_names):
+    logger.info('Substituindo valores NaN por zero')
+
+    for column in key_columns_names:
+        dataframe[column] = dataframe[column].fillna(0)
+        
+    logger.info('Valores NaN substituídos por zero com sucesso')
+
+
+def get_lot_references(row, key_columns):
+    logger.info('Buscando os lotes de referência do registro')
+
+    lot_references = []
+    
+    for key in key_columns:
+        value = row[key + 1]
+        
+        if isinstance(value, int):
+            if value > 0:
+                lot_references.append(str(value))
+        elif isinstance(value, float):
+            if value > 0:
+                lot_references.append(str(int(value)))
+        else:
+            if len(value) > 0:
+                lot_references.append(value)
+
+    logger.info('Lotes de referência do registro encontrados com sucesso')
+    logger.debug(lot_references)
+
+    """
+    Um pouco de regra de negócio:
+    =========================================================
+    
+    Cenário #1:
+    Planilhas que possuem apenas um campo de lote de referência
+    Nesse caso simplesmente retornamos o valor do campo
+    Nunca o campo poderá estar vazio. Se isso ocorrer, a aplicação irá retornar erro
+
+    Exemplo:
+    Etiqueta (Lote Ref.)    |
+    ------------------------|
+    "PFK"                   |
+
+    ou
+
+    Lote Ref. / Ativo-Frota |
+    ------------------------|
+    "CBA"                   |
+    
+    Cenário #2:
+    Planilhas que possuem três campos de lote de referência
+    - Um campo para valor individual
+    - Dois campos para intervalo de valores (valor inicial e valor final)
+
+    Nesse caso, ou o campo individual deve ser preenchido, ou os dois campos do intervalo de valores
+    Nunca os três campos deverão estar preenchidos. Se isso ocorrer, a aplicação irá retornar erro
+    Nunca os três campos poderão estar vazios. Se isso ocorrer, a aplicação irá retornar erro
+    
+    Exemplo:
+    Etiqueta (Lote Ref.) | Etiqueta (Lote Ref.) - Inicio | Etiqueta (Lote Ref.) - Fim
+    ---------------------|-------------------------------|----------------------------------
+    14314                |                               |
+                         | 14317                         | 14323
+    """
+
+    if len(lot_references) > 2:
+        logger.error('Formato inválido: Lotes de referência devem ser informados ou individual ou em intervalo')
+        raise Exception('Formato Inválido', 'Lotes de referência devem ser informados ou individual ou em intervalo')
+    elif len(lot_references) == 2:
+        logger.info('Gerando o intervalo dos lotes de referência')
+        
+        int_lot_references = [ int(lot) for lot in lot_references ]
+        interval_lot_references = list(range(min(int_lot_references), max(int_lot_references) + 1, 1))
+        
+        logger.info('Intervalo dos lotes de referência gerado com sucesso')
+        logger.debug(interval_lot_references)
+
+        return interval_lot_references
+    elif len(lot_references) == 1:
+        return lot_references
+    else:
+        logger.error('Formato inválido: Ao menos um lote de referência deve ser informados')
+        raise Exception('Formato Inválido', 'Ao menos um lote de referência deve ser informados')
+
+
+def get_image_name(file_name):
     pattern = r'\d{4}-\d{2}-\d{2}\s\d{2}\.\d{2}\.\d{2}\.jpg|jpeg|png|gif'
-    return re.findall(pattern, image_path)[0]
+    return re.findall(pattern, file_name)[0]
 
 
-def extract_image(lot_reference, lot_reference_range_min, lot_reference_range_max, output_path, image_name):
-    # Existem duas formas de tratar os lotes de referência
-    # Forma 1) Individual: o lot_referente vem preenchido e lot_reference_range_min e lot_reference_range_max vem zerados
-    # Forma 2) Range: o lot_referente vem zerado e lot_reference_range_min e lot_reference_range_max vem preenchidos
-    if lot_reference > 0:
-        fetch_image(output_path, image_name, lot_reference)
+def get_image_names(qty_columns, row):
+    logger.info('Buscando as nomes das fotos do lote')
+
+    image_names = []
     
-    if lot_reference == 0:
-        for lot_reference in range(lot_reference_range_min, lot_reference_range_max + 1):
-            fetch_image(output_path, image_name, lot_reference)
-
-
-def fetch_image(output_path, image_name, lot_reference):
-    image_path = os.path.join(output_path, str(lot_reference))
-    os_utils.create_folder(image_path)
+    for column in range(qty_columns):
+        cell_value = str(row[column])
+        
+        if cell_value.startswith('file:///'):
+            image_name = get_image_name(cell_value)
+            image_names.append(image_name)
     
-    path_original_file = os.path.join(absolute_path, input_folder, images_folder, image_name)
-    path_destination_file = os.path.join(image_path, image_name)
+    logger.info('Nomes das fotos do lote encontradas com sucesso')
+    logger.debug(image_names)
+
+    return image_names
+
+
+def create_folder_for_lot(file_name, lot_reference):
+    logger.info('Criando pasta para o lote de referência no diretório de saída')
+
+    file_folder = os_utils.get_file_name(file_name)
+    lot_folder = str(lot_reference)
+    os_utils.create_folder(os.path.join(output_folder, images_folder, file_folder, lot_folder))
     
-    shutil.copyfile(path_original_file, path_destination_file)
-    image_utils.resize_image(path_destination_file)
+    logger.info('Pasta para o lote de referência criada com sucesso')
 
 
-for file_name in os_utils.get_files_list(input_folder, allowed_extensions):
-    try:
-        input_file = os.path.join(absolute_path, input_folder, file_name)
-        logger.info('Encontrada a planilha "{}"'.format(input_file))
+def copy_image_to_output_folder(file_name, lot_reference, image_names):
+    logger.info('Copiando imagens do lote para a pasta do diretório de saída')
 
-        output_path = os.path.join(absolute_path, output_folder, os_utils.get_file_name(file_name))
-        logger.info('Criando o diretório de saída "{}"'.format(output_path))
-        os_utils.create_folder(output_path)
-        
-        logger.info('Abrindo a planilha "{}"'.format(file_name))
-        df = pandas.read_excel(input_file)
+    file_folder = os_utils.get_file_name(file_name)
+    lot_folder = str(lot_reference)
 
-        logger.info("Convertendo colunas para texto")
-        df = df.astype(str)
+    for image_name in image_names:
+        full_source_path = os.path.join(os_utils.get_absolute_path(), input_folder, images_folder, image_name)
+        full_destination_path = os.path.join(os_utils.get_absolute_path(), output_folder, images_folder, file_folder, lot_folder, image_name)
 
-        logger.info('Obtendo nomes das colunas')
-        df_columns = df.columns
-        
-        logger.info('Filtrando colunas de referência de lote')
-        key_columns = ['Etiqueta (Lote Ref.)', 'Etiqueta (Lote Ref.) - Inicio', 'Etiqueta (Lote Ref.) - Fim']
-        logger.debug(key_columns)
+        try:
+            os_utils.copy_file(full_source_path, full_destination_path)
+        except:
+            logger.error('Não foi encontrada a foto "{}"'.format(image_name))
+    
+    logger.info('Imagens do lote copiadas com sucesso para a pasta do diretório de saída')
 
-        logger.info("Convertendo colunas de referência de lote para numérico")
-        df[key_columns] = df[key_columns].mask(df.eq('nan')).fillna(0).apply(pandas.to_numeric)
-        
-        logger.info('Filtrando colunas contendo referência para as fotos dos lotes')
-        url_columns = ['Foto Etiqueta (Lote Ref.)', 'Foto Principal', 'Foto Adicional 1', 'Foto Adicional 2', 'Foto Adicional 3']
-        logger.debug(url_columns)
 
-        logger.info('Verificando linha a linha')
-        row_number = 1
-        for row in df.iterrows():
-            row_number = row_number + 1
-            
-            logger.info('Linha "{}"'.format(row_number))
+def resize_and_compress_images(file_name, lot_reference, image_names):
+    logger.info('Redimensionando e compactando imagens do lote')
 
-            lot_reference           = int(df.loc[row_number-2, 'Etiqueta (Lote Ref.)'])
-            lot_reference_range_min = int(df.loc[row_number-2, 'Etiqueta (Lote Ref.) - Inicio'])
-            lot_reference_range_max = int(df.loc[row_number-2, 'Etiqueta (Lote Ref.) - Fim'])
-            
-            if lot_reference > 0:
-                logger.info('Referência "{}"'.format(lot_reference))
-            else:
-                logger.info('Referência "[{}-{}]"'.format(lot_reference_range_min, lot_reference_range_max))
+    file_folder = os_utils.get_file_name(file_name)
+    lot_folder = str(lot_reference)
 
-            logger.info('Verificando coluna a coluna')
-            for column in url_columns:
-                cell = df.loc[row_number-2, column]
-                
-                if cell != 'nan':
-                    image_name = get_image_name(cell)
-                    
-                    logger.info('Verificando a coluna "{}"'.format(column))
-                    logger.info('Extraindo a foto "{}"'.format(image_name))
-                    
-                    try:
-                        extract_image(lot_reference, lot_reference_range_min, lot_reference_range_max, output_path, image_name)
-                    except:
-                        logger.error('Não foi possível extrair a foto "{}"'.format(image_name))
+    for image_name in image_names:
+        full_destination_path = os.path.join(os_utils.get_absolute_path(), output_folder, images_folder, file_folder, lot_folder, image_name)
 
-    except Exception as error:
-        logger.error("{} ao tentar processar o arquivo {}".format(error, file_name))
+        try:
+            image_utils.resize_image(full_destination_path)
+        except:
+            logger.error('Não foi possível redimensionar e compactar a foto "{}"'.format(image_name))
+    
+    logger.info('Imagens do lote redimensionadas e compactadas com sucesso')
+
+
+def process_row(input_file, qty_columns, key_columns, index, row):
+    logger.info('Processando linha: {}'.format(index + 1))
+
+    lot_references = get_lot_references(row, key_columns)
+    image_names = get_image_names(qty_columns, row)
+
+    for lot_reference in lot_references:
+        create_folder_for_lot(input_file, lot_reference)
+        copy_image_to_output_folder(input_file, lot_reference, image_names)
+        resize_and_compress_images(input_file, lot_reference, image_names)
+
+    logger.info('Linha processada com sucesso')
+
+
+def process_file(input_file):
+    logger.info('Processando arquivo: {}'.format(input_file))
+
+    create_folder_for_file(input_file)
+    full_file_path = get_full_file_path(input_file)
+    dataframe = read_file(full_file_path)
+    columns = get_column_names(dataframe)
+    qty_columns = get_column_count(columns)
+    key_column_names = get_key_columns_names(columns)
+    key_columns_indexes = get_key_columns_indexes(columns)
+    replace_nan_values(dataframe, key_column_names)
+    for index, row in enumerate(dataframe.itertuples()):
+        process_row(input_file, qty_columns, key_columns_indexes, index, row)
+
+    logger.info('Arquivo processado com sucesso')
+
+
+def show_success_message():
+    logger.info("Processo finalizado com sucesso")
+    done = str(input("Pressione ENTER para encerrar..."))
+
+
+if __name__ == "__main__":
+    create_input_folder()
+    create_output_folder()
+
+    input_files = get_input_files()
+    for input_file in input_files:
+        process_file(input_file)
+    
+    show_success_message()
