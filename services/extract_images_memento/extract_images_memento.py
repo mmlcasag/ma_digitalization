@@ -207,10 +207,11 @@ def get_lot_references(row, key_columns):
     14314                |                               |
                          | 14317                         | 14323
     """
-
-    if len(lot_references) > 2:
-        logger.error('Formato inválido: Lotes de referência devem ser informados ou individual ou em intervalo')
-        raise Exception('Formato Inválido', 'Lotes de referência devem ser informados ou individual ou em intervalo')
+    
+    if len(lot_references) == 0:
+        return lot_references
+    elif len(lot_references) == 1:
+        return lot_references
     elif len(lot_references) == 2:
         logger.info('Gerando o intervalo dos lotes de referência')
         
@@ -221,11 +222,9 @@ def get_lot_references(row, key_columns):
         logger.debug(interval_lot_references)
 
         return interval_lot_references
-    elif len(lot_references) == 1:
-        return lot_references
-    else:
-        logger.error('Formato inválido: Ao menos um lote de referência deve ser informados')
-        raise Exception('Formato Inválido', 'Ao menos um lote de referência deve ser informados')
+    elif len(lot_references) > 2:
+        logger.error('Formato inválido: Lotes de referência devem ser informados ou individual ou em intervalo')
+        raise Exception('Formato Inválido', 'Lotes de referência devem ser informados ou individual ou em intervalo')
 
 
 def get_image_name(file_name):
@@ -236,19 +235,21 @@ def get_image_name(file_name):
 def get_image_names(qty_columns, row):
     logger.info('Buscando as nomes das fotos do lote')
 
-    image_names = []
+    clean_image_names = []
     
     for column in range(qty_columns):
         cell_value = str(row[column])
         
         if cell_value.startswith('file:///'):
-            image_name = get_image_name(cell_value)
-            image_names.append(image_name)
+            image_names = cell_value.split(',')
+            for image_name in image_names:
+                clean_image_name = get_image_name(image_name)
+                clean_image_names.append(clean_image_name)
     
     logger.info('Nomes das fotos do lote encontradas com sucesso')
-    logger.debug(image_names)
+    logger.debug(clean_image_names)
 
-    return image_names
+    return clean_image_names
 
 
 def create_folder_for_lot(file_name, lot_reference):
@@ -267,14 +268,15 @@ def copy_image_to_output_folder(file_name, lot_reference, image_names):
     file_folder = os_utils.get_file_name(file_name)
     lot_folder = str(lot_reference)
 
-    for image_name in image_names:
-        full_source_path = os.path.join(os_utils.get_absolute_path(), input_folder, images_folder, image_name)
-        full_destination_path = os.path.join(os_utils.get_absolute_path(), output_folder, images_folder, file_folder, lot_folder, image_name)
+    if len(image_names) > 0:
+        for image_name in image_names:
+            full_source_path = os.path.join(os_utils.get_absolute_path(), input_folder, images_folder, image_name)
+            full_destination_path = os.path.join(os_utils.get_absolute_path(), output_folder, images_folder, file_folder, lot_folder, image_name)
 
-        try:
-            os_utils.copy_file(full_source_path, full_destination_path)
-        except:
-            logger.error('Não foi encontrada a foto "{}"'.format(image_name))
+            try:
+                os_utils.copy_file(full_source_path, full_destination_path)
+            except:
+                logger.error('Não foi encontrada a foto "{}"'.format(image_name))
     
     logger.info('Imagens do lote copiadas com sucesso para a pasta do diretório de saída')
 
@@ -284,14 +286,15 @@ def resize_and_compress_images(file_name, lot_reference, image_names):
 
     file_folder = os_utils.get_file_name(file_name)
     lot_folder = str(lot_reference)
+    
+    if len(image_names) > 0:
+        for image_name in image_names:
+            full_destination_path = os.path.join(os_utils.get_absolute_path(), output_folder, images_folder, file_folder, lot_folder, image_name)
 
-    for image_name in image_names:
-        full_destination_path = os.path.join(os_utils.get_absolute_path(), output_folder, images_folder, file_folder, lot_folder, image_name)
-
-        try:
-            image_utils.resize_image(full_destination_path)
-        except:
-            logger.error('Não foi possível redimensionar e compactar a foto "{}"'.format(image_name))
+            try:
+                image_utils.resize_image(full_destination_path)
+            except:
+                logger.error('Não foi possível redimensionar e compactar a foto "{}"'.format(image_name))
     
     logger.info('Imagens do lote redimensionadas e compactadas com sucesso')
 
@@ -300,12 +303,14 @@ def process_row(input_file, qty_columns, key_columns, index, row):
     logger.info('Processando linha: {}'.format(index + 1))
 
     lot_references = get_lot_references(row, key_columns)
-    image_names = get_image_names(qty_columns, row)
+    
+    if len(lot_references) > 0:
+        image_names = get_image_names(qty_columns, row)
 
-    for lot_reference in lot_references:
-        create_folder_for_lot(input_file, lot_reference)
-        copy_image_to_output_folder(input_file, lot_reference, image_names)
-        resize_and_compress_images(input_file, lot_reference, image_names)
+        for lot_reference in lot_references:
+            create_folder_for_lot(input_file, lot_reference)
+            copy_image_to_output_folder(input_file, lot_reference, image_names)
+            resize_and_compress_images(input_file, lot_reference, image_names)
 
     logger.info('Linha processada com sucesso')
 
