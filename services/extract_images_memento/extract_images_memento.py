@@ -228,8 +228,8 @@ def get_lot_references(row, key_columns):
 
 
 def get_image_name(file_name):
-    pattern = r'\d{4}-\d{2}-\d{2}\s\d{2}\.\d{2}\.\d{2}\.jpg|jpeg|png|gif'
-    return re.findall(pattern, file_name)[0]
+    pattern = r'[\/][A-Za-z0-9()\s._-]+(?:.jpg|.jpeg|.png|.gif|.jfif|.wmv|.mp4)'
+    return re.findall(pattern, file_name)[0][1:]
 
 
 def get_image_names(qty_columns, row):
