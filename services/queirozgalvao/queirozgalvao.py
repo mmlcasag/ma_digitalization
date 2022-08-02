@@ -1,129 +1,157 @@
 import os
+import shutil
 import pandas
 import requests
+import json
 
-import utils.os as os_utils
-import utils.ma as ma_utils
+if os.path.exists("output"):
+    shutil.rmtree("output")
+
+import helpers
 import utils.excel as excel_utils
 import utils.image as image_utils
+import utils.ma as ma_utils
+import utils.os as os_utils
 
-from classes.Crawler import Crawler
-from classes.Category import Category
-from classes.Product import Product
 from services.base.logger import Logger
 
 logger = Logger.__call__().get_logger()
 
-os_utils.create_folder("output")
-os_utils.create_folder("output", "xlsx")
-os_utils.create_folder("output", "images")
-
-categories = []
-
-main_crawler = Crawler("https://vendas.queirozgalvao.com/")
-
-for category_html in main_crawler.get_parent_category():
-    category = Category(category_html)
-    logger.info(category.to_string())
-
-    category_crawler = Crawler(category.get_url())
-
-    while category_crawler.get_page():
-        logger.info(f"Página: {category_crawler.get_page_number()}")
-
-        for product_url in category_crawler.get_products_url():
-            product_crawler = Crawler(product_url)
-            product_html = product_crawler.get_page()
-
-            product = Product(product_html)
-            logger.info(product.to_string())
-
-            category.add_product(product)
-
-        category_crawler.get_next_page()
-
-    logger.info(f"Total de Produtos na Categoria: {category.get_total_products()}")
-
-    categories.append(category)
-
+logger.info("Criando o dataframe")
 dataset = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns_with_categories())
 
-for category in categories:
-    for product in category.get_products():
-        dataset = dataset.append(
-            pandas.Series(
-                [
-                    product.get_reference(),
-                    "novo",
-                    product.get_reference(),
-                    product.get_short_description(),
-                    product.get_full_description(),
-                    "",
-                    excel_utils.convert_to_currency(product.get_price()),
-                    "",
-                    excel_utils.convert_to_currency(50),
-                    excel_utils.convert_to_currency(product.get_price()),
-                    product.get_owner(),
-                    product.get_city(),
-                    product.get_state(),
-                    product.get_plant(),
-                    "",
-                    "",
-                    "",
-                    "",
-                    "1",
-                    "",
-                    "",
-                    product.get_category(),
-                    product.get_subcategory(),
-                ],
-                index=dataset.columns,
-            ),
-            ignore_index=True,
-        )
+logger.info("Criando a estrutura de pastas de saída")
+if not os.path.exists("output"):
+    os.mkdir("output")
+if not os.path.exists("output/images"):
+    os.mkdir("output/images")
+if not os.path.exists("output/json"):
+    os.mkdir("output/json")
+if not os.path.exists("output/logs"):
+    os.mkdir("output/logs")
+if not os.path.exists("output/xlsx"):
+    os.mkdir("output/xlsx")
 
-        for remote_image_url in product.get_images():
-            relative_output_path = os.path.join(
-                "output", "images", product.get_reference()
+logger.info("Lendo o conteúdo da página web")
+request = requests.get(
+    "https://webapp2.queirozgalvao.com/portalvendas-api/v1/equipamentos?categoria=Todos"
+)
+
+logger.info("Escrevendo o conteúdo em um arquivo JSON")
+text_file = open("output/json/content.json", "w")
+text_file.write(request.text)
+text_file.close()
+
+logger.info("Lendo o arquivo JSON")
+json_file = open("output/json/content.json", "r")
+json_data = json.load(json_file)
+json_file.close()
+
+for element in json_data:
+    descricao_curta = helpers.get_descricao_curta(element)
+    descricao_detalhada = helpers.get_descricao_detalhada(element)
+    cidade = helpers.get_cidade(element["localizacao"])
+    estado = helpers.get_estado(element["localizacao"])
+    planta = helpers.get_planta(element["localizacao"])
+    fotos = helpers.get_fotos(element["idAnexo"])
+
+    logger.info("Informações sobre o ativo {}".format(element["metadataId"]))
+    logger.info("--> Código: {}".format(element["codigo"]))
+    logger.info("--> ID: {}".format(element["id"]))
+    logger.info("--> Nº Solicitação: {}".format(element["numeroSolicitacao"]))
+    logger.info("--> Data de Cadastro: {}".format(element["dataCadastro"]))
+    logger.info("--> Status: {}".format(element["status"]))
+    logger.info("--> Categoria: {}".format(element["categoria"]))
+    logger.info("--> Modelo: {}".format(element["modelo"]))
+    logger.info("--> Valor: {}".format(element["valor"]))
+    logger.info("--> Descrição do Anúncio: {}".format(element["descricaoAnuncio"]))
+    logger.info("--> Proprietário: {}".format(element["proprietario"]))
+    logger.info("--> Proprietário do Ativo: {}".format(element["proprietarioAtivo"]))
+    logger.info("--> Grupo de Compliance: {}".format(element["grupoCompliance"]))
+    logger.info("--> Ano de Fabricação: {}".format(element["anoFabricacao"]))
+    logger.info("--> Ano do Modelo: {}".format(element["anoModelo"]))
+    logger.info("--> Nº da Placa: {}".format(element["placa"]))
+    logger.info("--> Nº de Série: {}".format(element["numeroSerie"]))
+    logger.info("--> Nº do Motor: {}".format(element["motor"]))
+    logger.info("--> Combustível: {}".format(element["combustivel"]))
+    logger.info("--> KMs: {}".format(element["kms"]))
+    logger.info("--> Horímetro: {}".format(element["horimetro"]))
+    logger.info("--> Localização: {}".format(element["localizacao"]))
+    logger.info("--> Quantidade de fotos: {}".format(len(fotos)))
+    logger.info("--> Descrição Curta: {}".format(descricao_curta))
+    logger.info("--> Descrição Detalhada: {}".format(descricao_detalhada))
+    logger.info("--> Cidade: {}".format(cidade))
+    logger.info("--> Estado: {}".format(estado))
+    logger.info("--> Planta: {}".format(planta))
+
+    logger.info("Adicionando o ativo ao dataframe")
+    dataset = dataset.append(
+        pandas.Series(
+            [
+                element["codigo"],
+                "novo",
+                element["codigo"],
+                descricao_curta,
+                descricao_detalhada,
+                "",
+                excel_utils.convert_to_currency(element["valor"]),
+                "",
+                excel_utils.convert_to_currency(50),
+                excel_utils.convert_to_currency(element["valor"]),
+                element["proprietario"],
+                cidade,
+                estado,
+                planta,
+                "",
+                "",
+                "",
+                "",
+                "1",
+                "",
+                "",
+                element["categoria"],
+                element["categoria"],
+            ],
+            index=dataset.columns,
+        ),
+        ignore_index=True,
+    )
+
+    logger.info("Extraindo as fotos do ativo")
+    for foto_url in fotos:
+        diretorio_ativo = os.path.join("output", "images", element["codigo"])
+        foto_ativo = os.path.join(diretorio_ativo, os.path.basename(foto_url))
+
+        if not os.path.exists(diretorio_ativo):
+            logger.info("Criando a pasta para a extração das fotos do ativo")
+            os.mkdir(diretorio_ativo)
+
+        logger.info(f'Extraindo foto "{foto_url}"')
+        image_data = requests.get(foto_url).content
+        with open(foto_ativo, "wb") as handler:
+            handler.write(image_data)
+
+        try:
+            logger.info("Redimensionando foto")
+            image_utils.resize_image(os.path.join(os.getcwd(), foto_ativo))
+        except Exception as error:
+            logger.error(
+                '"{}" ao tentar redimensionar a imagem "{}"'.format(error, foto_ativo)
             )
-            relative_image_path = os.path.join(
-                relative_output_path, os.path.basename(remote_image_url)
-            )
 
-            os_utils.create_folder(relative_output_path)
-
-            logger.info(f'Extraindo a imagem para "{relative_image_path}"')
-            image_data = requests.get(remote_image_url).content
-            with open(relative_image_path, "wb") as handler:
-                handler.write(image_data)
-
+        if os_utils.get_file_extension(foto_ativo).lower() != "jpg":
             try:
-                logger.info('Redimensionando a imagem "{}"'.format(relative_image_path))
-                image_utils.resize_image(os.path.join(os.getcwd(), relative_image_path))
+                logger.info("Convertendo foto para JPG")
+                image_utils.convert_to_jpg(
+                    os.path.join(os.getcwd(), foto_ativo),
+                    os_utils.get_file_extension(foto_ativo),
+                    diretorio_ativo,
+                    False,
+                )
             except Exception as error:
                 logger.error(
-                    '"{}" ao tentar redimensionar a imagem "{}"'.format(
-                        error, relative_image_path
-                    )
+                    '"{}" ao tentar converter a imagem "{}"'.format(error, foto_ativo)
                 )
-
-            if os_utils.get_file_extension(relative_image_path).lower() != "jpg":
-                try:
-                    logger.info(
-                        'Convertendo a imagem "{}" para JPG'.format(relative_image_path)
-                    )
-                    image_utils.convert_to_jpg(
-                        os.path.join(os.getcwd(), relative_image_path),
-                        os_utils.get_file_extension(relative_image_path),
-                        relative_output_path,
-                        False,
-                    )
-                except Exception as error:
-                    logger.error(
-                        '"{}" ao tentar converter a imagem "{}"'.format(
-                            error, relative_image_path
-                        )
-                    )
 
 logger.info("Ordenando dados pelo número do lote")
 dataset = dataset.sort_values("Nº do lote")
