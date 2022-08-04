@@ -48,12 +48,15 @@ json_data = json.load(json_file)
 json_file.close()
 
 for element in json_data:
-    descricao_curta = helpers.get_descricao_curta(element)
-    descricao_detalhada = helpers.get_descricao_detalhada(element)
+    valor = helpers.get_valor(element["valor"])
+    incremento = helpers.get_incremento(element["valor"])
+    placa = helpers.get_placa(element["placa"])
     cidade = helpers.get_cidade(element["localizacao"])
     estado = helpers.get_estado(element["localizacao"])
     planta = helpers.get_planta(element["localizacao"])
     fotos = helpers.get_fotos(element["idAnexo"])
+    descricao_curta = helpers.get_descricao_curta(element)
+    descricao_detalhada = helpers.get_descricao_detalhada(element)
 
     logger.info("Informações sobre o ativo {}".format(element["metadataId"]))
     logger.info("--> Código: {}".format(element["codigo"]))
@@ -63,26 +66,29 @@ for element in json_data:
     logger.info("--> Status: {}".format(element["status"]))
     logger.info("--> Categoria: {}".format(element["categoria"]))
     logger.info("--> Modelo: {}".format(element["modelo"]))
-    logger.info("--> Valor: {}".format(element["valor"]))
+    logger.info("--> Valor (Original): {}".format(element["valor"]))
+    logger.info("--> Valor (Numérico): {}".format(valor))
+    logger.info("--> Valor do Incremento: {}".format(incremento))
     logger.info("--> Descrição do Anúncio: {}".format(element["descricaoAnuncio"]))
     logger.info("--> Proprietário: {}".format(element["proprietario"]))
     logger.info("--> Proprietário do Ativo: {}".format(element["proprietarioAtivo"]))
     logger.info("--> Grupo de Compliance: {}".format(element["grupoCompliance"]))
     logger.info("--> Ano de Fabricação: {}".format(element["anoFabricacao"]))
     logger.info("--> Ano do Modelo: {}".format(element["anoModelo"]))
-    logger.info("--> Nº da Placa: {}".format(element["placa"]))
+    logger.info("--> Nº da Placa (Original): {}".format(element["placa"]))
+    logger.info("--> Nº da Placa (Tratada): {}".format(placa))
     logger.info("--> Nº de Série: {}".format(element["numeroSerie"]))
     logger.info("--> Nº do Motor: {}".format(element["motor"]))
     logger.info("--> Combustível: {}".format(element["combustivel"]))
     logger.info("--> KMs: {}".format(element["kms"]))
     logger.info("--> Horímetro: {}".format(element["horimetro"]))
     logger.info("--> Localização: {}".format(element["localizacao"]))
-    logger.info("--> Quantidade de fotos: {}".format(len(fotos)))
-    logger.info("--> Descrição Curta: {}".format(descricao_curta))
-    logger.info("--> Descrição Detalhada: {}".format(descricao_detalhada))
     logger.info("--> Cidade: {}".format(cidade))
     logger.info("--> Estado: {}".format(estado))
     logger.info("--> Planta: {}".format(planta))
+    logger.info("--> Quantidade de fotos: {}".format(len(fotos)))
+    logger.info("--> Descrição Curta: {}".format(descricao_curta))
+    logger.info("--> Descrição Detalhada: {}".format(descricao_detalhada))
 
     logger.info("Adicionando o ativo ao dataframe")
     dataset = dataset.append(
@@ -94,10 +100,10 @@ for element in json_data:
                 descricao_curta,
                 descricao_detalhada,
                 "",
-                excel_utils.convert_to_currency(element["valor"]),
+                excel_utils.convert_to_currency(valor),
                 "",
-                excel_utils.convert_to_currency(50),
-                excel_utils.convert_to_currency(element["valor"]),
+                excel_utils.convert_to_currency(incremento),
+                excel_utils.convert_to_currency(valor),
                 element["proprietario"],
                 cidade,
                 estado,
