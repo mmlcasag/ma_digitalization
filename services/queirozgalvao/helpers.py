@@ -31,13 +31,13 @@ def get_descricao_curta(registro):
             descricao_curta = descricao_curta + ", " + str(registro["anoModelo"])
 
         if registro["placa"]:
-            descricao_curta = descricao_curta + ", PL: " + get_placa(registro["placa"])
+            descricao_curta = descricao_curta + ", PL.: " + get_placa(registro["placa"])
 
         if registro["numeroSerie"]:
             if registro["numeroSerie"] == "*":
-                descricao_curta = descricao_curta + ", CH: NÃO IDENTIFICADO"
+                descricao_curta = descricao_curta + ", CH.: NÃO IDENTIFICADO"
             else:
-                descricao_curta = descricao_curta + ", CH: " + registro["numeroSerie"]
+                descricao_curta = descricao_curta + ", CH.: " + registro["numeroSerie"]
     else:
         if registro["modelo"]:
             descricao_curta = descricao_curta + registro["modelo"]
@@ -72,6 +72,8 @@ def get_descricao_curta(registro):
     descricao_curta = descricao_curta.replace("VEICULO UTILITARIO ", "")
     descricao_curta = descricao_curta.replace("VEÍCULO UTILITÁRIO ", "")
     descricao_curta = descricao_curta.replace("LOTE ", "")
+    descricao_curta = descricao_curta.replace("MBB ", "MERCEDES-BENZ ")
+    descricao_curta = descricao_curta.replace("VW ", "VOLKSWAGEN ")
 
     if descricao_curta[0:1] == "=":
         descricao_curta = descricao_curta[1:]
@@ -213,6 +215,8 @@ def get_descricao_detalhada(registro):
     descricao_detalhada = descricao_detalhada.replace("VEICULO UTILITARIO ", "")
     descricao_detalhada = descricao_detalhada.replace("VEÍCULO UTILITÁRIO ", "")
     descricao_detalhada = descricao_detalhada.replace("LOTE ", "")
+    descricao_detalhada = descricao_detalhada.replace("MBB ", "MERCEDES-BENZ ")
+    descricao_detalhada = descricao_detalhada.replace("VW ", "VOLKSWAGEN ")
 
     if descricao_detalhada[0:1] == "=":
         descricao_detalhada = descricao_detalhada[1:]

@@ -132,10 +132,18 @@ for element in json_data:
             logger.info("Criando a pasta para a extração das fotos do ativo")
             os.mkdir(diretorio_ativo)
 
-        logger.info(f'Extraindo foto "{foto_url}"')
-        image_data = requests.get(foto_url).content
-        with open(foto_ativo, "wb") as handler:
-            handler.write(image_data)
+        try:
+            logger.info(f'Extraindo foto "{foto_url}"')
+            image_data = requests.get(foto_url).content
+            with open(foto_ativo, "wb") as handler:
+                handler.write(image_data)
+        except Exception as error:
+            logger.error('"{}" ao tentar extrair a imagem "{}"'.format(error, foto_url))
+            raise Exception(
+                'Ocorreu uma indisponibilidade no site da Queiroz Galvão ao tentar extrair a imagem "{}"'.format(
+                    foto_url
+                )
+            )
 
         try:
             logger.info("Redimensionando foto")
