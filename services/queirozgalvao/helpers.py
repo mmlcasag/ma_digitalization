@@ -74,6 +74,7 @@ def get_descricao_curta(registro):
     descricao_curta = descricao_curta.replace("LOTE ", "")
     descricao_curta = descricao_curta.replace("MBB ", "MERCEDES-BENZ ")
     descricao_curta = descricao_curta.replace("VW ", "VOLKSWAGEN ")
+    descricao_curta = descricao_curta.replace("VOLKS ", "VOLKSWAGEN ")
 
     if descricao_curta[0:1] == "=":
         descricao_curta = descricao_curta[1:]
@@ -217,6 +218,7 @@ def get_descricao_detalhada(registro):
     descricao_detalhada = descricao_detalhada.replace("LOTE ", "")
     descricao_detalhada = descricao_detalhada.replace("MBB ", "MERCEDES-BENZ ")
     descricao_detalhada = descricao_detalhada.replace("VW ", "VOLKSWAGEN ")
+    descricao_detalhada = descricao_detalhada.replace("VOLKS ", "VOLKSWAGEN ")
 
     if descricao_detalhada[0:1] == "=":
         descricao_detalhada = descricao_detalhada[1:]
