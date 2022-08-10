@@ -125,7 +125,9 @@ for element in json_data:
 
     logger.info("Extraindo as fotos do ativo")
     for foto_url in fotos:
-        diretorio_ativo = os.path.join("output", "images", element["codigo"])
+        diretorio_ativo = os.path.join(
+            os.getcwd(), "output", "images", element["codigo"]
+        )
         foto_ativo = os.path.join(diretorio_ativo, os.path.basename(foto_url))
 
         if not os.path.exists(diretorio_ativo):
@@ -139,11 +141,6 @@ for element in json_data:
                 handler.write(image_data)
         except Exception as error:
             logger.error('"{}" ao tentar extrair a imagem "{}"'.format(error, foto_url))
-            raise Exception(
-                'Ocorreu uma indisponibilidade no site da Queiroz Galvão ao tentar extrair a imagem "{}"'.format(
-                    foto_url
-                )
-            )
 
         try:
             logger.info("Redimensionando foto")
