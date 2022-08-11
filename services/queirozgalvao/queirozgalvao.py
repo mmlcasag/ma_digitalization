@@ -18,7 +18,9 @@ from services.base.logger import Logger
 logger = Logger.__call__().get_logger()
 
 logger.info("Criando o dataframe")
-dataset = pandas.DataFrame(columns=ma_utils.get_spreadsheet_columns_with_categories())
+columns = ma_utils.get_spreadsheet_columns_with_categories()
+columns.append("Placa")
+dataset = pandas.DataFrame(columns=columns)
 
 logger.info("Criando a estrutura de pastas de saída")
 if not os.path.exists("output"):
@@ -50,6 +52,7 @@ json_file.close()
 for element in json_data:
     valor = helpers.get_valor(element["valor"])
     incremento = helpers.get_incremento(element["valor"])
+    placa_uf = helpers.get_placa_com_uf(element["placa"])
     placa = helpers.get_placa(element["placa"])
     cidade = helpers.get_cidade(element["localizacao"])
     estado = helpers.get_estado(element["localizacao"])
@@ -76,7 +79,7 @@ for element in json_data:
     logger.info("--> Ano de Fabricação: {}".format(element["anoFabricacao"]))
     logger.info("--> Ano do Modelo: {}".format(element["anoModelo"]))
     logger.info("--> Nº da Placa (Original): {}".format(element["placa"]))
-    logger.info("--> Nº da Placa (Tratada): {}".format(placa))
+    logger.info("--> Nº da Placa (Tratada): {}".format(placa_uf))
     logger.info("--> Nº de Série: {}".format(element["numeroSerie"]))
     logger.info("--> Nº do Motor: {}".format(element["motor"]))
     logger.info("--> Combustível: {}".format(element["combustivel"]))
@@ -117,6 +120,7 @@ for element in json_data:
                 "",
                 element["categoria"],
                 element["categoria"],
+                placa,
             ],
             index=dataset.columns,
         ),

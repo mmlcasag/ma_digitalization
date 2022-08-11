@@ -31,7 +31,9 @@ def get_descricao_curta(registro):
             descricao_curta = descricao_curta + ", " + str(registro["anoModelo"])
 
         if registro["placa"]:
-            descricao_curta = descricao_curta + ", PL.: " + get_placa(registro["placa"])
+            descricao_curta = (
+                descricao_curta + ", PL.: " + get_placa_com_uf(registro["placa"])
+            )
 
         if registro["numeroSerie"]:
             if registro["numeroSerie"] == "*":
@@ -91,7 +93,10 @@ def get_descricao_detalhada(registro):
 
         if registro["placa"]:
             descricao_detalhada = (
-                descricao_detalhada + "Placa: " + get_placa(registro["placa"]) + "<br>"
+                descricao_detalhada
+                + "Placa: "
+                + get_placa_com_uf(registro["placa"])
+                + "<br>"
             )
 
         if registro["numeroSerie"]:
@@ -226,7 +231,7 @@ def get_descricao_detalhada(registro):
     return descricao_detalhada.strip()
 
 
-def get_placa(placa):
+def get_placa_com_uf(placa):
     if placa:
         if len(placa) == 8:
             letras = placa[0:3]
@@ -237,6 +242,21 @@ def get_placa(placa):
             numeros = placa[4:8]
             estado = placa[9:11]
             return letras + numeros + " (" + estado + ")"
+        else:
+            return ""
+    return ""
+
+
+def get_placa(placa):
+    if placa:
+        if len(placa) == 8:
+            letras = placa[0:3]
+            numeros = placa[4:8]
+            return letras + numeros
+        elif len(placa) == 11:
+            letras = placa[0:3]
+            numeros = placa[4:8]
+            return letras + numeros
         else:
             return ""
     return ""
