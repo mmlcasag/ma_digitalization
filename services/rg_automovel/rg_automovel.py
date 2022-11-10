@@ -7,104 +7,451 @@ import requests
 from services.base.logger import Logger
 from services.base.spreadsheet_converter import SpreadsheetConverter
 
+
 logger = Logger.__call__().get_logger()
 
 
 class CONST:
     PLATE = "Placa"
-    SERIAL_NUMBER = "Chassi"
+    CHASSI = "Chassi"
     FIPE = "Consultar Tabela Fipe?"
 
 
 class RGAutomovelConverter(SpreadsheetConverter):
-    
-    
     def calculate_debts(self, values):
         total = 0
         for value in values:
             try:
                 val = re.sub("[^0-9,.]", "", value)
-                
+
                 if len(val.strip()) == 0:
                     val = "0,00"
-                
+
                 total += float(val.replace(".", "").replace(",", "."))
-            except Exception as error:
+            except Exception:
                 logger.error(f"Valor recebido que ocasionou um erro: {value}")
                 raise
 
         return total
 
+    def get_vehicle_data(self, plate, chassi, check_fipe):
+        base_url = "http://ws.rgdoautomovel.com.br"
 
-    def get_vehicle_data(self, plate, serial_number, check_fipe):
-        try:
-            base_url = "http://ws.rgdoautomovel.com.br"
-            
-            request_params = {
-                "pstrFormat": "json",
-                "pstrCliente": "maisativo.sbid",
-                "pstrLogin": "maisativo.sbid",
-                "pstrSenha": "sbid153",
-            }
-
-            if plate != "null":
-                logger.info(
-                    "Buscando informações do veículo de placa {}".format(str(plate))
-                )
-                request_params["pstrPlaca"] = plate
-
-            if serial_number != "null":
-                logger.info(
-                    "Buscando informações do veículo de chassi {}".format(
-                        str(serial_number)
-                    )
-                )
-                request_params["pstrChassi"] = serial_number
-
-            bin_estadual_response = requests.get(
-                f"{base_url}/binestadual", params=request_params, timeout=300
-            )
-
-            bin_estadual_json = bin_estadual_response.json()
-
-            logger.info("OK")
-        except Exception as error:
-            logger.error(f'Erro "{error}" ao tentar chamar a API de Dados Estaduais do RG do Automóvel')
-            raise
-
-        try:
-            precificador = {
-                "struct_RespostaRst": {"Resposta": {"struct_ResultadoPrecificador": False}}
-            }
-            if check_fipe:
-                logger.info("Buscando valores na tabela Fipe")
-                
-                precificador_response = requests.get(
-                    f"{base_url}/precificador", params=request_params, timeout=300
-                )
-                
-                precificador_json = precificador_response.json()
-                
-                if "struct_RespostaRst" in precificador_json.keys():
-                    precificador_json = precificador_json["struct_RespostaRst"]
-                    if "Resposta" in precificador_json.keys():
-                        precificador_json = precificador_json["Resposta"]
-                        if "struct_ResultadoPrecificador" in precificador_json.keys():
-                            precificador = precificador_json["struct_ResultadoPrecificador"]
-                
-                if isinstance(precificador, list):
-                    precificador = precificador[0]
-
-                logger.info("OK")
-        except Exception as error:
-            logger.error(f'Erro "{error}" ao tentar chamar a API de Precificação do RG do Automóvel')
-            raise
-        
-        return {
-            "bin_estadual": bin_estadual_json["struct_RespostaRst"]["Resposta"],
-            "precificador": precificador,
+        request_params = {
+            "pstrFormat": "json",
+            "pstrCliente": "maisativo.sbid",
+            "pstrLogin": "maisativo.sbid",
+            "pstrSenha": "sbid153",
         }
 
+        if plate != "":
+            request_params["pstrPlaca"] = plate
+        elif chassi != "":
+            request_params["pstrChassi"] = chassi
+
+        if plate != "" or chassi != "":
+            try:
+                logger.info("Chamando a API BIN Estadual do RG do Automóvel")
+
+                for i in range(5):
+                    try:
+                        logger.info(f"Tentativa {(i + 1)}/5")
+
+                        bin_estadual_response = requests.get(
+                            f"{base_url}/binestadual",
+                            params=request_params,
+                            timeout=300,
+                        )
+
+                        bin_estadual_json = bin_estadual_response.json()
+
+                        logger.debug(
+                            f'Resposta da API BIN Estadual do RG do Automóvel: "{bin_estadual_json}"'
+                        )
+
+                        break
+                    except Exception as error:
+                        if isinstance(error, requests.exceptions.ReadTimeout):
+                            logger.info("Ocorreu timeout")
+
+                            if (i + 1) == 5:
+                                raise Exception("Atingiu o limite de timeouts")
+                        else:
+                            raise
+
+                if "struct_RespostaRst" in bin_estadual_json.keys():
+                    bin_estadual_json = bin_estadual_json["struct_RespostaRst"]
+
+                    if "erro" in bin_estadual_json.keys():
+                        if bin_estadual_json["erro"]:
+                            raise Exception(
+                                str(bin_estadual_json["erroCodigo"])
+                                + " - "
+                                + str(bin_estadual_json["msg"])
+                            )
+
+                    if "Resposta" in bin_estadual_json.keys():
+                        bin_estadual_json = bin_estadual_json["Resposta"]
+
+                        logger.debug(f'Placa: "{bin_estadual_json["Placa"].upper()}"')
+                        logger.debug(f'UF: "{bin_estadual_json["UF"].upper()}"')
+                        logger.debug(f'Chassi: "{bin_estadual_json["Chassi"].upper()}"')
+                        logger.debug(f'Tipo: "{bin_estadual_json["Tipo"]}"')
+                        logger.debug(f'Marca: "{bin_estadual_json["Marca"].upper()}"')
+                        logger.debug(f'Modelo: "{bin_estadual_json["Modelo"].upper()}"')
+                        logger.debug(
+                            f'Ano Fabricação: "{bin_estadual_json["AnoFabricacao"]}"'
+                        )
+                        logger.debug(f'Ano Modelo: "{bin_estadual_json["AnoModelo"]}"')
+                        logger.debug(f'Renavam: "{bin_estadual_json["Renavam"]}"')
+                        logger.debug(f'Cor: "{bin_estadual_json["Cor"]}"')
+                        logger.debug(
+                            f'Combustível: "{bin_estadual_json["Combustivel"]}"'
+                        )
+                        logger.debug(f'Cilindrada: "{bin_estadual_json["Cilindrada"]}"')
+                        logger.debug(
+                            f'Proprietário: "{bin_estadual_json["Proprietario"].upper()}"'
+                        )
+                        logger.debug(
+                            f'Situação do Veículo: "{bin_estadual_json["SituacaoVeiculo"]}"'
+                        )
+                        logger.debug(
+                            f'Tipo de Remarcação do Chassi: "{bin_estadual_json["TipoRemarcacaoChassi"]}"'
+                        )
+                        logger.debug(f'Espécie: "{bin_estadual_json["Especie"]}"')
+                        logger.debug(f'Carroceria: "{bin_estadual_json["Carroceria"]}"')
+                        logger.debug(f'Potência: "{bin_estadual_json["Potencia"]}"')
+                        logger.debug(f'Município: "{bin_estadual_json["Municipio"]}"')
+                        logger.debug(f'Nº Motor: "{bin_estadual_json["NrMotor"]}"')
+                        logger.debug(
+                            f'Procedência do Veículo: "{bin_estadual_json["ProcedenciaVeiculo"]}"'
+                        )
+                        logger.debug(
+                            f'Capacidade de Carga: "{bin_estadual_json["CapacidadeDeCarga"]}"'
+                        )
+                        logger.debug(
+                            f'Capacidade de Passageiros: "{bin_estadual_json["CapacidadePassageiros"]}"'
+                        )
+                        logger.debug(
+                            f'Nº Carroceria: "{bin_estadual_json["Carroceria"]}"'
+                        )
+                        logger.debug(
+                            f'Nº Caixa de Câmbio: "{bin_estadual_json["NrCaixaCambio"]}"'
+                        )
+                        logger.debug(f'Nº Eixos: "{bin_estadual_json["NrEixos"]}"')
+                        logger.debug(
+                            f'Terceiro Eixo: "{bin_estadual_json["TerceiroEixo"]}"'
+                        )
+                        logger.debug(
+                            f'Eixo Traseiro Diferencial: "{bin_estadual_json["EixoTrasDiferencial"]}"'
+                        )
+                        logger.debug(f'Montagem: "{bin_estadual_json["Montagem"]}"')
+                        logger.debug(f'CMT: "{bin_estadual_json["CMT"]}"')
+                        logger.debug(f'PBT: "{bin_estadual_json["PBT"]}"')
+
+                        logger.debug(
+                            f'Restrição 1: "{bin_estadual_json["Restricao1"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 2: "{bin_estadual_json["Restricao2"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 3: "{bin_estadual_json["Restricao3"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 4: "{bin_estadual_json["Restricao4"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 5: "{bin_estadual_json["Restricao5"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 6: "{bin_estadual_json["Restricao6"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 7: "{bin_estadual_json["Restricao7"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 8: "{bin_estadual_json["Restricao8"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 9: "{bin_estadual_json["Restricao9"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 10: "{bin_estadual_json["Restricao10"]}"'
+                        )
+                        logger.debug(
+                            f'Restrição 11: "{bin_estadual_json["Restricao11"]}"'
+                        )
+
+                        bin_estadual_json["restricoes"] = ""
+
+                        try:
+                            if bin_estadual_json["Restricao1"]:
+                                bin_estadual_json["restricoes"] += bin_estadual_json[
+                                    "Restricao1"
+                                ]
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 1" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao2"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao2"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 2" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao3"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao3"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 3" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao4"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao4"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 4" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao5"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao5"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 5" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao6"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao6"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 6" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao7"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao7"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 7" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao8"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao8"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 8" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao9"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao9"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 9" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao10"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao10"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 10" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        try:
+                            if bin_estadual_json["Restricao11"]:
+                                bin_estadual_json[
+                                    "restricoes"
+                                ] += f', {bin_estadual_json["Restricao11"]}'
+                        except Exception:
+                            logger.warning(
+                                'Erro ao tentar concatenar "Restrição 11" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                            )
+
+                        logger.debug(
+                            f'Restrições Concatenadas: {bin_estadual_json["restricoes"]}'
+                        )
+
+                        logger.debug(f'IPVA: "{bin_estadual_json["ValorDebitoIpva"]}"')
+                        logger.debug(
+                            f'DPVAT: "{bin_estadual_json["ValorDebitoDpvat"]}"'
+                        )
+                        logger.debug(
+                            f'DETRAN: "{bin_estadual_json["ValorDebitoDetran"]}"'
+                        )
+                        logger.debug(f'PRF: "{bin_estadual_json["ValorDebitoPrf"]}"')
+                        logger.debug(f'DER: "{bin_estadual_json["ValorDebitoDer"]}"')
+                        logger.debug(
+                            f'DERSA: "{bin_estadual_json["ValorDebitoDersa"]}"'
+                        )
+                        logger.debug(
+                            f'CETESB: "{bin_estadual_json["ValorDebitoCetesb"]}"'
+                        )
+                        logger.debug(
+                            f'RENAINF: "{bin_estadual_json["ValorDebitoRenainf"]}"'
+                        )
+                        logger.debug(
+                            f'Multas: "{bin_estadual_json["ValorDebitoMultas"]}"'
+                        )
+                        logger.debug(
+                            f'Licenciamento: "{bin_estadual_json["ValorDebitoLicenc"]}"'
+                        )
+                        logger.debug(
+                            f'Débitos Municipais: "{bin_estadual_json["ValorDebitoMunicipais"]}"'
+                        )
+
+                        bin_estadual_json["debitos"] = 0
+                        try:
+                            bin_estadual_json["debitos"] = self.calculate_debts(
+                                [
+                                    bin_estadual_json["ValorDebitoDpvat"],
+                                    bin_estadual_json["ValorDebitoDersa"],
+                                    bin_estadual_json["ValorDebitoMunicipais"],
+                                    bin_estadual_json["ValorDebitoDer"],
+                                    bin_estadual_json["ValorDebitoPrf"],
+                                    bin_estadual_json["ValorDebitoLicenc"],
+                                    bin_estadual_json["ValorDebitoIpva"],
+                                    bin_estadual_json["ValorDebitoRenainf"],
+                                    bin_estadual_json["ValorDebitoMultas"],
+                                    bin_estadual_json["ValorDebitoCetesb"],
+                                    bin_estadual_json["ValorDebitoDetran"],
+                                ]
+                            )
+                        except Exception:
+                            logger.warning(
+                                "Erro ao tentar calcular somatório de débitos. Aplicado valor zero para não abortar a operação."
+                            )
+
+                        logger.debug(
+                            f'Total de Débitos: {bin_estadual_json["debitos"]}'
+                        )
+                    else:
+                        raise Exception(
+                            'O script não encontrou o objeto "Resposta" na resposta'
+                        )
+                else:
+                    raise Exception(
+                        'O script não encontrou o objeto "struct_RespostaRst" na resposta'
+                    )
+            except Exception as error:
+                logger.error(
+                    f'A API BIN Estadual do RG do Automóvel respondeu diferente do esperado. Mais informações: "{error}"'
+                )
+                raise
+
+        valor_fipe = ""
+        if check_fipe:
+            try:
+                logger.info("Chamando a API Precificador do RG do Automóvel")
+
+                for i in range(5):
+                    try:
+                        logger.info(f"Tentativa {(i + 1)}/5")
+
+                        precificador_response = requests.get(
+                            f"{base_url}/precificador",
+                            params=request_params,
+                            timeout=300,
+                        )
+
+                        precificador_json = precificador_response.json()
+
+                        logger.debug(
+                            f'Resposta da API Precificador do RG do Automóvel: "{precificador_json}"'
+                        )
+
+                        break
+                    except Exception as error:
+                        if isinstance(error, requests.exceptions.ReadTimeout):
+                            logger.info("Ocorreu timeout")
+
+                            if (i + 1) == 5:
+                                valor_fipe = "Timeout"
+                                raise Exception("Atingiu o limite de timeouts")
+                        else:
+                            raise
+
+                if "struct_RespostaRst" in precificador_json.keys():
+                    precificador_json = precificador_json["struct_RespostaRst"]
+
+                    if "erro" in precificador_json.keys():
+                        if precificador_json["erro"]:
+                            raise Exception(
+                                str(precificador_json["erroCodigo"])
+                                + " - "
+                                + str(precificador_json["msg"])
+                            )
+
+                    if "Resposta" in precificador_json.keys():
+                        precificador_json = precificador_json["Resposta"]
+
+                        if "struct_ResultadoPrecificador" in precificador_json.keys():
+                            precificador_json = precificador_json[
+                                "struct_ResultadoPrecificador"
+                            ]
+
+                            if isinstance(precificador_json, list):
+                                precificador_json = precificador_json[0]
+
+                            if "PrecoFipe" in precificador_json.keys():
+                                if precificador_json["PrecoFipe"]:
+                                    valor_fipe = precificador_json["PrecoFipe"]
+                                else:
+                                    valor_fipe = "0,00"
+
+                                logger.debug(f'Tabela Fipe: "{valor_fipe}"')
+                            else:
+                                raise Exception(
+                                    'O script não encontrou o atributo "PrecoFipe" na resposta'
+                                )
+                        else:
+                            raise Exception(
+                                'O script não encontrou o objeto "struct_ResultadoPrecificador" na resposta'
+                            )
+                    else:
+                        raise Exception(
+                            'O script não encontrou o objeto "Resposta" na resposta'
+                        )
+                else:
+                    raise Exception(
+                        'O script não encontrou o objeto "struct_RespostaRst" na resposta'
+                    )
+            except Exception as error:
+                logger.error(
+                    f'A API Precificador do RG do Automóvel respondeu diferente do esperado. Mais informações: "{error}"'
+                )
+
+        return {
+            "bin_estadual": bin_estadual_json,
+            "valor_fipe": valor_fipe,
+        }
 
     def process_file(self, file):
         data = pandas.read_excel(file)
@@ -148,160 +495,74 @@ class RGAutomovelConverter(SpreadsheetConverter):
         ]
 
         for idx, v in enumerate(data[CONST.PLATE]):
-            plate = data[CONST.PLATE].fillna("null").values[idx]
-            serial_number = data[CONST.SERIAL_NUMBER].fillna("null").values[idx]
-            fipe = data[CONST.FIPE].fillna("null").values[idx].lower()
             check_fipe = False
-            fipe_val = ""
 
-            if fipe == "s" or fipe == " sim":
-                check_fipe = True
-            
-            if plate == "null":
+            plate = (
+                data[CONST.PLATE]
+                .fillna("NULL")
+                .values[idx]
+                .upper()
+                .replace(" ", "")
+                .strip()
+            )
+            chassi = (
+                data[CONST.CHASSI]
+                .fillna("NULL")
+                .values[idx]
+                .upper()
+                .replace(" ", "")
+                .strip()
+            )
+            fipe = (
+                data[CONST.FIPE]
+                .fillna("NULL")
+                .values[idx]
+                .upper()
+                .replace(" ", "")
+                .strip()
+            )
+
+            if plate == "NULL":
                 plate = ""
-            
-            if serial_number == "null":
-                serial_number = ""
 
-            if plate != "" or serial_number != "":
+            if chassi == "NULL":
+                chassi = ""
+
+            if fipe == "S" or fipe == "SIM" or fipe == "Y" or fipe == "YES":
+                check_fipe = True
+
+            logger.info("Lendo registro da planilha de entrada:")
+            logger.info(f'--> Placa: "{plate}"')
+            logger.info(f'--> Chassi: "{chassi}"')
+            logger.info(f'--> Consultar Tabela Fipe? "{fipe}"')
+
+            if plate != "" or chassi != "":
                 try:
-                    response = self.get_vehicle_data(plate, serial_number, check_fipe)
+                    response = self.get_vehicle_data(plate, chassi, check_fipe)
 
-                    if plate == "FUW0401":
-                        raise Exception("Invalid plate")
+                    logger.info("Adicionando registro à planilha de saída")
 
-                    if check_fipe:
-                        if "PrecoFipe" in response["precificador"].keys():
-                            fipe_val = response["precificador"]["PrecoFipe"]
-                        else:
-                            logger.warning("RG do Automóvel não encontrou valor de Fipe para esse veículo")
-
-                    restricao_1 = response["bin_estadual"]["Restricao1"]
-                    restricao_2 = response["bin_estadual"]["Restricao2"]
-                    restricao_3 = response["bin_estadual"]["Restricao3"]
-                    restricao_4 = response["bin_estadual"]["Restricao4"]
-                    restricao_5 = response["bin_estadual"]["Restricao5"]
-                    restricao_6 = response["bin_estadual"]["Restricao6"]
-                    restricao_7 = response["bin_estadual"]["Restricao7"]
-                    restricao_8 = response["bin_estadual"]["Restricao8"]
-                    restricao_9 = response["bin_estadual"]["Restricao9"]
-                    restricao_10 = response["bin_estadual"]["Restricao10"]
-                    restricao_11 = response["bin_estadual"]["Restricao11"]
-                    
-                    restricoes = ""
-                    if restricao_1:
-                        restricoes += restricao_1
-                    if restricao_2:
-                        restricoes += f", {restricao_2}"
-                    if restricao_3:
-                        restricoes += f", {restricao_3}"
-                    if restricao_4:
-                        restricoes += f", {restricao_4}"
-                    if restricao_5:
-                        restricoes += f", {restricao_5}"
-                    if restricao_6:
-                        restricoes += f", {restricao_6}"
-                    if restricao_7:
-                        restricoes += f", {restricao_7}"
-                    if restricao_8:
-                        restricoes += f", {restricao_8}"
-                    if restricao_9:
-                        restricoes += f", {restricao_9}"
-                    if restricao_10:
-                        restricoes += f", {restricao_10}"
-                    if restricao_11:
-                        restricoes += f", {restricao_11}"
-
-                    debts = self.calculate_debts(
-                        [
-                            response["bin_estadual"]["ValorDebitoDpvat"],
-                            response["bin_estadual"]["ValorDebitoDersa"],
-                            response["bin_estadual"]["ValorDebitoMunicipais"],
-                            response["bin_estadual"]["ValorDebitoDer"],
-                            response["bin_estadual"]["ValorDebitoPrf"],
-                            response["bin_estadual"]["ValorDebitoLicenc"],
-                            response["bin_estadual"]["ValorDebitoIpva"],
-                            response["bin_estadual"]["ValorDebitoRenainf"],
-                            response["bin_estadual"]["ValorDebitoMultas"],
-                            response["bin_estadual"]["ValorDebitoCetesb"],
-                            response["bin_estadual"]["ValorDebitoDetran"],
-                        ]
-                    )
-
-                    logger.debug(f'Tabela Fipe: {fipe_val}')
-                    logger.debug(f'Proprietário: {response["bin_estadual"]["Proprietario"].upper()}')
-                    logger.debug(f'Restrição 1: {restricao_1}')
-                    logger.debug(f'Restrição 2: {restricao_2}')
-                    logger.debug(f'Restrição 3: {restricao_3}')
-                    logger.debug(f'Restrição 4: {restricao_4}')
-                    logger.debug(f'Restrição 5: {restricao_5}')
-                    logger.debug(f'Restrição 6: {restricao_6}')
-                    logger.debug(f'Restrição 7: {restricao_7}')
-                    logger.debug(f'Restrição 8: {restricao_8}')
-                    logger.debug(f'Restrição 9: {restricao_9}')
-                    logger.debug(f'Restrição 10: {restricao_10}')
-                    logger.debug(f'Restrição 11: {restricao_11}')
-                    logger.debug(f'Restrições: {restricoes}')
-                    logger.debug(f'Débitos Municipais: {response["bin_estadual"]["ValorDebitoMunicipais"]}')
-                    logger.debug(f'Licenciamento: {response["bin_estadual"]["ValorDebitoLicenc"]}')
-                    logger.debug(f'Multas: {response["bin_estadual"]["ValorDebitoMultas"]}')
-                    logger.debug(f'IPVA: {response["bin_estadual"]["ValorDebitoIpva"]}')
-                    logger.debug(f'DPVAT: {response["bin_estadual"]["ValorDebitoDpvat"]}')
-                    logger.debug(f'DETRAN: {response["bin_estadual"]["ValorDebitoDetran"]}')
-                    logger.debug(f'PRF: {response["bin_estadual"]["ValorDebitoPrf"]}')
-                    logger.debug(f'DER: {response["bin_estadual"]["ValorDebitoDer"]}')
-                    logger.debug(f'DERSA: {response["bin_estadual"]["ValorDebitoDersa"]}')
-                    logger.debug(f'CETESB: {response["bin_estadual"]["ValorDebitoCetesb"]}')
-                    logger.debug(f'RENAINF: {response["bin_estadual"]["ValorDebitoRenainf"]}')
-                    logger.debug(f'Total de Débitos: {debts}')
-                    logger.debug(f'Tipo: {response["bin_estadual"]["Tipo"]}')
-                    logger.debug(f'Marca: {response["bin_estadual"]["Marca"].upper()}')
-                    logger.debug(f'Modelo: {response["bin_estadual"]["Modelo"].upper()}')
-                    logger.debug(f'Ano Fabricação: {response["bin_estadual"]["AnoFabricacao"]}')
-                    logger.debug(f'Ano Modelo: {response["bin_estadual"]["AnoModelo"]}')
-                    logger.debug(f'Placa: {response["bin_estadual"]["Placa"].upper()}')
-                    logger.debug(f'UF: {response["bin_estadual"]["UF"].upper()}')
-                    logger.debug(f'Chassi: {response["bin_estadual"]["Chassi"].upper()}')
-                    logger.debug(f'Renavam: {response["bin_estadual"]["Renavam"]}')
-                    logger.debug(f'Cor: {response["bin_estadual"]["Cor"]}')
-                    logger.debug(f'Combustível: {response["bin_estadual"]["Combustivel"]}')
-                    logger.debug(f'Cilindrada: {response["bin_estadual"]["Cilindrada"]}')
-                    logger.debug(f'Situação do Veículo: {response["bin_estadual"]["SituacaoVeiculo"]}')
-                    logger.debug(f'Tipo de Remarcação do Chassi: {response["bin_estadual"]["TipoRemarcacaoChassi"]}')
-                    logger.debug(f'Espécie: {response["bin_estadual"]["Especie"]}')
-                    logger.debug(f'Carroceria: {response["bin_estadual"]["Carroceria"]}')
-                    logger.debug(f'Potência: {response["bin_estadual"]["Potencia"]}')
-                    logger.debug(f'Município: {response["bin_estadual"]["Municipio"]}')
-                    logger.debug(f'Nº Motor: {response["bin_estadual"]["NrMotor"]}')
-                    logger.debug(f'Procedência do Veículo: {response["bin_estadual"]["ProcedenciaVeiculo"]}')
-                    logger.debug(f'Capacidade de Carga: {response["bin_estadual"]["CapacidadeDeCarga"]}')
-                    logger.debug(f'Capacidade de Passageiros: {response["bin_estadual"]["CapacidadePassageiros"]}')
-                    logger.debug(f'Nº Carroceria: {response["bin_estadual"]["Carroceria"]}')
-                    logger.debug(f'Nº Caixa de Câmbio: {response["bin_estadual"]["NrCaixaCambio"]}')
-                    logger.debug(f'Nº Eixos: {response["bin_estadual"]["NrEixos"]}')
-                    logger.debug(f'Terceiro Eixo: {response["bin_estadual"]["TerceiroEixo"]}')
-                    logger.debug(f'Eixo Traseiro Diferencial: {response["bin_estadual"]["EixoTrasDiferencial"]}')
-                    logger.debug(f'Montagem: {response["bin_estadual"]["Montagem"]}')
-                    logger.debug(f'CMT: {response["bin_estadual"]["CMT"]}')
-                    logger.debug(f'PBT: {response["bin_estadual"]["PBT"]}')
-                    
                     append_data = {
                         "Lote Ref. / Ativo-Frota": "",
                         "Tabela Molicar": "",
-                        "Tabela Fipe": fipe_val,
+                        "Tabela Fipe": response["valor_fipe"],
                         "Proprietário/CNPJ (Proprietário do documento)": response[
                             "bin_estadual"
                         ]["Proprietario"].upper(),
-                        "Restrições": restricoes,
-                        "Débitos (Total)": debts,
+                        "Restrições": response["bin_estadual"]["restricoes"],
+                        "Débitos (Total)": response["bin_estadual"]["debitos"],
                         "Tipo": response["bin_estadual"]["Tipo"],
-                        "Marca (SEMPRE MAIUSCULA)": response["bin_estadual"]["Marca"].upper(),
-                        "Modelo (SEMPRE MAIUSCULA)": response["bin_estadual"]["Modelo"].upper(),
+                        "Marca (SEMPRE MAIUSCULA)": response["bin_estadual"][
+                            "Marca"
+                        ].upper(),
+                        "Modelo (SEMPRE MAIUSCULA)": response["bin_estadual"][
+                            "Modelo"
+                        ].upper(),
                         "Ano Fab/Modelo": f"{response['bin_estadual']['AnoFabricacao']}/{response['bin_estadual']['AnoModelo']}",
                         "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": f"{str(response['bin_estadual']['Placa'].upper())} ({response['bin_estadual']['UF'].upper()})",
-                        "Chassi (SEMPRE MAIUSCULA)": str(response["bin_estadual"][
-                            "Chassi"
-                        ]).upper(),
+                        "Chassi (SEMPRE MAIUSCULA)": str(
+                            response["bin_estadual"]["Chassi"]
+                        ).upper(),
                         "Renavam": response["bin_estadual"]["Renavam"],
                         "Cor": response["bin_estadual"]["Cor"],
                         "Combustível": response["bin_estadual"]["Combustivel"],
@@ -337,14 +598,22 @@ class RGAutomovelConverter(SpreadsheetConverter):
                     }
 
                     temp_list.append(append_data)
-                except Exception as error:
-                    temp_list.append({
-                        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": str(plate).upper(),
-                        "Chassi (SEMPRE MAIUSCULA)": str(serial_number).upper(),
-                        "Modelo (SEMPRE MAIUSCULA)": "Ocorreu um erro ao tentar processar esse registro"
-                    })
 
-                    logger.error(f'Ocorreu o erro "{error}" ao processar esse registro')
+                    logger.info("Registro adicionado à planilha de saída com sucesso")
+                except Exception as error:
+                    temp_list.append(
+                        {
+                            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))": str(
+                                plate
+                            ).upper(),
+                            "Chassi (SEMPRE MAIUSCULA)": str(chassi).upper(),
+                            "Modelo (SEMPRE MAIUSCULA)": f"Erro: {error}",
+                        }
+                    )
+
+                    logger.info(
+                        "Registro adicionado à planilha de saída descrevendo erro encontrado durante o processamento"
+                    )
 
         df = pandas.DataFrame(temp_list, columns=df_columns)
 
@@ -358,7 +627,6 @@ class RGAutomovelConverter(SpreadsheetConverter):
 
         df.to_excel(writer, sheet_name="Listagem", index=False)
         writer.save()
-
 
     def execute(self):
         self.create_input_folder()
@@ -375,9 +643,9 @@ class RGAutomovelConverter(SpreadsheetConverter):
                 logger.info(
                     f"Processamento da planilha {count} de {len(list_files)} iniciado"
                 )
-                
+
                 self.process_file(file)
-                
+
                 logger.info(
                     f"Processamento da planilha {count} de {len(list_files)} finalizado"
                 )
@@ -385,11 +653,11 @@ class RGAutomovelConverter(SpreadsheetConverter):
             except Exception as error:
                 logger.error(f'Erro "{error}" no processamento do arquivo "{file}"')
 
-    
+
 if __name__ == "__main__":
     try:
         logger.info("Iniciando a conversão")
-        
+
         rgAutomovelConverter = RGAutomovelConverter(
             ".",
             ["input"],
@@ -400,7 +668,7 @@ if __name__ == "__main__":
             os.path.join("output", "xlsx", "resulting_spreadsheet.xlsx"),
         )
         rgAutomovelConverter.execute()
-        
+
         logger.info("Processo finalizado com sucesso.")
         done = str(input("Pressione ENTER para encerrar..."))
     except Exception as error:
