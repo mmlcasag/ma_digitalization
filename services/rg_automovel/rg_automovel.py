@@ -17,6 +17,14 @@ class CONST:
     FIPE = "Consultar Tabela Fipe?"
 
 
+class RespostaException(Exception):
+    """
+    Disparada quando ocorre o erro O script não encontrou o objeto "Resposta" na resposta
+    """
+
+    pass
+
+
 class RGAutomovelConverter(SpreadsheetConverter):
     def calculate_debts(self, values):
         total = 0
@@ -69,7 +77,360 @@ class RGAutomovelConverter(SpreadsheetConverter):
                             f'Resposta da API BIN Estadual do RG do Automóvel: "{bin_estadual_json}"'
                         )
 
-                        break
+                        if "struct_RespostaRst" in bin_estadual_json.keys():
+                            bin_estadual_json = bin_estadual_json["struct_RespostaRst"]
+
+                            if "erro" in bin_estadual_json.keys():
+                                if bin_estadual_json["erro"]:
+                                    raise Exception(
+                                        str(bin_estadual_json["erroCodigo"])
+                                        + " - "
+                                        + str(bin_estadual_json["msg"])
+                                    )
+
+                            if "Resposta" in bin_estadual_json.keys():
+                                bin_estadual_json = bin_estadual_json["Resposta"]
+
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "Marca"
+                                ]
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("GM", "CHEVROLET")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("CHEV", "CHEVROLET")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("VW", "VOLKSWAGEN")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MMC", "MITSUBISHI")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MB", "MERCEDES-BENZ")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("LR", "LAND ROVER")
+
+                                logger.debug(
+                                    f'Placa: "{bin_estadual_json["Placa"].upper()}"'
+                                )
+                                logger.debug(f'UF: "{bin_estadual_json["UF"].upper()}"')
+                                logger.debug(
+                                    f'Chassi: "{bin_estadual_json["Chassi"].upper()}"'
+                                )
+                                logger.debug(f'Tipo: "{bin_estadual_json["Tipo"]}"')
+                                logger.debug(
+                                    f'Marca (original): "{bin_estadual_json["Marca"].upper()}"'
+                                )
+                                logger.debug(
+                                    f'Marca (tratada): "{bin_estadual_json["MarcaTratada"].upper()}"'
+                                )
+                                logger.debug(
+                                    f'Modelo: "{bin_estadual_json["Modelo"].upper()}"'
+                                )
+                                logger.debug(
+                                    f'Ano Fabricação: "{bin_estadual_json["AnoFabricacao"]}"'
+                                )
+                                logger.debug(
+                                    f'Ano Modelo: "{bin_estadual_json["AnoModelo"]}"'
+                                )
+                                logger.debug(
+                                    f'Renavam: "{bin_estadual_json["Renavam"]}"'
+                                )
+                                logger.debug(f'Cor: "{bin_estadual_json["Cor"]}"')
+                                logger.debug(
+                                    f'Combustível: "{bin_estadual_json["Combustivel"]}"'
+                                )
+                                logger.debug(
+                                    f'Cilindrada: "{bin_estadual_json["Cilindrada"]}"'
+                                )
+                                logger.debug(
+                                    f'Proprietário: "{bin_estadual_json["Proprietario"].upper()}"'
+                                )
+                                logger.debug(
+                                    f'Situação do Veículo: "{bin_estadual_json["SituacaoVeiculo"]}"'
+                                )
+                                logger.debug(
+                                    f'Tipo de Remarcação do Chassi: "{bin_estadual_json["TipoRemarcacaoChassi"]}"'
+                                )
+                                logger.debug(
+                                    f'Espécie: "{bin_estadual_json["Especie"]}"'
+                                )
+                                logger.debug(
+                                    f'Carroceria: "{bin_estadual_json["Carroceria"]}"'
+                                )
+                                logger.debug(
+                                    f'Potência: "{bin_estadual_json["Potencia"]}"'
+                                )
+                                logger.debug(
+                                    f'Município: "{bin_estadual_json["Municipio"]}"'
+                                )
+                                logger.debug(
+                                    f'Nº Motor: "{bin_estadual_json["NrMotor"]}"'
+                                )
+                                logger.debug(
+                                    f'Procedência do Veículo: "{bin_estadual_json["ProcedenciaVeiculo"]}"'
+                                )
+                                logger.debug(
+                                    f'Capacidade de Carga: "{bin_estadual_json["CapacidadeDeCarga"]}"'
+                                )
+                                logger.debug(
+                                    f'Capacidade de Passageiros: "{bin_estadual_json["CapacidadePassageiros"]}"'
+                                )
+                                logger.debug(
+                                    f'Nº Carroceria: "{bin_estadual_json["Carroceria"]}"'
+                                )
+                                logger.debug(
+                                    f'Nº Caixa de Câmbio: "{bin_estadual_json["NrCaixaCambio"]}"'
+                                )
+                                logger.debug(
+                                    f'Nº Eixos: "{bin_estadual_json["NrEixos"]}"'
+                                )
+                                logger.debug(
+                                    f'Terceiro Eixo: "{bin_estadual_json["TerceiroEixo"]}"'
+                                )
+                                logger.debug(
+                                    f'Eixo Traseiro Diferencial: "{bin_estadual_json["EixoTrasDiferencial"]}"'
+                                )
+                                logger.debug(
+                                    f'Montagem: "{bin_estadual_json["Montagem"]}"'
+                                )
+                                logger.debug(f'CMT: "{bin_estadual_json["CMT"]}"')
+                                logger.debug(f'PBT: "{bin_estadual_json["PBT"]}"')
+
+                                logger.debug(
+                                    f'Restrição 1: "{bin_estadual_json["Restricao1"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 2: "{bin_estadual_json["Restricao2"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 3: "{bin_estadual_json["Restricao3"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 4: "{bin_estadual_json["Restricao4"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 5: "{bin_estadual_json["Restricao5"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 6: "{bin_estadual_json["Restricao6"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 7: "{bin_estadual_json["Restricao7"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 8: "{bin_estadual_json["Restricao8"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 9: "{bin_estadual_json["Restricao9"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 10: "{bin_estadual_json["Restricao10"]}"'
+                                )
+                                logger.debug(
+                                    f'Restrição 11: "{bin_estadual_json["Restricao11"]}"'
+                                )
+
+                                bin_estadual_json["restricoes"] = ""
+
+                                try:
+                                    if bin_estadual_json["Restricao1"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += bin_estadual_json["Restricao1"]
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 1" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao2"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao2"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 2" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao3"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao3"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 3" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao4"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao4"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 4" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao5"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao5"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 5" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao6"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao6"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 6" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao7"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao7"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 7" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao8"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao8"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 8" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao9"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao9"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 9" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao10"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao10"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 10" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                try:
+                                    if bin_estadual_json["Restricao11"]:
+                                        bin_estadual_json[
+                                            "restricoes"
+                                        ] += f', {bin_estadual_json["Restricao11"]}'
+                                except Exception:
+                                    logger.warning(
+                                        'Erro ao tentar concatenar "Restrição 11" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
+                                    )
+
+                                if bin_estadual_json["restricoes"] == "":
+                                    bin_estadual_json["restricoes"] = "NADA CONSTA"
+
+                                logger.debug(
+                                    f'Restrições Concatenadas: {bin_estadual_json["restricoes"]}'
+                                )
+
+                                logger.debug(
+                                    f'IPVA: "{bin_estadual_json["ValorDebitoIpva"]}"'
+                                )
+                                logger.debug(
+                                    f'DPVAT: "{bin_estadual_json["ValorDebitoDpvat"]}"'
+                                )
+                                logger.debug(
+                                    f'DETRAN: "{bin_estadual_json["ValorDebitoDetran"]}"'
+                                )
+                                logger.debug(
+                                    f'PRF: "{bin_estadual_json["ValorDebitoPrf"]}"'
+                                )
+                                logger.debug(
+                                    f'DER: "{bin_estadual_json["ValorDebitoDer"]}"'
+                                )
+                                logger.debug(
+                                    f'DERSA: "{bin_estadual_json["ValorDebitoDersa"]}"'
+                                )
+                                logger.debug(
+                                    f'CETESB: "{bin_estadual_json["ValorDebitoCetesb"]}"'
+                                )
+                                logger.debug(
+                                    f'RENAINF: "{bin_estadual_json["ValorDebitoRenainf"]}"'
+                                )
+                                logger.debug(
+                                    f'Multas: "{bin_estadual_json["ValorDebitoMultas"]}"'
+                                )
+                                logger.debug(
+                                    f'Licenciamento: "{bin_estadual_json["ValorDebitoLicenc"]}"'
+                                )
+                                logger.debug(
+                                    f'Débitos Municipais: "{bin_estadual_json["ValorDebitoMunicipais"]}"'
+                                )
+
+                                bin_estadual_json["debitos"] = 0
+
+                                try:
+                                    bin_estadual_json["debitos"] = self.calculate_debts(
+                                        [
+                                            bin_estadual_json["ValorDebitoDpvat"],
+                                            bin_estadual_json["ValorDebitoDersa"],
+                                            bin_estadual_json["ValorDebitoMunicipais"],
+                                            bin_estadual_json["ValorDebitoDer"],
+                                            bin_estadual_json["ValorDebitoPrf"],
+                                            bin_estadual_json["ValorDebitoLicenc"],
+                                            bin_estadual_json["ValorDebitoIpva"],
+                                            bin_estadual_json["ValorDebitoRenainf"],
+                                            bin_estadual_json["ValorDebitoMultas"],
+                                            bin_estadual_json["ValorDebitoCetesb"],
+                                            bin_estadual_json["ValorDebitoDetran"],
+                                        ]
+                                    )
+                                except Exception:
+                                    logger.warning(
+                                        "Erro ao tentar calcular somatório de débitos. Aplicado valor zero para não abortar a operação."
+                                    )
+
+                                if bin_estadual_json["debitos"] == 0:
+                                    bin_estadual_json["debitos"] = "NADA CONSTA"
+
+                                logger.debug(
+                                    f'Total de Débitos: {bin_estadual_json["debitos"]}'
+                                )
+
+                                break
+                            else:
+                                raise RespostaException(
+                                    'O script não encontrou o objeto "Resposta" na resposta'
+                                )
+                        else:
+                            raise Exception(
+                                'O script não encontrou o objeto "struct_RespostaRst" na resposta'
+                            )
+                    except RespostaException as error:
+                        logger.info(error)
+
+                        if (i + 1) == 5:
+                            raise Exception(bin_estadual_json["Controle"]["Descricao"])
                     except Exception as error:
                         if isinstance(error, requests.exceptions.ReadTimeout):
                             logger.info("Ocorreu timeout")
@@ -78,288 +439,6 @@ class RGAutomovelConverter(SpreadsheetConverter):
                                 raise Exception("Atingiu o limite de timeouts")
                         else:
                             raise
-
-                if "struct_RespostaRst" in bin_estadual_json.keys():
-                    bin_estadual_json = bin_estadual_json["struct_RespostaRst"]
-
-                    if "erro" in bin_estadual_json.keys():
-                        if bin_estadual_json["erro"]:
-                            raise Exception(
-                                str(bin_estadual_json["erroCodigo"])
-                                + " - "
-                                + str(bin_estadual_json["msg"])
-                            )
-
-                    if "Resposta" in bin_estadual_json.keys():
-                        bin_estadual_json = bin_estadual_json["Resposta"]
-
-                        logger.debug(f'Placa: "{bin_estadual_json["Placa"].upper()}"')
-                        logger.debug(f'UF: "{bin_estadual_json["UF"].upper()}"')
-                        logger.debug(f'Chassi: "{bin_estadual_json["Chassi"].upper()}"')
-                        logger.debug(f'Tipo: "{bin_estadual_json["Tipo"]}"')
-                        logger.debug(f'Marca: "{bin_estadual_json["Marca"].upper()}"')
-                        logger.debug(f'Modelo: "{bin_estadual_json["Modelo"].upper()}"')
-                        logger.debug(
-                            f'Ano Fabricação: "{bin_estadual_json["AnoFabricacao"]}"'
-                        )
-                        logger.debug(f'Ano Modelo: "{bin_estadual_json["AnoModelo"]}"')
-                        logger.debug(f'Renavam: "{bin_estadual_json["Renavam"]}"')
-                        logger.debug(f'Cor: "{bin_estadual_json["Cor"]}"')
-                        logger.debug(
-                            f'Combustível: "{bin_estadual_json["Combustivel"]}"'
-                        )
-                        logger.debug(f'Cilindrada: "{bin_estadual_json["Cilindrada"]}"')
-                        logger.debug(
-                            f'Proprietário: "{bin_estadual_json["Proprietario"].upper()}"'
-                        )
-                        logger.debug(
-                            f'Situação do Veículo: "{bin_estadual_json["SituacaoVeiculo"]}"'
-                        )
-                        logger.debug(
-                            f'Tipo de Remarcação do Chassi: "{bin_estadual_json["TipoRemarcacaoChassi"]}"'
-                        )
-                        logger.debug(f'Espécie: "{bin_estadual_json["Especie"]}"')
-                        logger.debug(f'Carroceria: "{bin_estadual_json["Carroceria"]}"')
-                        logger.debug(f'Potência: "{bin_estadual_json["Potencia"]}"')
-                        logger.debug(f'Município: "{bin_estadual_json["Municipio"]}"')
-                        logger.debug(f'Nº Motor: "{bin_estadual_json["NrMotor"]}"')
-                        logger.debug(
-                            f'Procedência do Veículo: "{bin_estadual_json["ProcedenciaVeiculo"]}"'
-                        )
-                        logger.debug(
-                            f'Capacidade de Carga: "{bin_estadual_json["CapacidadeDeCarga"]}"'
-                        )
-                        logger.debug(
-                            f'Capacidade de Passageiros: "{bin_estadual_json["CapacidadePassageiros"]}"'
-                        )
-                        logger.debug(
-                            f'Nº Carroceria: "{bin_estadual_json["Carroceria"]}"'
-                        )
-                        logger.debug(
-                            f'Nº Caixa de Câmbio: "{bin_estadual_json["NrCaixaCambio"]}"'
-                        )
-                        logger.debug(f'Nº Eixos: "{bin_estadual_json["NrEixos"]}"')
-                        logger.debug(
-                            f'Terceiro Eixo: "{bin_estadual_json["TerceiroEixo"]}"'
-                        )
-                        logger.debug(
-                            f'Eixo Traseiro Diferencial: "{bin_estadual_json["EixoTrasDiferencial"]}"'
-                        )
-                        logger.debug(f'Montagem: "{bin_estadual_json["Montagem"]}"')
-                        logger.debug(f'CMT: "{bin_estadual_json["CMT"]}"')
-                        logger.debug(f'PBT: "{bin_estadual_json["PBT"]}"')
-
-                        logger.debug(
-                            f'Restrição 1: "{bin_estadual_json["Restricao1"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 2: "{bin_estadual_json["Restricao2"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 3: "{bin_estadual_json["Restricao3"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 4: "{bin_estadual_json["Restricao4"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 5: "{bin_estadual_json["Restricao5"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 6: "{bin_estadual_json["Restricao6"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 7: "{bin_estadual_json["Restricao7"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 8: "{bin_estadual_json["Restricao8"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 9: "{bin_estadual_json["Restricao9"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 10: "{bin_estadual_json["Restricao10"]}"'
-                        )
-                        logger.debug(
-                            f'Restrição 11: "{bin_estadual_json["Restricao11"]}"'
-                        )
-
-                        bin_estadual_json["restricoes"] = ""
-
-                        try:
-                            if bin_estadual_json["Restricao1"]:
-                                bin_estadual_json["restricoes"] += bin_estadual_json[
-                                    "Restricao1"
-                                ]
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 1" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao2"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao2"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 2" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao3"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao3"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 3" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao4"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao4"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 4" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao5"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao5"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 5" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao6"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao6"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 6" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao7"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao7"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 7" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao8"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao8"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 8" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao9"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao9"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 9" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao10"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao10"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 10" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        try:
-                            if bin_estadual_json["Restricao11"]:
-                                bin_estadual_json[
-                                    "restricoes"
-                                ] += f', {bin_estadual_json["Restricao11"]}'
-                        except Exception:
-                            logger.warning(
-                                'Erro ao tentar concatenar "Restrição 11" ao campo "Restrições concatenadas". Campo foi desconsiderado para não abortar a operação.'
-                            )
-
-                        logger.debug(
-                            f'Restrições Concatenadas: {bin_estadual_json["restricoes"]}'
-                        )
-
-                        logger.debug(f'IPVA: "{bin_estadual_json["ValorDebitoIpva"]}"')
-                        logger.debug(
-                            f'DPVAT: "{bin_estadual_json["ValorDebitoDpvat"]}"'
-                        )
-                        logger.debug(
-                            f'DETRAN: "{bin_estadual_json["ValorDebitoDetran"]}"'
-                        )
-                        logger.debug(f'PRF: "{bin_estadual_json["ValorDebitoPrf"]}"')
-                        logger.debug(f'DER: "{bin_estadual_json["ValorDebitoDer"]}"')
-                        logger.debug(
-                            f'DERSA: "{bin_estadual_json["ValorDebitoDersa"]}"'
-                        )
-                        logger.debug(
-                            f'CETESB: "{bin_estadual_json["ValorDebitoCetesb"]}"'
-                        )
-                        logger.debug(
-                            f'RENAINF: "{bin_estadual_json["ValorDebitoRenainf"]}"'
-                        )
-                        logger.debug(
-                            f'Multas: "{bin_estadual_json["ValorDebitoMultas"]}"'
-                        )
-                        logger.debug(
-                            f'Licenciamento: "{bin_estadual_json["ValorDebitoLicenc"]}"'
-                        )
-                        logger.debug(
-                            f'Débitos Municipais: "{bin_estadual_json["ValorDebitoMunicipais"]}"'
-                        )
-
-                        bin_estadual_json["debitos"] = 0
-                        try:
-                            bin_estadual_json["debitos"] = self.calculate_debts(
-                                [
-                                    bin_estadual_json["ValorDebitoDpvat"],
-                                    bin_estadual_json["ValorDebitoDersa"],
-                                    bin_estadual_json["ValorDebitoMunicipais"],
-                                    bin_estadual_json["ValorDebitoDer"],
-                                    bin_estadual_json["ValorDebitoPrf"],
-                                    bin_estadual_json["ValorDebitoLicenc"],
-                                    bin_estadual_json["ValorDebitoIpva"],
-                                    bin_estadual_json["ValorDebitoRenainf"],
-                                    bin_estadual_json["ValorDebitoMultas"],
-                                    bin_estadual_json["ValorDebitoCetesb"],
-                                    bin_estadual_json["ValorDebitoDetran"],
-                                ]
-                            )
-                        except Exception:
-                            logger.warning(
-                                "Erro ao tentar calcular somatório de débitos. Aplicado valor zero para não abortar a operação."
-                            )
-
-                        logger.debug(
-                            f'Total de Débitos: {bin_estadual_json["debitos"]}'
-                        )
-                    else:
-                        raise Exception(
-                            'O script não encontrou o objeto "Resposta" na resposta'
-                        )
-                else:
-                    raise Exception(
-                        'O script não encontrou o objeto "struct_RespostaRst" na resposta'
-                    )
             except Exception as error:
                 logger.error(
                     f'A API BIN Estadual do RG do Automóvel respondeu diferente do esperado. Mais informações: "{error}"'
@@ -387,7 +466,60 @@ class RGAutomovelConverter(SpreadsheetConverter):
                             f'Resposta da API Precificador do RG do Automóvel: "{precificador_json}"'
                         )
 
-                        break
+                        if "struct_RespostaRst" in precificador_json.keys():
+                            precificador_json = precificador_json["struct_RespostaRst"]
+
+                            if "erro" in precificador_json.keys():
+                                if precificador_json["erro"]:
+                                    raise Exception(
+                                        str(precificador_json["erroCodigo"])
+                                        + " - "
+                                        + str(precificador_json["msg"])
+                                    )
+
+                            if "Resposta" in precificador_json.keys():
+                                precificador_json = precificador_json["Resposta"]
+
+                                if (
+                                    "struct_ResultadoPrecificador"
+                                    in precificador_json.keys()
+                                ):
+                                    precificador_json = precificador_json[
+                                        "struct_ResultadoPrecificador"
+                                    ]
+
+                                    if isinstance(precificador_json, list):
+                                        precificador_json = precificador_json[0]
+
+                                    if "PrecoFipe" in precificador_json.keys():
+                                        if precificador_json["PrecoFipe"]:
+                                            valor_fipe = precificador_json["PrecoFipe"]
+                                        else:
+                                            valor_fipe = "0,00"
+
+                                        logger.debug(f'Tabela Fipe: "{valor_fipe}"')
+                                        break
+                                    else:
+                                        raise Exception(
+                                            'O script não encontrou o atributo "PrecoFipe" na resposta'
+                                        )
+                                else:
+                                    raise Exception(
+                                        'O script não encontrou o objeto "struct_ResultadoPrecificador" na resposta'
+                                    )
+                            else:
+                                raise Exception(
+                                    'O script não encontrou o objeto "Resposta" na resposta'
+                                )
+                        else:
+                            raise Exception(
+                                'O script não encontrou o objeto "struct_RespostaRst" na resposta'
+                            )
+                    except RespostaException as error:
+                        logger.info(error)
+
+                        if (i + 1) == 5:
+                            raise Exception(bin_estadual_json["Controle"]["Descricao"])
                     except Exception as error:
                         if isinstance(error, requests.exceptions.ReadTimeout):
                             logger.info("Ocorreu timeout")
@@ -397,52 +529,6 @@ class RGAutomovelConverter(SpreadsheetConverter):
                                 raise Exception("Atingiu o limite de timeouts")
                         else:
                             raise
-
-                if "struct_RespostaRst" in precificador_json.keys():
-                    precificador_json = precificador_json["struct_RespostaRst"]
-
-                    if "erro" in precificador_json.keys():
-                        if precificador_json["erro"]:
-                            raise Exception(
-                                str(precificador_json["erroCodigo"])
-                                + " - "
-                                + str(precificador_json["msg"])
-                            )
-
-                    if "Resposta" in precificador_json.keys():
-                        precificador_json = precificador_json["Resposta"]
-
-                        if "struct_ResultadoPrecificador" in precificador_json.keys():
-                            precificador_json = precificador_json[
-                                "struct_ResultadoPrecificador"
-                            ]
-
-                            if isinstance(precificador_json, list):
-                                precificador_json = precificador_json[0]
-
-                            if "PrecoFipe" in precificador_json.keys():
-                                if precificador_json["PrecoFipe"]:
-                                    valor_fipe = precificador_json["PrecoFipe"]
-                                else:
-                                    valor_fipe = "0,00"
-
-                                logger.debug(f'Tabela Fipe: "{valor_fipe}"')
-                            else:
-                                raise Exception(
-                                    'O script não encontrou o atributo "PrecoFipe" na resposta'
-                                )
-                        else:
-                            raise Exception(
-                                'O script não encontrou o objeto "struct_ResultadoPrecificador" na resposta'
-                            )
-                    else:
-                        raise Exception(
-                            'O script não encontrou o objeto "Resposta" na resposta'
-                        )
-                else:
-                    raise Exception(
-                        'O script não encontrou o objeto "struct_RespostaRst" na resposta'
-                    )
             except Exception as error:
                 logger.error(
                     f'A API Precificador do RG do Automóvel respondeu diferente do esperado. Mais informações: "{error}"'
@@ -553,7 +639,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
                         "Débitos (Total)": response["bin_estadual"]["debitos"],
                         "Tipo": response["bin_estadual"]["Tipo"],
                         "Marca (SEMPRE MAIUSCULA)": response["bin_estadual"][
-                            "Marca"
+                            "MarcaTratada"
                         ].upper(),
                         "Modelo (SEMPRE MAIUSCULA)": response["bin_estadual"][
                             "Modelo"
