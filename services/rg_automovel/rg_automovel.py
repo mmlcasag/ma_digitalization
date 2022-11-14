@@ -96,16 +96,22 @@ class RGAutomovelConverter(SpreadsheetConverter):
                                 ]
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
+                                ].replace("CHEV", "CHEVROLET")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
                                 ].replace("GM", "CHEVROLET")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("CHEV", "CHEVROLET")
+                                ].replace("VOLKS", "VOLKSWAGEN")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
                                 ].replace("VW", "VOLKSWAGEN")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
                                 ].replace("MMC", "MITSUBISHI")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MBB", "MERCEDES-BENZ")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
                                 ].replace("MB", "MERCEDES-BENZ")
@@ -417,6 +423,73 @@ class RGAutomovelConverter(SpreadsheetConverter):
                                     f'Total de Débitos: {bin_estadual_json["debitos"]}'
                                 )
 
+                                bin_estadual_json["observacoes_gerais"] = ""
+
+                                if bin_estadual_json["Proprietario"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Proprietário não informado"
+
+                                if bin_estadual_json["restricoes"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Restrições não informadas"
+
+                                if bin_estadual_json["debitos"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Débitos não informados"
+
+                                if bin_estadual_json["Tipo"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Tipo não informado"
+
+                                if bin_estadual_json["MarcaTratada"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Marca não informada"
+
+                                if bin_estadual_json["Modelo"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Modelo não informado"
+
+                                if bin_estadual_json["AnoModelo"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Ano Fab/Modelo não informado"
+
+                                if bin_estadual_json["Placa"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Placa não informada"
+
+                                if bin_estadual_json["UF"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "UF não informada"
+
+                                if bin_estadual_json["Chassi"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Chassi não informada"
+
+                                if bin_estadual_json["Renavam"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Renavam não informado"
+
+                                if bin_estadual_json["Cor"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Cor não informada"
+
+                                if bin_estadual_json["Combustivel"] == "":
+                                    bin_estadual_json[
+                                        "observacoes_gerais"
+                                    ] = "Combustível não informado"
+
                                 break
                             else:
                                 raise RespostaException(
@@ -578,6 +651,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
             "Montagem",
             "CMT",
             "PBT",
+            "Observações Gerais",
         ]
 
         for idx, v in enumerate(data[CONST.PLATE]):
@@ -681,6 +755,9 @@ class RGAutomovelConverter(SpreadsheetConverter):
                         "Montagem": response["bin_estadual"]["Montagem"],
                         "CMT": response["bin_estadual"]["CMT"],
                         "PBT": response["bin_estadual"]["PBT"],
+                        "Observações Gerais": response["bin_estadual"][
+                            "observacoes_gerais"
+                        ],
                     }
 
                     temp_list.append(append_data)
@@ -693,7 +770,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
                                 plate
                             ).upper(),
                             "Chassi (SEMPRE MAIUSCULA)": str(chassi).upper(),
-                            "Modelo (SEMPRE MAIUSCULA)": f"Erro: {error}",
+                            "Observações Gerais": f"{error}",
                         }
                     )
 
