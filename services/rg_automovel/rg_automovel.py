@@ -91,33 +91,209 @@ class RGAutomovelConverter(SpreadsheetConverter):
                             if "Resposta" in bin_estadual_json.keys():
                                 bin_estadual_json = bin_estadual_json["Resposta"]
 
+                                if "Placa" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Placa"] = ""
+                                if "UF" not in bin_estadual_json.keys():
+                                    bin_estadual_json["UF"] = ""
+                                if "Chassi" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Chassi"] = ""
+                                if "Tipo" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Tipo"] = ""
+                                if "Marca" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Marca"] = ""
+                                if "MarcaTratada" not in bin_estadual_json.keys():
+                                    bin_estadual_json["MarcaTratada"] = ""
+                                if "Modelo" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Modelo"] = ""
+                                if "AnoFabricacao" not in bin_estadual_json.keys():
+                                    bin_estadual_json["AnoFabricacao"] = ""
+                                if "AnoModelo" not in bin_estadual_json.keys():
+                                    bin_estadual_json["AnoModelo"] = ""
+                                if "Renavam" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Renavam"] = ""
+                                if "Cor" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Cor"] = ""
+                                if "Combustivel" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Combustivel"] = ""
+                                if "Cilindrada" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Cilindrada"] = ""
+                                if "Proprietario" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Proprietario"] = ""
+                                if "SituacaoVeiculo" not in bin_estadual_json.keys():
+                                    bin_estadual_json["SituacaoVeiculo"] = ""
+                                if (
+                                    "TipoRemarcacaoChassi"
+                                    not in bin_estadual_json.keys()
+                                ):
+                                    bin_estadual_json["TipoRemarcacaoChassi"] = ""
+                                if "Especie" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Especie"] = ""
+                                if "Carroceria" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Carroceria"] = ""
+                                if "Potencia" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Potencia"] = ""
+                                if "Municipio" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Municipio"] = ""
+                                if "NrMotor" not in bin_estadual_json.keys():
+                                    bin_estadual_json["NrMotor"] = ""
+                                if "ProcedenciaVeiculo" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ProcedenciaVeiculo"] = ""
+                                if "CapacidadeDeCarga" not in bin_estadual_json.keys():
+                                    bin_estadual_json["CapacidadeDeCarga"] = ""
+                                if (
+                                    "CapacidadePassageiros"
+                                    not in bin_estadual_json.keys()
+                                ):
+                                    bin_estadual_json["CapacidadePassageiros"] = ""
+                                if "Carroceria" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Carroceria"] = ""
+                                if "NrCaixaCambio" not in bin_estadual_json.keys():
+                                    bin_estadual_json["NrCaixaCambio"] = ""
+                                if "NrEixos" not in bin_estadual_json.keys():
+                                    bin_estadual_json["NrEixos"] = ""
+                                if "TerceiroEixo" not in bin_estadual_json.keys():
+                                    bin_estadual_json["TerceiroEixo"] = ""
+                                if (
+                                    "EixoTrasDiferencial"
+                                    not in bin_estadual_json.keys()
+                                ):
+                                    bin_estadual_json["EixoTrasDiferencial"] = ""
+                                if "Montagem" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Montagem"] = ""
+                                if "CMT" not in bin_estadual_json.keys():
+                                    bin_estadual_json["CMT"] = ""
+                                if "PBT" not in bin_estadual_json.keys():
+                                    bin_estadual_json["PBT"] = ""
+                                if "Restricao1" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao1"] = ""
+                                if "Restricao2" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao2"] = ""
+                                if "Restricao3" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao3"] = ""
+                                if "Restricao4" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao4"] = ""
+                                if "Restricao5" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao5"] = ""
+                                if "Restricao6" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao6"] = ""
+                                if "Restricao7" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao7"] = ""
+                                if "Restricao8" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao8"] = ""
+                                if "Restricao9" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao9"] = ""
+                                if "Restricao10" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao10"] = ""
+                                if "Restricao11" not in bin_estadual_json.keys():
+                                    bin_estadual_json["Restricao11"] = ""
+                                if "restricoes" not in bin_estadual_json.keys():
+                                    bin_estadual_json["restricoes"] = ""
+                                if "ValorDebitoIpva" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoIpva"] = ""
+                                if "ValorDebitoDpvat" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoDpvat"] = ""
+                                if "ValorDebitoDetran" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoDetran"] = ""
+                                if "ValorDebitoPrf" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoPrf"] = ""
+                                if "ValorDebitoDer" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoDer"] = ""
+                                if "ValorDebitoDersa" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoDersa"] = ""
+                                if "ValorDebitoCetesb" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoCetesb"] = ""
+                                if "ValorDebitoRenainf" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoRenainf"] = ""
+                                if "ValorDebitoMultas" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoMultas"] = ""
+                                if "ValorDebitoLicenc" not in bin_estadual_json.keys():
+                                    bin_estadual_json["ValorDebitoLicenc"] = ""
+                                if (
+                                    "ValorDebitoMunicipais"
+                                    not in bin_estadual_json.keys()
+                                ):
+                                    bin_estadual_json["ValorDebitoMunicipais"] = ""
+                                if "debitos" not in bin_estadual_json.keys():
+                                    bin_estadual_json["debitos"] = ""
+                                if "observacoes_gerais" not in bin_estadual_json.keys():
+                                    bin_estadual_json["observacoes_gerais"] = ""
+
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "Marca"
                                 ]
+
+                                if bin_estadual_json["MarcaTratada"] == "CHEV":
+                                    bin_estadual_json["MarcaTratada"] = "CHEVROLET"
+                                elif bin_estadual_json["MarcaTratada"] == "GM":
+                                    bin_estadual_json["MarcaTratada"] = "CHEVROLET"
+                                elif bin_estadual_json["MarcaTratada"] == "VOLKS":
+                                    bin_estadual_json["MarcaTratada"] = "VOLKSWAGEN"
+                                elif bin_estadual_json["MarcaTratada"] == "VW":
+                                    bin_estadual_json["MarcaTratada"] = "VOLKSWAGEN"
+                                elif bin_estadual_json["MarcaTratada"] == "MMC":
+                                    bin_estadual_json["MarcaTratada"] = "MITSUBISHI"
+                                elif bin_estadual_json["MarcaTratada"] == "MB":
+                                    bin_estadual_json["MarcaTratada"] = "MERCEDES-BENZ"
+                                elif bin_estadual_json["MarcaTratada"] == "MBB":
+                                    bin_estadual_json["MarcaTratada"] = "MERCEDES-BENZ"
+                                elif bin_estadual_json["MarcaTratada"] == "LR":
+                                    bin_estadual_json["MarcaTratada"] = "LAND ROVER"
+
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("CHEV", "CHEVROLET")
+                                ].replace("CHEV ", "CHEVROLET ")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("GM", "CHEVROLET")
+                                ].replace("CHEV/", "CHEVROLET/")
+
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("VOLKS", "VOLKSWAGEN")
+                                ].replace("GM ", "CHEVROLET ")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("VW", "VOLKSWAGEN")
+                                ].replace("GM/", "CHEVROLET/")
+
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("MMC", "MITSUBISHI")
+                                ].replace("VOLKS ", "VOLKSWAGEN ")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("MBB", "MERCEDES-BENZ")
+                                ].replace("VOLKS/", "VOLKSWAGEN/")
+
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("MB", "MERCEDES-BENZ")
+                                ].replace("VW ", "VOLKSWAGEN ")
                                 bin_estadual_json["MarcaTratada"] = bin_estadual_json[
                                     "MarcaTratada"
-                                ].replace("LR", "LAND ROVER")
+                                ].replace("VW/", "VOLKSWAGEN/")
+
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MMC ", "MITSUBISHI ")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MMC/", "MITSUBISHI/")
+
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MB ", "MERCEDES-BENZ ")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MB/", "MERCEDES-BENZ/")
+
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MBB ", "MERCEDES-BENZ ")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("MBB/", "MERCEDES-BENZ/")
+
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("LR ", "LAND ROVER ")
+                                bin_estadual_json["MarcaTratada"] = bin_estadual_json[
+                                    "MarcaTratada"
+                                ].replace("LR/", "LAND ROVER/")
 
                                 logger.debug(
                                     f'Placa: "{bin_estadual_json["Placa"].upper()}"'
