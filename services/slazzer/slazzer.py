@@ -74,7 +74,10 @@ def process_image(input_image, background_image, background_color):
 
 
 def save_output_image(output_image_name, output_image):
-    with open(f"{output_folder}/{output_image_name}", "wb") as img:
+    file_name = os_utils.get_file_name(output_image_name)
+    file_extension = "png"
+
+    with open(f"{output_folder}/{file_name}.{file_extension}", "wb") as img:
         img.write(output_image)
 
 
