@@ -49,17 +49,24 @@ def process_image(input_image, background_image, background_color):
             f'Como carregamos a imagem de fundo "{background_image}", aplicaremos esse fundo na imagem'
         )
         files = {"source_image_file": open(PATH, "rb"), "bg_image_file": open(BG, "rb")}
+        data = {"format": "jpg", "scale": "70%", "position": "center"}
     elif background_color != "":
         logger.info(
             f'Como carregamos a cor de fundo "{background_color}", aplicaremos essa cor de fundo na imagem'
         )
         files = {"source_image_file": open(PATH, "rb")}
-        data = {"bg_color_code": background_color}
+        data = {
+            "format": "jpg",
+            "scale": "70%",
+            "position": "center",
+            "bg_color_code": background_color,
+        }
     else:
         logger.info(
             "Como não carregamos nem imagem nem cor de fundo, apenas removeremos o fundo da imagem"
         )
         files = {"source_image_file": open(PATH, "rb")}
+        data = {"format": "jpg", "scale": "70%", "position": "center"}
 
     logger.info("Processando a imagem")
     response = requests.post(URL, headers=headers, files=files, data=data)
@@ -75,7 +82,7 @@ def process_image(input_image, background_image, background_color):
 
 def save_output_image(output_image_name, output_image):
     file_name = os_utils.get_file_name(output_image_name)
-    file_extension = "png"
+    file_extension = "jpg"
 
     with open(f"{output_folder}/{file_name}.{file_extension}", "wb") as img:
         img.write(output_image)
