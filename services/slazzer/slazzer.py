@@ -49,24 +49,19 @@ def process_image(input_image, background_image, background_color):
             f'Como carregamos a imagem de fundo "{background_image}", aplicaremos esse fundo na imagem'
         )
         files = {"source_image_file": open(PATH, "rb"), "bg_image_file": open(BG, "rb")}
-        data = {"format": "jpg", "scale": "70%", "position": "center"}
+        data = {"format": "jpg", "scale_value": "70%,5%"}
     elif background_color != "":
         logger.info(
             f'Como carregamos a cor de fundo "{background_color}", aplicaremos essa cor de fundo na imagem'
         )
         files = {"source_image_file": open(PATH, "rb")}
-        data = {
-            "format": "jpg",
-            "scale": "70%",
-            "position": "center",
-            "bg_color_code": background_color,
-        }
+        data = {"format": "jpg", "bg_color_code": background_color}
     else:
         logger.info(
             "Como não carregamos nem imagem nem cor de fundo, apenas removeremos o fundo da imagem"
         )
         files = {"source_image_file": open(PATH, "rb")}
-        data = {"format": "jpg", "scale": "70%", "position": "center"}
+        data = {"format": "jpg"}
 
     logger.info("Processando a imagem")
     response = requests.post(URL, headers=headers, files=files, data=data)
