@@ -46,7 +46,6 @@ class CONST:
 
 class ValeMEConverter(SpreadsheetConverter):
     def execute(self):
-
         self.create_input_folder()
         self.create_output_folder()
 
@@ -286,7 +285,7 @@ class ValeMEConverter(SpreadsheetConverter):
             ["Lote de Referência", "Código do Produto"], ascending=True
         ).to_excel(writer, sheet_name="Listagem", index=False)
 
-        writer.save()
+        writer.close()
 
 
 if __name__ == "__main__":
