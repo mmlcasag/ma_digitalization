@@ -83,7 +83,7 @@ class DedaloConverter(SpreadsheetConverter):
             lambda x: excel_utils.convert_to_currency(x)
         )
         df.to_excel(writer, sheet_name="Colunada", index=False)
-        writer.save()
+        writer.close()
         logger.info(f"Arquivo processado com sucesso: {filepath}")
 
 
