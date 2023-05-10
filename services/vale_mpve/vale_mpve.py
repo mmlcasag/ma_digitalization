@@ -362,7 +362,7 @@ class ValeMPVEConverter(SpreadsheetConverter):
 
         writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
         df.to_excel(writer, sheet_name="Colunada", index=False)
-        writer.save()
+        writer.close()
 
 
 if __name__ == "__main__":

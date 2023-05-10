@@ -30,14 +30,14 @@ class RGAutomovelConverter(SpreadsheetConverter):
         total = 0
         for value in values:
             try:
-                val = re.sub("[^0-9,.]", "", value)
+                val = re.sub("[^0-9,.]", "", str(value))
 
                 if len(val.strip()) == 0:
                     val = "0,00"
 
                 total += float(val.replace(".", "").replace(",", "."))
             except Exception:
-                logger.error(f"Valor recebido que ocasionou um erro: {value}")
+                logger.error(f"Valor recebido que ocasionou um erro: {str(value)}")
                 raise
 
         return total
@@ -965,7 +965,7 @@ class RGAutomovelConverter(SpreadsheetConverter):
         writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
 
         df.to_excel(writer, sheet_name="Listagem", index=False)
-        writer.save()
+        writer.close()
 
     def execute(self):
         self.create_input_folder()

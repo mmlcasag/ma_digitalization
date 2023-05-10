@@ -94,38 +94,32 @@ for element in json_data:
     logger.info("--> Descrição Detalhada: {}".format(descricao_detalhada))
 
     logger.info("Adicionando o ativo ao dataframe")
-    dataset = dataset.append(
-        pandas.Series(
-            [
-                element["codigo"],
-                "novo",
-                element["codigo"],
-                descricao_curta,
-                descricao_detalhada,
-                "",
-                excel_utils.convert_to_currency(valor),
-                "",
-                excel_utils.convert_to_currency(incremento),
-                excel_utils.convert_to_currency(valor),
-                element["proprietario"],
-                cidade,
-                estado,
-                planta,
-                "",
-                "",
-                "",
-                "",
-                "1",
-                "",
-                "",
-                element["categoria"],
-                element["categoria"],
-                placa,
-            ],
-            index=dataset.columns,
-        ),
-        ignore_index=True,
-    )
+    dataset.loc[len(dataset)] = [
+        element["codigo"],
+        "novo",
+        element["codigo"],
+        descricao_curta,
+        descricao_detalhada,
+        "",
+        excel_utils.convert_to_currency(valor),
+        "",
+        excel_utils.convert_to_currency(incremento),
+        excel_utils.convert_to_currency(valor),
+        element["proprietario"],
+        cidade,
+        estado,
+        planta,
+        "",
+        "",
+        "",
+        "",
+        "1",
+        "",
+        "",
+        element["categoria"],
+        element["categoria"],
+        placa,
+    ]
 
     logger.info("Extraindo as fotos do ativo")
     for foto_url in fotos:
@@ -184,7 +178,7 @@ dataframe = pandas.DataFrame(dataset)
 dataframe.to_excel(excel_file, sheet_name="Colunada", index=False)
 
 logger.info("Salvando e fechando o arquivo Excel resultante")
-excel_file.save()
+excel_file.close()
 
 logger.info("Arquivo Excel gerado com sucesso")
 

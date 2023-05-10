@@ -117,7 +117,6 @@ def extract_images_excel(file_name, output_folder):
             "{} ao tentar extrair imagens de planilha Excel {}".format(error, file_name)
         )
     finally:
-
         try:
             logger.info("Fechando o arquivo Excel")
             workbook.Close()
@@ -247,12 +246,18 @@ def convert_to_currency(v):
         if "," in val and "." not in val:
             val = val.replace(",", ".")
 
-    amount = "{:,.2f}".format(float(val))
-    return amount.replace(",", "X").replace(".", ",").replace("X", ".")
+    try:
+        amount = "{:,.2f}".format(float(val))
+        return amount.replace(",", "X").replace(".", ",").replace("X", ".")
+    except Exception:
+        return 0
 
 
 def convert_to_numeric(v):
-    return "{:_.2f}".format(float(v)).replace(".", ",").replace("_", ".")
+    try:
+        return "{:_.2f}".format(float(v)).replace(".", ",").replace("_", ".")
+    except Exception:
+        return v
 
 
 def convert_to_percent(v):

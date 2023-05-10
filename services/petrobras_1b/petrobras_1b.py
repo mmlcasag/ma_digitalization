@@ -126,7 +126,6 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 df = pandas.read_excel(xls, sheet_name=sheet)
                 df.to_excel(writer, sheet_name=sheet, index=False)
 
-            writer.save()
             writer.close()
             excel_file_name = excel_file_name.replace("xlsb", "xlsx")
             xls_to_exclude = input_path.replace("xlsb", "xlsx")
@@ -192,6 +191,8 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         )
         df1 = df1.mask(df1.eq("None")).dropna(how="all")
         df1 = df1.mask(df1.eq("None")).fillna("")
+        df1 = df1.mask(df1.eq("nan")).dropna(how="all")
+        df1 = df1.mask(df1.eq("nan")).fillna("")
 
         logger.info("Ajustando os nomes das colunas")
         df1 = df1.rename(
@@ -277,7 +278,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             try:
                 logger.info("Processando o lote de número: {}".format(asset_number))
 
-                if asset_number == "None":
+                if asset_number == "None" or asset_number == "nan":
                     logger.warning("Número do Lote inválido. Desconsiderando a linha")
                     continue
 
@@ -443,39 +444,33 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                     asset_html_description = "Em arquivo separado"
 
                 logger.info("Gerando a linha colunada do lote")
-                dataset_sheet_1 = dataset_sheet_1.append(
-                    pandas.Series(
-                        [
-                            asset_number,
-                            "novo",
-                            asset_number,
-                            asset_description,
-                            asset_full_description,
-                            asset_initial_value,
-                            "",
-                            "",
-                            asset_increment_value,
-                            asset_reference_value,
-                            asset_owner_name,
-                            asset_location_city,
-                            asset_location_state,
-                            "Vendedor",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "1",
-                            "",
-                            asset_html_description,
-                        ],
-                        index=dataset_sheet_1.columns,
-                    ),
-                    ignore_index=True,
-                )
+                dataset_sheet_1.loc[len(dataset_sheet_1)] = [
+                    asset_number,
+                    "novo",
+                    asset_number,
+                    asset_description,
+                    asset_full_description,
+                    asset_initial_value,
+                    "",
+                    "",
+                    asset_increment_value,
+                    asset_reference_value,
+                    asset_owner_name,
+                    asset_location_city,
+                    asset_location_state,
+                    "Vendedor",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "1",
+                    "",
+                    asset_html_description,
+                ]
                 logger.info("Linha da planilha colunada montada com sucesso")
 
                 logger.info("Gerando linhas da planilha de listagem")
-                dataset_sheet_2 = dataset_sheet_2.append(local_df1)
+                dataset_sheet_2 = pandas.concat([dataset_sheet_2, local_df1])
                 logger.info("Linhas da planilha de listagem montadas com sucesso")
             except Exception as error:
                 logger.error(
@@ -526,7 +521,7 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
         dataframe_sheet_2.to_excel(excel_file, sheet_name="Listagem", index=False)
 
         logger.info("Salvando e fechando o arquivo Excel resultante")
-        excel_file.save()
+        excel_file.close()
 
         logger.info("Arquivo Excel gerado com sucesso")
     except Exception as error:

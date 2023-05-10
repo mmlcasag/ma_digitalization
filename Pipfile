@@ -23,8 +23,8 @@ flake8 = "*"
 black = "*"
 pyinstaller = "*"
 pefile = "*"
-unknown = {editable = true, path = "."}
 pywin32-ctypes = {version = "*", sys_platform = "== 'win32'"}
+unknown = {editable = true, path = "."}
 
 [pipenv]
 allow_prereleases = true

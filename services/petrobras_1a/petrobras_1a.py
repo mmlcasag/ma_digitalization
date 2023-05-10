@@ -292,7 +292,7 @@ class PetrobrasConverter(SpreadsheetConverter):
         colunada_sheet.to_excel(writer, sheet_name="Colunada", index=False)
         listagem_sheet.to_excel(writer, sheet_name="Listagem", index=False)
 
-        writer.save()
+        writer.close()
         logger.info("Xlsx criado com sucesso")
 
         logger.info("Criando o arquivos HTML")
