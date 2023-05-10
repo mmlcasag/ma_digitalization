@@ -6,7 +6,7 @@ After git cloning the project into a local folder, please follow these steps:
 
 Use the most recent version available <a href="https://www.python.org/downloads/">here</a>.
 
-The project currently uses Python version 3.9.2.
+The project currently uses Python version 3.11.3.
 
 ### pip ###
 
@@ -35,6 +35,13 @@ sudo apt install python3-pip
 C:\> curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 C:\> python get-pip.py
 ```
+
+To update pip to latest version:
+```
+python.exe -m pip install --upgrade pip
+```
+
+The project currently uses pip version 23.1.2.
 
 ## 2. Install pipenv
 
