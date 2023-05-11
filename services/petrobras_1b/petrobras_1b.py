@@ -232,6 +232,10 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
             ]
         )
 
+        df1["Número do Lote"] = df1["Número do Lote"].apply(
+            lambda x: excel_utils.convert_to_integer(x)
+        )
+
         logger.info("Ordenando dados pelo número do lote e pelo código do produto")
         df1 = df1.sort_values(["Número do Lote", "Código do Produto"], ascending=True)
 
@@ -268,6 +272,10 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
                 "Valor Total",
                 "Valor Inicial",
             ]
+        )
+
+        df2["Número do Lote"] = df2["Número do Lote"].apply(
+            lambda x: excel_utils.convert_to_integer(x)
         )
 
         logger.info("Ordenando dados pelo número do lote")
@@ -516,6 +524,10 @@ for excel_file_name in os_utils.get_files_list(input_folder, allowed_extensions)
 
         dataframe_sheet_2["Quantidade"] = dataframe_sheet_2["Quantidade"].apply(
             lambda x: excel_utils.convert_to_numeric(x)
+        )
+
+        dataframe_sheet_2 = dataframe_sheet_2.mask(dataframe_sheet_2.eq("nan")).fillna(
+            ""
         )
 
         dataframe_sheet_2.to_excel(excel_file, sheet_name="Listagem", index=False)

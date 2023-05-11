@@ -262,3 +262,10 @@ def convert_to_numeric(v):
 
 def convert_to_percent(v):
     return str("{:_.2%}".format(round(float(v), 4))).replace(".", ",").replace("_", ".")
+
+
+def convert_to_integer(v):
+    try:
+        return str(int(float(v)))
+    except Exception:
+        return None
