@@ -1,10 +1,12 @@
+import extrato
 import base_estadual
 import codificador_fipe
 
-print("Base Estadual")
-response = base_estadual.request_by_placa("AAA1111")
-print(response)
+response = extrato.request_extrato()
+response.to_string()
 
-print("Codificador FIPE")
-response = codificador_fipe.request_by_placa("AAA1111")
-print(response)
+response = base_estadual.request_by_placa("AEF9041")
+response.to_string()
+
+response = codificador_fipe.request_by_placa("AEF9041")
+response.to_string()
