@@ -1,9 +1,7 @@
-import utils
 import common
+import convert
 import xml.etree.ElementTree as ET
-from services.base.logger import Logger
 
-logger = Logger.__call__().get_logger()
 
 CONST_CODIFICADOR_FIPE = "CodificacaoFIPE_V2"
 
@@ -57,9 +55,7 @@ class CodificadorFipe:
         self.tabelas_fipe = Precificadores(tabelas_fipe_tag)
 
     def to_string(self):
-        logger.debug(
-            f"{self.solicitacao.to_string()}{self.dados_veiculo.to_string()}{self.tabelas_fipe.to_string()}"
-        )
+        return f"{self.solicitacao.to_string()}{self.dados_veiculo.to_string()}{self.tabelas_fipe.to_string()}"
 
 
 class Solicitacao:
@@ -87,14 +83,14 @@ class Solicitacao:
             case _:
                 mensagem_extenso = "Erro Desconhecido"
 
-        self.dado = utils.to_string(dado)
-        self.numero_resposta = utils.to_string(numero_resposta)
-        self.tempo = utils.to_float(tempo, "US")
-        self.mensagem = utils.to_string(mensagem_extenso)
-        self.horario = utils.to_datetime(horario)
+        self.dado = convert.to_string(dado)
+        self.numero_resposta = convert.to_string(numero_resposta)
+        self.tempo = convert.to_float(tempo, "US")
+        self.mensagem = convert.to_string(mensagem_extenso)
+        self.horario = convert.to_datetime(horario)
 
     def to_string(self):
-        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {utils.from_float_to_string(self.tempo,4)}\n* Mensagem: {self.mensagem}\n* Horário: {utils.from_datetime_to_string(self.horario)}"
+        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo,4)}\n* Mensagem: {self.mensagem}\n* Horário: {convert.from_datetime_to_string(self.horario)}"
 
 
 class DadosVeiculo:
@@ -124,54 +120,64 @@ class DadosVeiculo:
         eixo_traseiro = dados_veiculo_tag.find("EIXO_TRASEIRO_DIF").text
         carroceria = dados_veiculo_tag.find("CARROCERIA").text
 
-        self.procedencia = utils.to_string(procedencia)
-        self.municipio = utils.to_string(municipio)
-        self.uf = utils.to_string(uf)
-        self.placa = utils.to_string(placa)
-        self.chassi = utils.to_string(chassi)
-        self.situacao_chassi = utils.to_string(situacao_chassi)
-        self.marca_modelo = utils.to_string(marca_modelo)
-        self.ano = utils.to_string(ano)
-        self.capacidade_carga = utils.to_string(capacidade_carga)
-        self.combustivel = utils.to_string(combustivel)
-        self.cor = utils.to_string(cor)
-        self.potencia = utils.to_string(potencia)
-        self.cilindradas = utils.to_string(cilindradas)
-        self.max_passageiros = utils.to_string(max_passageiros)
-        self.tipo_montagem = utils.to_string(tipo_montagem)
-        self.eixos = utils.to_string(eixos)
-        self.pbt = utils.to_string(pbt)
-        self.cmt = utils.to_string(cmt)
-        self.tipo_veiculo = utils.to_string(tipo_veiculo)
-        self.tipo_carroceria = utils.to_string(tipo_carroceria)
-        self.motor = utils.to_string(motor)
-        self.cambio = utils.to_string(cambio)
-        self.eixo_traseiro = utils.to_string(eixo_traseiro)
-        self.carroceria = utils.to_string(carroceria)
+        self.procedencia = convert.to_string(procedencia)
+        self.municipio = convert.to_string(municipio)
+        self.uf = convert.to_string(uf)
+        self.placa = convert.to_string(placa)
+        self.chassi = convert.to_string(chassi)
+        self.situacao_chassi = convert.to_string(situacao_chassi)
+        self.marca_modelo = convert.to_string(marca_modelo)
+        self.ano = convert.to_string(ano)
+        self.capacidade_carga = convert.to_int(capacidade_carga)
+        self.combustivel = convert.to_string(combustivel)
+        self.cor = convert.to_string(cor)
+        self.potencia = convert.to_int(potencia)
+        self.cilindradas = convert.to_int(cilindradas)
+        self.max_passageiros = convert.to_int(max_passageiros)
+        self.tipo_montagem = convert.to_string(tipo_montagem)
+        self.eixos = convert.to_int(eixos)
+        self.pbt = convert.to_int(pbt)
+        self.cmt = convert.to_int(cmt)
+        self.tipo_veiculo = convert.to_string(tipo_veiculo)
+        self.tipo_carroceria = convert.to_string(tipo_carroceria)
+        self.motor = convert.to_int(motor)
+        self.cambio = convert.to_int(cambio)
+        self.eixo_traseiro = convert.to_int(eixo_traseiro)
+        self.carroceria = convert.to_string(carroceria)
 
     def to_string(self):
-        return f"\nDADOS VEICULO:\n* Procedência: {self.procedencia}\n* Município: {self.municipio}\n* UF: {self.uf}\n* Placa: {self.placa}\n* Chassi: {self.chassi}\n* Situação do Chassi: {self.situacao_chassi}\n* Marca/Modelo: {self.marca_modelo}\n* Ano: {self.ano}\n* Capacidade de Carga: {self.capacidade_carga}\n* Combustível: {self.combustivel}\n* Cor: {self.cor}\n* Potência: {self.potencia}\n* Cilindradas: {self.cilindradas}\n* Máximo de Passageiros: {self.max_passageiros}\n* Tipo de Montagem: {self.tipo_montagem}\n* Eixos: {self.eixos}\n* PBT: {self.pbt}\n* CMT: {self.cmt}\n* Tipo Veículo: {self.tipo_veiculo}\n* Tipo Carroceria: {self.tipo_carroceria}\n* Motor: {self.motor}\n* Câmbio: {self.cambio}\n* Eixo Traseiro: {self.eixo_traseiro}\n* Carroceria: {self.carroceria}"
+        return f"\nDADOS VEICULO:\n* Procedência: {self.procedencia}\n* Município: {self.municipio}\n* UF: {self.uf}\n* Placa: {self.placa}\n* Chassi: {self.chassi}\n* Situação do Chassi: {self.situacao_chassi}\n* Marca/Modelo: {self.marca_modelo}\n* Ano: {self.ano}\n* Capacidade de Carga: {convert.from_int_to_string(self.capacidade_carga)}\n* Combustível: {self.combustivel}\n* Cor: {self.cor}\n* Potência: {convert.from_int_to_string(self.potencia)}\n* Cilindradas: {convert.from_int_to_string(self.cilindradas)}\n* Máximo de Passageiros: {convert.from_int_to_string(self.max_passageiros)}\n* Tipo de Montagem: {self.tipo_montagem}\n* Eixos: {convert.from_int_to_string(self.eixos)}\n* PBT: {convert.from_int_to_string(self.pbt)}\n* CMT: {convert.from_int_to_string(self.cmt)}\n* Tipo Veículo: {self.tipo_veiculo}\n* Tipo Carroceria: {self.tipo_carroceria}\n* Motor: {convert.from_int_to_string(self.motor)}\n* Câmbio: {convert.from_int_to_string(self.cambio)}\n* Eixo Traseiro: {convert.from_int_to_string(self.eixo_traseiro)}\n* Carroceria: {self.carroceria}"
 
 
 class Precificadores:
     def __init__(self, tabelas_fipe_tag):
-        valores_tabela_fipe = []
+        codigos = []
+        marcas_modelos = []
+        valores = []
         for tabela_fipe_tag in tabelas_fipe_tag:
             for child in tabela_fipe_tag:
-                valor_fipe = utils.to_float(child.find("VALOR").text, "US")
-                valores_tabela_fipe.append(valor_fipe)
+                codigo = convert.to_string(child.find("CODIGO").text)
+                marca_modelo = convert.to_string(child.find("MARCA_MODELO").text)
+                valor = convert.to_float(child.find("VALOR").text, "US")
 
-        self.tabelas_fipe = valores_tabela_fipe
+                codigos.append(codigo)
+                marcas_modelos.append(marca_modelo)
+                valores.append(valor)
+
+        self.codigos = codigos
+        self.marcas_modelos = marcas_modelos
+        self.valores = valores
 
     def to_string(self):
         string = f"\nTABELAS FIPE:"
 
-        if len(self.tabelas_fipe) == 0:
+        if len(self.codigos) == 0:
             string = string + f"\n* Nenhuma tabela FIPE encontrada"
         else:
-            for tabela_fipe in self.tabelas_fipe:
+            for i in range(len(self.codigos)):
                 string = (
-                    string + f"\n* Valor: {utils.from_float_to_string(tabela_fipe, 2)}"
+                    string
+                    + f"\n  * Tabela {i+1}\n    * Código: {self.codigos[i]}\n    * Marca/Modelo: {self.marcas_modelos[i]}\n    * Valor: {convert.from_float_to_string(self.valores[i], 2)}"
                 )
 
         return string

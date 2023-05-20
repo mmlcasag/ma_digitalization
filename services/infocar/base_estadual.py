@@ -1,9 +1,7 @@
-import utils
 import common
+import convert
 import xml.etree.ElementTree as ET
-from services.base.logger import Logger
 
-logger = Logger.__call__().get_logger()
 
 CONST_BASE_ESTADUAL = "BaseEstadual_B"
 
@@ -62,7 +60,9 @@ class BaseEstadual:
                     for restricao_inner in restricoes_tag:
                         if restricao_inner.tag == "RESTRICOES":
                             for restricoes in restricao_inner:
-                                restricoes_arr.append(utils.to_string(restricoes.text))
+                                restricoes_arr.append(
+                                    convert.to_string(restricoes.text)
+                                )
                         if restricao_inner.tag == "INTENCAO_DE_FINANCIAMENTO":
                             intencao_financiamento_tag = restricao_inner
                 if child.tag == "DEBITOS_ESTADUAIS":
@@ -82,9 +82,7 @@ class BaseEstadual:
         self.proprietario = Proprietario(proprietario_tag)
 
     def to_string(self):
-        logger.debug(
-            f"{self.solicitacao.to_string()}{self.dados_veiculo.to_string()}{self.especificacoes.to_string()}{self.restricoes.to_string()}{self.intencao_financiamento.to_string()}{self.debitos.to_string()}{self.comunicacao_venda.to_string()}{self.proprietario.to_string()}"
-        )
+        return f"{self.solicitacao.to_string()}{self.dados_veiculo.to_string()}{self.especificacoes.to_string()}{self.restricoes.to_string()}{self.intencao_financiamento.to_string()}{self.debitos.to_string()}{self.comunicacao_venda.to_string()}{self.proprietario.to_string()}"
 
 
 class Solicitacao:
@@ -112,14 +110,14 @@ class Solicitacao:
             case _:
                 mensagem_extenso = "Erro Desconhecido"
 
-        self.dado = utils.to_string(dado)
-        self.numero_resposta = utils.to_string(numero_resposta)
-        self.tempo = utils.to_float(tempo, "US")
-        self.mensagem = utils.to_string(mensagem_extenso)
-        self.horario = utils.to_datetime(horario)
+        self.dado = convert.to_string(dado)
+        self.numero_resposta = convert.to_string(numero_resposta)
+        self.tempo = convert.to_float(tempo, "US")
+        self.mensagem = convert.to_string(mensagem_extenso)
+        self.horario = convert.to_datetime(horario)
 
     def to_string(self):
-        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {utils.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Horário: {utils.from_datetime_to_string(self.horario)}"
+        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Horário: {convert.from_datetime_to_string(self.horario)}"
 
 
 class DadosVeiculo:
@@ -135,24 +133,24 @@ class DadosVeiculo:
         ano_modelo = dados_veiculo_tag.find("ANOMODELO").text
         ano_fabricacao = dados_veiculo_tag.find("ANOFABRICACAO").text
         combustivel = dados_veiculo_tag.find("COMBUSTIVEL").text
-        tipo_combustivel = dados_veiculo_tag.find("TIPOVEICULO").text
+        tipo_veiculo = dados_veiculo_tag.find("TIPOVEICULO").text
 
-        self.placa = utils.to_string(placa)
-        self.chassi = utils.to_string(chassi)
-        self.municipio = utils.to_string(municipio)
-        self.uf = utils.to_string(uf)
-        self.municipio_emplacado = utils.to_string(municipio_emplacado[0:-4])
-        self.uf_emplacado = utils.to_string(municipio_emplacado[-3:-1])
-        self.renavam = utils.to_string(renavam)
-        self.cor = utils.to_string(cor)
-        self.modelo = utils.to_string(modelo)
-        self.ano_modelo = utils.to_string(ano_modelo)
-        self.ano_fabricacao = utils.to_string(ano_fabricacao)
-        self.combustivel = utils.to_string(combustivel)
-        self.tipo_combustivel = utils.to_string(tipo_combustivel)
+        self.placa = convert.to_string(placa)
+        self.chassi = convert.to_string(chassi)
+        self.municipio = convert.to_string(municipio)
+        self.uf = convert.to_string(uf)
+        self.municipio_emplacado = convert.to_string(municipio_emplacado[0:-4])
+        self.uf_emplacado = convert.to_string(municipio_emplacado[-3:-1])
+        self.renavam = convert.to_string(renavam)
+        self.cor = convert.to_string(cor)
+        self.modelo = convert.to_string(modelo)
+        self.ano_modelo = convert.to_int(ano_modelo)
+        self.ano_fabricacao = convert.to_int(ano_fabricacao)
+        self.combustivel = convert.to_string(combustivel)
+        self.tipo_veiculo = convert.to_string(tipo_veiculo)
 
     def to_string(self):
-        return f"\nDADOS VEICULO:\n* Placa: {self.placa}\n* Chassi: {self.chassi}\n* Município: {self.municipio}\n* UF: {self.uf}\n* Município Emplacado: {self.municipio_emplacado}\n* UF Emplacado: {self.uf_emplacado}\n* Renavam: {self.renavam}\n* Cor: {self.cor}\n* Modelo: {self.modelo}\n* Ano Modelo: {self.ano_modelo}\n* Ano Fabricação: {self.ano_fabricacao}\n* Combustível: {self.combustivel}\n* Tipo Combustível: {self.tipo_combustivel}"
+        return f"\nDADOS VEICULO:\n* Placa: {self.placa}\n* Chassi: {self.chassi}\n* Município: {self.municipio}\n* UF: {self.uf}\n* Município Emplacado: {self.municipio_emplacado}\n* UF Emplacado: {self.uf_emplacado}\n* Renavam: {self.renavam}\n* Cor: {self.cor}\n* Modelo: {self.modelo}\n* Ano Modelo: {convert.from_int_to_string(self.ano_modelo)}\n* Ano Fabricação: {convert.from_int_to_string(self.ano_fabricacao)}\n* Combustível: {self.combustivel}\n* Tipo Veículo: {self.tipo_veiculo}"
 
 
 class Especificacoes:
@@ -179,30 +177,30 @@ class Especificacoes:
         num_docto_faturado = especificacoes_tag.find("DOCUMENTOFATURADO").text
         uf_docto_faturado = especificacoes_tag.find("UFFATURADO").text
 
-        self.motor = utils.to_string(motor)
-        self.cambio = utils.to_string(cambio)
-        self.passageiros = utils.to_string(passageiros)
-        self.potencia = utils.to_string(potencia)
-        self.eixos = utils.to_string(eixos)
-        self.carga = utils.to_string(carga)
-        self.cmt = utils.to_string(cmt)
-        self.pbt = utils.to_string(pbt)
-        self.num_carroceria = utils.to_string(num_carroceria)
-        self.eixo_traseiro = utils.to_string(eixo_traseiro)
-        self.terceiro_eixo = utils.to_string(terceiro_eixo)
-        self.cilindradas = utils.to_string(cilindradas)
-        self.especie = utils.to_string(especie)
-        self.categoria = utils.to_string(categoria)
-        self.carroceria = utils.to_string(carroceria)
-        self.procedencia = utils.to_string(procedencia)
-        self.data_atualizacao = utils.to_string(data_atualizacao)
-        self.situacao_chassi = utils.to_string(situacao_chassi)
-        self.tipo_docto_faturado = utils.to_string(tipo_docto_faturado)
-        self.num_docto_faturado = utils.to_string(num_docto_faturado)
-        self.uf_docto_faturado = utils.to_string(uf_docto_faturado)
+        self.motor = convert.to_int(motor)
+        self.cambio = convert.to_int(cambio)
+        self.passageiros = convert.to_int(passageiros)
+        self.potencia = convert.to_int(potencia)
+        self.eixos = convert.to_int(eixos)
+        self.carga = convert.to_int(carga)
+        self.cmt = convert.to_int(cmt)
+        self.pbt = convert.to_int(pbt)
+        self.num_carroceria = convert.to_int(num_carroceria)
+        self.eixo_traseiro = convert.to_int(eixo_traseiro)
+        self.terceiro_eixo = convert.to_int(terceiro_eixo)
+        self.cilindradas = convert.to_int(cilindradas)
+        self.especie = convert.to_string(especie)
+        self.categoria = convert.to_string(categoria)
+        self.carroceria = convert.to_string(carroceria)
+        self.procedencia = convert.to_string(procedencia)
+        self.data_atualizacao = convert.to_date(data_atualizacao)
+        self.situacao_chassi = convert.to_string(situacao_chassi)
+        self.tipo_docto_faturado = convert.to_string(tipo_docto_faturado)
+        self.num_docto_faturado = convert.to_string(num_docto_faturado)
+        self.uf_docto_faturado = convert.to_string(uf_docto_faturado)
 
     def to_string(self):
-        return f"\nESPECIFICAÇÕES:\n* Motor: {self.motor}\n* Câmbio: {self.cambio}\n* Passageiros: {self.passageiros}\n* Potência: {self.potencia}\n* Eixos: {self.eixos}\n* Carga: {self.carga}\n* CMT: {self.cmt}\n* PBT: {self.pbt}\n* Número Carroceria: {self.num_carroceria}\n* Eixo Traseiro: {self.eixo_traseiro}\n* Terceiro Eixo: {self.terceiro_eixo}\n* Cilindradas: {self.cilindradas}\n* Espécie: {self.especie}\n* Categoria: {self.categoria}\n* Carroceria: {self.carroceria}\n* Procedência: {self.procedencia}\n* Data Atualização: {self.data_atualizacao}\n* Situação Chassi: {self.situacao_chassi}\n* Tipo Documento Faturado: {self.tipo_docto_faturado}\n* Número Documento Faturado: {self.num_docto_faturado}\n* UF Documento Faturado: {self.uf_docto_faturado}"
+        return f"\nESPECIFICAÇÕES:\n* Motor: {convert.from_int_to_string(self.motor)}\n* Câmbio: {convert.from_int_to_string(self.cambio)}\n* Passageiros: {convert.from_int_to_string(self.passageiros)}\n* Potência: {convert.from_int_to_string(self.potencia)}\n* Eixos: {convert.from_int_to_string(self.eixos)}\n* Carga: {convert.from_int_to_string(self.carga)}\n* CMT: {convert.from_int_to_string(self.cmt)}\n* PBT: {convert.from_int_to_string(self.pbt)}\n* Número Carroceria: {convert.from_int_to_string(self.num_carroceria)}\n* Eixo Traseiro: {convert.from_int_to_string(self.eixo_traseiro)}\n* Terceiro Eixo: {convert.from_int_to_string(self.terceiro_eixo)}\n* Cilindradas: {convert.from_int_to_string(self.cilindradas)}\n* Espécie: {self.especie}\n* Categoria: {self.categoria}\n* Carroceria: {self.carroceria}\n* Procedência: {self.procedencia}\n* Data Atualização: {convert.from_date_to_string(self.data_atualizacao)}\n* Situação Chassi: {self.situacao_chassi}\n* Tipo Documento Faturado: {self.tipo_docto_faturado}\n* Número Documento Faturado: {self.num_docto_faturado}\n* UF Documento Faturado: {self.uf_docto_faturado}"
 
 
 class Restricoes:
@@ -210,8 +208,8 @@ class Restricoes:
         situacao_veiculo = restricoes_tag.find("SITUACAO_VEICULO").text
         roubo_furto = restricoes_tag.find("ROUBO_E_FURTO").text
 
-        self.situacao_veiculo = utils.to_string(situacao_veiculo)
-        self.roubo_furto = utils.to_string(roubo_furto)
+        self.situacao_veiculo = convert.to_string(situacao_veiculo)
+        self.roubo_furto = convert.to_string(roubo_furto)
         self.restricoes = restricoes_arr
 
     def to_string(self):
@@ -244,18 +242,18 @@ class IntencaoFinanciamento:
             "DATADAVIGENCIADOCONTRATOFINANCEIRA"
         ).text
 
-        self.nome_financiado = utils.to_string(nome_financiado)
-        self.docto_financiado = utils.to_string(docto_financiado)
-        self.restricao_documento = utils.to_string(restricao_documento)
-        self.data_inclusao = utils.to_date(data_inclusao)
-        self.cod_financeira = utils.to_string(cod_financeira)
-        self.nome_financeira = utils.to_string(nome_financeira)
-        self.restricao_financeira = utils.to_string(restricao_financeira)
-        self.num_contrato = utils.to_string(num_contrato)
-        self.dat_vigencia_contrato = utils.to_date(dat_vigencia_contrato)
+        self.nome_financiado = convert.to_string(nome_financiado)
+        self.docto_financiado = convert.to_string(docto_financiado)
+        self.restricao_documento = convert.to_string(restricao_documento)
+        self.data_inclusao = convert.to_date(data_inclusao)
+        self.cod_financeira = convert.to_string(cod_financeira)
+        self.nome_financeira = convert.to_string(nome_financeira)
+        self.restricao_financeira = convert.to_string(restricao_financeira)
+        self.num_contrato = convert.to_string(num_contrato)
+        self.dat_vigencia_contrato = convert.to_date(dat_vigencia_contrato)
 
     def to_string(self):
-        return f"\nINTENÇÃO DE FINANCIAMENTO:\n* Nome do Financiado: {self.nome_financiado}\n* Documento do Financiado: {self.docto_financiado}\n* Restrição no Documento: {self.restricao_documento}\n* Data de Inclusão: {utils.from_date_to_string(self.data_inclusao)}\n* Código da Financeira: {self.cod_financeira}\n* Nome da Financeira: {self.nome_financeira}\n* Restrição na Financeira: {self.restricao_financeira}\n* Número do Contrato: {self.num_contrato}\n* Data de Vigência do Contrato: {utils.from_date_to_string(self.dat_vigencia_contrato)}"
+        return f"\nINTENÇÃO DE FINANCIAMENTO:\n* Nome do Financiado: {self.nome_financiado}\n* Documento do Financiado: {self.docto_financiado}\n* Restrição no Documento: {self.restricao_documento}\n* Data de Inclusão: {convert.from_date_to_string(self.data_inclusao)}\n* Código da Financeira: {self.cod_financeira}\n* Nome da Financeira: {self.nome_financeira}\n* Restrição na Financeira: {self.restricao_financeira}\n* Número do Contrato: {self.num_contrato}\n* Data de Vigência do Contrato: {convert.from_date_to_string(self.dat_vigencia_contrato)}"
 
 
 class Debitos:
@@ -274,23 +272,23 @@ class Debitos:
         data_licenciamento = debitos_tag.find("DATALICENCIAMENTO").text
         exercicio_licenciamento = debitos_tag.find("EXERCICIOLICENCIAMENTO").text
 
-        self.debitos_ipva = utils.to_float(debitos_ipva, "BR")
-        self.debitos_licenciamento = utils.to_float(debitos_licenciamento, "BR")
-        self.debitos_dpvat = utils.to_float(debitos_dpvat, "BR")
-        self.debitos_multas = utils.to_float(debitos_multas, "BR")
-        self.multas_detran = utils.to_float(multas_detran, "BR")
-        self.multas_cetesb = utils.to_float(multas_cetesb, "BR")
-        self.multas_municipais = utils.to_float(multas_municipais, "BR")
-        self.multas_renainf = utils.to_float(multas_renainf, "BR")
-        self.multas_municipais = utils.to_float(multas_municipais, "BR")
-        self.multas_dersa = utils.to_float(multas_dersa, "BR")
-        self.multas_der = utils.to_float(multas_der, "BR")
-        self.multas_prf = utils.to_float(multas_prf, "BR")
-        self.data_licenciamento = utils.to_date(data_licenciamento)
-        self.exercicio_licenciamento = utils.to_date(exercicio_licenciamento)
+        self.debitos_ipva = convert.to_float(debitos_ipva, "BR")
+        self.debitos_licenciamento = convert.to_float(debitos_licenciamento, "BR")
+        self.debitos_dpvat = convert.to_float(debitos_dpvat, "BR")
+        self.debitos_multas = convert.to_float(debitos_multas, "BR")
+        self.multas_detran = convert.to_float(multas_detran, "BR")
+        self.multas_cetesb = convert.to_float(multas_cetesb, "BR")
+        self.multas_municipais = convert.to_float(multas_municipais, "BR")
+        self.multas_renainf = convert.to_float(multas_renainf, "BR")
+        self.multas_municipais = convert.to_float(multas_municipais, "BR")
+        self.multas_dersa = convert.to_float(multas_dersa, "BR")
+        self.multas_der = convert.to_float(multas_der, "BR")
+        self.multas_prf = convert.to_float(multas_prf, "BR")
+        self.data_licenciamento = convert.to_date(data_licenciamento)
+        self.exercicio_licenciamento = convert.to_date(exercicio_licenciamento)
 
     def to_string(self):
-        return f"\nDÉBITOS:\n* Débitos de IPVA: {utils.from_float_to_string(self.debitos_ipva, 2)}\n* Débitos de Licenciamento: {utils.from_float_to_string(self.debitos_licenciamento, 2)}\n* Débitos de DPVAT: {utils.from_float_to_string(self.debitos_dpvat, 2)}\n* Débitos de Multas: {utils.from_float_to_string(self.debitos_multas, 2)}\n* Multas DETRAN: {utils.from_float_to_string(self.multas_detran, 2)}\n* Multas CETESB: {utils.from_float_to_string(self.multas_cetesb, 2)}\n* Multas Municipais: {utils.from_float_to_string(self.multas_municipais, 2)}\n* Multas RENAINF: {utils.from_float_to_string(self.multas_renainf, 2)}\n* Multas DERSA: {utils.from_float_to_string(self.multas_dersa, 2)}\n* Multas DER: {utils.from_float_to_string(self.multas_der, 2)}\n* Multas PRF: {utils.from_float_to_string(self.multas_prf, 2)}\n* Data de Licenciamento: {utils.from_date_to_string(self.data_licenciamento)}\n* Exercício do Licenciamento: {utils.from_date_to_string(self.exercicio_licenciamento)}"
+        return f"\nDÉBITOS:\n* Débitos de IPVA: {convert.from_float_to_string(self.debitos_ipva, 2)}\n* Débitos de Licenciamento: {convert.from_float_to_string(self.debitos_licenciamento, 2)}\n* Débitos de DPVAT: {convert.from_float_to_string(self.debitos_dpvat, 2)}\n* Débitos de Multas: {convert.from_float_to_string(self.debitos_multas, 2)}\n* Multas DETRAN: {convert.from_float_to_string(self.multas_detran, 2)}\n* Multas CETESB: {convert.from_float_to_string(self.multas_cetesb, 2)}\n* Multas Municipais: {convert.from_float_to_string(self.multas_municipais, 2)}\n* Multas RENAINF: {convert.from_float_to_string(self.multas_renainf, 2)}\n* Multas DERSA: {convert.from_float_to_string(self.multas_dersa, 2)}\n* Multas DER: {convert.from_float_to_string(self.multas_der, 2)}\n* Multas PRF: {convert.from_float_to_string(self.multas_prf, 2)}\n* Data de Licenciamento: {convert.from_date_to_string(self.data_licenciamento)}\n* Exercício do Licenciamento: {convert.from_date_to_string(self.exercicio_licenciamento)}"
 
 
 class ComunicacaoVenda:
@@ -299,12 +297,12 @@ class ComunicacaoVenda:
         data_comunicado = comunicacao_venda_tag.find("DATACOMUNICACAO").text
         data_venda = comunicacao_venda_tag.find("DATADEVENDAS").text
 
-        self.comunicado = utils.to_string(comunicado)
-        self.data_comunicado = utils.to_datetime(data_comunicado)
-        self.data_venda = utils.to_datetime(data_venda)
+        self.comunicado = convert.to_string(comunicado)
+        self.data_comunicado = convert.to_datetime(data_comunicado)
+        self.data_venda = convert.to_datetime(data_venda)
 
     def to_string(self):
-        return f"\nCOMUNICAÇÃO DE VENDA:\n* Comunicado: {self.comunicado}\n* Data Comunicado: {utils.from_datetime_to_string(self.data_comunicado)}\n* Data Venda: {utils.from_datetime_to_string(self.data_venda)}"
+        return f"\nCOMUNICAÇÃO DE VENDA:\n* Comunicado: {self.comunicado}\n* Data Comunicado: {convert.from_datetime_to_string(self.data_comunicado)}\n* Data Venda: {convert.from_datetime_to_string(self.data_venda)}"
 
 
 class Proprietario:
@@ -312,8 +310,8 @@ class Proprietario:
         nome = proprietario_tag.find("PROPRIETARIO_ATUAL").text
         documento = proprietario_tag.find("DOCUMENTO").text
 
-        self.nome = utils.to_string(nome)
-        self.documento = utils.to_string(documento)
+        self.nome = convert.to_string(nome)
+        self.documento = convert.to_string(documento)
 
     def to_string(self):
         return f"\nPROPRIETÁRIO:\n* Nome: {self.nome}\n* Documento: {self.documento}"

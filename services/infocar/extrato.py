@@ -1,4 +1,4 @@
-import utils
+import convert
 import requests
 import xml.etree.ElementTree as ET
 from services.base.logger import Logger
@@ -72,12 +72,12 @@ def get_body(endpoint, dia, mes, ano, key):
     return f"""<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Body>
-            <Extrato xmlns="http://tempuri.org/">
-                <ano>2023</ano>
-                <mes>05</mes>
-                <dia>18</dia>
-                <chave>alI0RkoxU3c6S2I0amw4eVg=</chave>
-            </Extrato>
+            <{endpoint} xmlns="http://tempuri.org/">
+                <ano>{ano}</ano>
+                <mes>{mes}</mes>
+                <dia>{dia}</dia>
+                <chave>{key}</chave>
+            </{endpoint}>
         </soap:Body>
     </soap:Envelope>"""
 
@@ -105,7 +105,7 @@ class Extrato:
         self.resposta = Resposta(resposta_tag)
 
     def to_string(self):
-        logger.debug(f"""{self.solicitacao.to_string()}{self.resposta.to_string()}""")
+        return f"{self.solicitacao.to_string()}{self.resposta.to_string()}"
 
 
 class Solicitacao:
@@ -133,14 +133,14 @@ class Solicitacao:
             case _:
                 mensagem_extenso = "Erro Desconhecido"
 
-        self.dado = utils.to_date(dado)
-        self.numero_resposta = utils.to_string(numero_resposta)
-        self.tempo = utils.to_float(tempo, "US")
-        self.mensagem = utils.to_string(mensagem_extenso)
-        self.horario = utils.to_datetime(horario)
+        self.dado = convert.to_date(dado)
+        self.numero_resposta = convert.to_string(numero_resposta)
+        self.tempo = convert.to_float(tempo, "US")
+        self.mensagem = convert.to_string(mensagem_extenso)
+        self.horario = convert.to_datetime(horario)
 
     def to_string(self):
-        return f"""\nSOLICITACAO:\n* Dado: {utils.from_date_to_string(self.dado)}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {utils.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Horário: {utils.from_datetime_to_string(self.horario)}"""
+        return f"""\nSOLICITACAO:\n* Dado: {convert.from_date_to_string(self.dado)}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Horário: {convert.from_datetime_to_string(self.horario)}"""
 
 
 class Resposta:
@@ -150,10 +150,10 @@ class Resposta:
         quantidade = resposta_tag.find("QTD").text
         link = resposta_tag.find("LINK").text
 
-        self.usuario = utils.to_string(usuario)
-        self.data = utils.to_date(data)
-        self.quantidade = utils.to_int(quantidade)
-        self.link = utils.to_string(link)
+        self.usuario = convert.to_string(usuario)
+        self.data = convert.to_date(data)
+        self.quantidade = convert.to_int(quantidade)
+        self.link = convert.to_string(link)
 
     def to_string(self):
-        return f"""\nRESPOSTA:\n* Usuário: {self.usuario}\n* Data: {utils.from_date_to_string(self.data)}\n* Tempo: {utils.from_int_to_string(self.quantidade)}\n* Link: {self.link}"""
+        return f"""\nRESPOSTA:\n* Usuário: {self.usuario}\n* Data: {convert.from_date_to_string(self.data)}\n* Quantidade: {convert.from_int_to_string(self.quantidade)}\n* Link: {self.link}"""
