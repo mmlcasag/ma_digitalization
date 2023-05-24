@@ -50,9 +50,17 @@ class CodificadorFipe:
             if precificador_tag.tag == "FIPES":
                 tabelas_fipe_tag = child
 
-        self.solicitacao = Solicitacao(solicitacao_tag)
-        self.dados_veiculo = DadosVeiculo(dados_veiculo_tag)
-        self.tabelas_fipe = Precificadores(tabelas_fipe_tag)
+        if solicitacao_tag is not None:
+            self.solicitacao = Solicitacao(solicitacao_tag)
+        if self.solicitacao.mensagem != "1":
+            raise Exception(
+                f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
+            )
+
+        if dados_veiculo_tag is not None:
+            self.dados_veiculo = DadosVeiculo(dados_veiculo_tag)
+        if tabelas_fipe_tag is not None:
+            self.tabelas_fipe = Precificadores(tabelas_fipe_tag)
 
     def to_string(self):
         return f"{self.solicitacao.to_string()}{self.dados_veiculo.to_string()}{self.tabelas_fipe.to_string()}"
@@ -86,11 +94,12 @@ class Solicitacao:
         self.dado = convert.to_string(dado)
         self.numero_resposta = convert.to_string(numero_resposta)
         self.tempo = convert.to_float(tempo, "US")
-        self.mensagem = convert.to_string(mensagem_extenso)
+        self.mensagem = convert.to_string(mensagem)
+        self.mensagem_extenso = convert.to_string(mensagem_extenso)
         self.horario = convert.to_datetime(horario)
 
     def to_string(self):
-        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo,4)}\n* Mensagem: {self.mensagem}\n* Horário: {convert.from_datetime_to_string(self.horario)}"
+        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo,4)}\n* Mensagem: {self.mensagem}\n* Mensagem Extenso: {self.mensagem_extenso}\n* Horário: {convert.from_datetime_to_string(self.horario)}"
 
 
 class DadosVeiculo:
@@ -140,13 +149,13 @@ class DadosVeiculo:
         self.cmt = convert.to_int(cmt)
         self.tipo_veiculo = convert.to_string(tipo_veiculo)
         self.tipo_carroceria = convert.to_string(tipo_carroceria)
-        self.motor = convert.to_int(motor)
-        self.cambio = convert.to_int(cambio)
-        self.eixo_traseiro = convert.to_int(eixo_traseiro)
+        self.motor = convert.to_string(motor)
+        self.cambio = convert.to_string(cambio)
+        self.eixo_traseiro = convert.to_string(eixo_traseiro)
         self.carroceria = convert.to_string(carroceria)
 
     def to_string(self):
-        return f"\nDADOS VEICULO:\n* Procedência: {self.procedencia}\n* Município: {self.municipio}\n* UF: {self.uf}\n* Placa: {self.placa}\n* Chassi: {self.chassi}\n* Situação do Chassi: {self.situacao_chassi}\n* Marca/Modelo: {self.marca_modelo}\n* Ano: {self.ano}\n* Capacidade de Carga: {convert.from_int_to_string(self.capacidade_carga)}\n* Combustível: {self.combustivel}\n* Cor: {self.cor}\n* Potência: {convert.from_int_to_string(self.potencia)}\n* Cilindradas: {convert.from_int_to_string(self.cilindradas)}\n* Máximo de Passageiros: {convert.from_int_to_string(self.max_passageiros)}\n* Tipo de Montagem: {self.tipo_montagem}\n* Eixos: {convert.from_int_to_string(self.eixos)}\n* PBT: {convert.from_int_to_string(self.pbt)}\n* CMT: {convert.from_int_to_string(self.cmt)}\n* Tipo Veículo: {self.tipo_veiculo}\n* Tipo Carroceria: {self.tipo_carroceria}\n* Motor: {convert.from_int_to_string(self.motor)}\n* Câmbio: {convert.from_int_to_string(self.cambio)}\n* Eixo Traseiro: {convert.from_int_to_string(self.eixo_traseiro)}\n* Carroceria: {self.carroceria}"
+        return f"\nDADOS VEICULO:\n* Procedência: {self.procedencia}\n* Município: {self.municipio}\n* UF: {self.uf}\n* Placa: {self.placa}\n* Chassi: {self.chassi}\n* Situação do Chassi: {self.situacao_chassi}\n* Marca/Modelo: {self.marca_modelo}\n* Ano: {self.ano}\n* Capacidade de Carga: {convert.from_int_to_string(self.capacidade_carga)}\n* Combustível: {self.combustivel}\n* Cor: {self.cor}\n* Potência: {convert.from_int_to_string(self.potencia)}\n* Cilindradas: {convert.from_int_to_string(self.cilindradas)}\n* Máximo de Passageiros: {convert.from_int_to_string(self.max_passageiros)}\n* Tipo de Montagem: {self.tipo_montagem}\n* Eixos: {convert.from_int_to_string(self.eixos)}\n* PBT: {convert.from_int_to_string(self.pbt)}\n* CMT: {convert.from_int_to_string(self.cmt)}\n* Tipo Veículo: {self.tipo_veiculo}\n* Tipo Carroceria: {self.tipo_carroceria}\n* Motor: {self.motor}\n* Câmbio: {self.cambio}\n* Eixo Traseiro: {self.eixo_traseiro}\n* Carroceria: {self.carroceria}"
 
 
 class Precificadores:

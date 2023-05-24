@@ -2,7 +2,7 @@ import convert
 import requests
 import xml.etree.ElementTree as ET
 from services.base.logger import Logger
-from datetime import date, timedelta
+from datetime import date
 
 logger = Logger.__call__().get_logger()
 
@@ -34,16 +34,15 @@ def request_endpoint(endpoint):
 
 
 def make_request(endpoint):
-    yesterday = date.today() - timedelta(days=1)
+    today = date.today()
 
     url = get_url()
     headers = get_headers()
     key = get_key()
     body = get_body(
         endpoint,
-        yesterday.strftime("%d"),
-        yesterday.strftime("%m"),
-        yesterday.strftime("%Y"),
+        today.strftime("%m"),
+        today.strftime("%Y"),
         key,
     )
 
@@ -68,14 +67,13 @@ def get_key():
     return "alI0RkoxU3c6S2I0amw4eVg="
 
 
-def get_body(endpoint, dia, mes, ano, key):
+def get_body(endpoint, mes, ano, key):
     return f"""<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Body>
             <{endpoint} xmlns="http://tempuri.org/">
                 <ano>{ano}</ano>
                 <mes>{mes}</mes>
-                <dia>{dia}</dia>
                 <chave>{key}</chave>
             </{endpoint}>
         </soap:Body>
@@ -101,8 +99,15 @@ class Extrato:
                             if child.tag == "RESPOSTA":
                                 resposta_tag = child
 
-        self.solicitacao = Solicitacao(solicitacao_tag)
-        self.resposta = Resposta(resposta_tag)
+        if solicitacao_tag is not None:
+            self.solicitacao = Solicitacao(solicitacao_tag)
+        if self.solicitacao.mensagem != "1":
+            raise Exception(
+                f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
+            )
+
+        if resposta_tag is not None:
+            self.resposta = Resposta(resposta_tag)
 
     def to_string(self):
         return f"{self.solicitacao.to_string()}{self.resposta.to_string()}"
@@ -133,27 +138,31 @@ class Solicitacao:
             case _:
                 mensagem_extenso = "Erro Desconhecido"
 
-        self.dado = convert.to_date(dado)
+        self.dado = convert.to_string(dado)
         self.numero_resposta = convert.to_string(numero_resposta)
         self.tempo = convert.to_float(tempo, "US")
-        self.mensagem = convert.to_string(mensagem_extenso)
+        self.mensagem = convert.to_string(mensagem)
+        self.mensagem_extenso = convert.to_string(mensagem_extenso)
         self.horario = convert.to_datetime(horario)
 
     def to_string(self):
-        return f"""\nSOLICITACAO:\n* Dado: {convert.from_date_to_string(self.dado)}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Horário: {convert.from_datetime_to_string(self.horario)}"""
+        return f"""\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Mensagem Extenso: {self.mensagem_extenso}\n* Horário: {convert.from_datetime_to_string(self.horario)}"""
 
 
 class Resposta:
     def __init__(self, resposta_tag):
-        usuario = resposta_tag.find("USUARIO").text
-        data = resposta_tag.find("DATA").text
-        quantidade = resposta_tag.find("QTD").text
-        link = resposta_tag.find("LINK").text
+        today = date.today()
+        quantidade = 0
+
+        for child in resposta_tag:
+            if child.tag == "USUARIO":
+                usuario = child.text
+            if child.tag == "QTD":
+                quantidade += convert.to_int(child.text)
 
         self.usuario = convert.to_string(usuario)
-        self.data = convert.to_date(data)
-        self.quantidade = convert.to_int(quantidade)
-        self.link = convert.to_string(link)
+        self.mes = convert.to_string(today.strftime("%m/%Y"))
+        self.quantidade = quantidade
 
     def to_string(self):
-        return f"""\nRESPOSTA:\n* Usuário: {self.usuario}\n* Data: {convert.from_date_to_string(self.data)}\n* Quantidade: {convert.from_int_to_string(self.quantidade)}\n* Link: {self.link}"""
+        return f"""\nRESPOSTA:\n* Usuário: {self.usuario}\n* Mês: {self.mes}\n* Quantidade: {convert.from_int_to_string(self.quantidade)}"""

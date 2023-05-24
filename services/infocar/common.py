@@ -12,21 +12,25 @@ def request_endpoint(endpoint, placa, chassi):
     type = get_type(placa, chassi)
 
     try:
-        logger.info(f"Requisitando o endpoint {endpoint} com {type}: {data}")
         for i in range(5):
             try:
-                logger.info(f"Tentativa {(i + 1)}/5")
-
-                return make_request(endpoint, data, type)
+                logger.info(
+                    f"Requisitando o endpoint {endpoint} com {type}: {data} - Tentativa {(i + 1)}/5"
+                )
+                response = make_request(endpoint, data, type)
+                logger.debug(f"Resposta: {response}")
+                return response
             except requests.exceptions.Timeout:
                 logger.warning("Ocorreu timeout")
 
                 if (i + 1) == 5:
                     raise Exception("Atingiu o limite de tentativas")
-            except Exception:
+            except Exception as error:
+                logger.error(error)
                 raise
     except Exception as error:
         logger.error(error)
+        raise
 
 
 def make_request(endpoint, data, type):

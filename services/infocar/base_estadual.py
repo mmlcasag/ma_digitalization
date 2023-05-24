@@ -72,14 +72,29 @@ class BaseEstadual:
                 if child.tag == "PROPRIETARIO_S_":
                     proprietario_tag = child
 
-        self.solicitacao = Solicitacao(solicitacao_tag)
-        self.dados_veiculo = DadosVeiculo(dados_veiculo_tag)
-        self.especificacoes = Especificacoes(especificacoes_tag)
-        self.restricoes = Restricoes(restricoes_tag, restricoes_arr)
-        self.intencao_financiamento = IntencaoFinanciamento(intencao_financiamento_tag)
-        self.debitos = Debitos(debitos_tag)
-        self.comunicacao_venda = ComunicacaoVenda(comunicacao_venda_tag)
-        self.proprietario = Proprietario(proprietario_tag)
+        if solicitacao_tag is not None:
+            self.solicitacao = Solicitacao(solicitacao_tag)
+        if self.solicitacao.mensagem != "1":
+            raise Exception(
+                f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
+            )
+
+        if dados_veiculo_tag is not None:
+            self.dados_veiculo = DadosVeiculo(dados_veiculo_tag)
+        if especificacoes_tag is not None:
+            self.especificacoes = Especificacoes(especificacoes_tag)
+        if restricoes_tag is not None:
+            self.restricoes = Restricoes(restricoes_tag, restricoes_arr)
+        if intencao_financiamento_tag is not None:
+            self.intencao_financiamento = IntencaoFinanciamento(
+                intencao_financiamento_tag
+            )
+        if debitos_tag is not None:
+            self.debitos = Debitos(debitos_tag)
+        if comunicacao_venda_tag is not None:
+            self.comunicacao_venda = ComunicacaoVenda(comunicacao_venda_tag)
+        if proprietario_tag is not None:
+            self.proprietario = Proprietario(proprietario_tag)
 
     def to_string(self):
         return f"{self.solicitacao.to_string()}{self.dados_veiculo.to_string()}{self.especificacoes.to_string()}{self.restricoes.to_string()}{self.intencao_financiamento.to_string()}{self.debitos.to_string()}{self.comunicacao_venda.to_string()}{self.proprietario.to_string()}"
@@ -113,11 +128,12 @@ class Solicitacao:
         self.dado = convert.to_string(dado)
         self.numero_resposta = convert.to_string(numero_resposta)
         self.tempo = convert.to_float(tempo, "US")
-        self.mensagem = convert.to_string(mensagem_extenso)
+        self.mensagem = convert.to_string(mensagem)
+        self.mensagem_extenso = convert.to_string(mensagem_extenso)
         self.horario = convert.to_datetime(horario)
 
     def to_string(self):
-        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Horário: {convert.from_datetime_to_string(self.horario)}"
+        return f"\nSOLICITACAO:\n* Dado: {self.dado}\n* Número Resposta: {self.numero_resposta}\n* Tempo: {convert.from_float_to_string(self.tempo, 4)}\n* Mensagem: {self.mensagem}\n* Mensagem Extenso: {self.mensagem_extenso}\n* Horário: {convert.from_datetime_to_string(self.horario)}"
 
 
 class DadosVeiculo:
@@ -177,17 +193,17 @@ class Especificacoes:
         num_docto_faturado = especificacoes_tag.find("DOCUMENTOFATURADO").text
         uf_docto_faturado = especificacoes_tag.find("UFFATURADO").text
 
-        self.motor = convert.to_int(motor)
-        self.cambio = convert.to_int(cambio)
+        self.motor = convert.to_string(motor)
+        self.cambio = convert.to_string(cambio)
         self.passageiros = convert.to_int(passageiros)
         self.potencia = convert.to_int(potencia)
         self.eixos = convert.to_int(eixos)
         self.carga = convert.to_int(carga)
         self.cmt = convert.to_int(cmt)
         self.pbt = convert.to_int(pbt)
-        self.num_carroceria = convert.to_int(num_carroceria)
-        self.eixo_traseiro = convert.to_int(eixo_traseiro)
-        self.terceiro_eixo = convert.to_int(terceiro_eixo)
+        self.num_carroceria = convert.to_string(num_carroceria)
+        self.eixo_traseiro = convert.to_string(eixo_traseiro)
+        self.terceiro_eixo = convert.to_string(terceiro_eixo)
         self.cilindradas = convert.to_int(cilindradas)
         self.especie = convert.to_string(especie)
         self.categoria = convert.to_string(categoria)
@@ -200,7 +216,7 @@ class Especificacoes:
         self.uf_docto_faturado = convert.to_string(uf_docto_faturado)
 
     def to_string(self):
-        return f"\nESPECIFICAÇÕES:\n* Motor: {convert.from_int_to_string(self.motor)}\n* Câmbio: {convert.from_int_to_string(self.cambio)}\n* Passageiros: {convert.from_int_to_string(self.passageiros)}\n* Potência: {convert.from_int_to_string(self.potencia)}\n* Eixos: {convert.from_int_to_string(self.eixos)}\n* Carga: {convert.from_int_to_string(self.carga)}\n* CMT: {convert.from_int_to_string(self.cmt)}\n* PBT: {convert.from_int_to_string(self.pbt)}\n* Número Carroceria: {convert.from_int_to_string(self.num_carroceria)}\n* Eixo Traseiro: {convert.from_int_to_string(self.eixo_traseiro)}\n* Terceiro Eixo: {convert.from_int_to_string(self.terceiro_eixo)}\n* Cilindradas: {convert.from_int_to_string(self.cilindradas)}\n* Espécie: {self.especie}\n* Categoria: {self.categoria}\n* Carroceria: {self.carroceria}\n* Procedência: {self.procedencia}\n* Data Atualização: {convert.from_date_to_string(self.data_atualizacao)}\n* Situação Chassi: {self.situacao_chassi}\n* Tipo Documento Faturado: {self.tipo_docto_faturado}\n* Número Documento Faturado: {self.num_docto_faturado}\n* UF Documento Faturado: {self.uf_docto_faturado}"
+        return f"\nESPECIFICAÇÕES:\n* Motor: {self.motor}\n* Câmbio: {self.cambio}\n* Passageiros: {convert.from_int_to_string(self.passageiros)}\n* Potência: {convert.from_int_to_string(self.potencia)}\n* Eixos: {convert.from_int_to_string(self.eixos)}\n* Carga: {convert.from_int_to_string(self.carga)}\n* CMT: {convert.from_int_to_string(self.cmt)}\n* PBT: {convert.from_int_to_string(self.pbt)}\n* Número Carroceria: {self.num_carroceria}\n* Eixo Traseiro: {self.eixo_traseiro}\n* Terceiro Eixo: {self.terceiro_eixo}\n* Cilindradas: {convert.from_int_to_string(self.cilindradas)}\n* Espécie: {self.especie}\n* Categoria: {self.categoria}\n* Carroceria: {self.carroceria}\n* Procedência: {self.procedencia}\n* Data Atualização: {convert.from_date_to_string(self.data_atualizacao)}\n* Situação Chassi: {self.situacao_chassi}\n* Tipo Documento Faturado: {self.tipo_docto_faturado}\n* Número Documento Faturado: {self.num_docto_faturado}\n* UF Documento Faturado: {self.uf_docto_faturado}"
 
 
 class Restricoes:
