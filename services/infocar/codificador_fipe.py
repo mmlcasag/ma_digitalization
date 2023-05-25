@@ -56,7 +56,6 @@ class CodificadorFipe:
             raise Exception(
                 f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
             )
-
         if dados_veiculo_tag is not None:
             self.dados_veiculo = DadosVeiculo(dados_veiculo_tag)
         if tabelas_fipe_tag is not None:
@@ -68,11 +67,11 @@ class CodificadorFipe:
 
 class Solicitacao:
     def __init__(self, solicitacao_tag):
-        dado = solicitacao_tag.find("DADO").text
-        numero_resposta = solicitacao_tag.find("NUMERO_RESPOSTA").text
-        tempo = solicitacao_tag.find("TEMPO").text
-        mensagem = solicitacao_tag.find("MENSAGEM").text
-        horario = solicitacao_tag.find("HORARIO").text
+        dado = common.find_element(solicitacao_tag, "DADO")
+        numero_resposta = common.find_element(solicitacao_tag, "NUMERO_RESPOSTA")
+        tempo = common.find_element(solicitacao_tag, "TEMPO")
+        mensagem = common.find_element(solicitacao_tag, "MENSAGEM")
+        horario = common.find_element(solicitacao_tag, "HORARIO")
 
         mensagem_extenso = ""
         match (int(mensagem)):
@@ -104,30 +103,32 @@ class Solicitacao:
 
 class DadosVeiculo:
     def __init__(self, dados_veiculo_tag):
-        procedencia = dados_veiculo_tag.find("PROCEDENCIA").text
-        municipio = dados_veiculo_tag.find("MUNICIPIO").text
-        uf = dados_veiculo_tag.find("UF").text
-        placa = dados_veiculo_tag.find("PLACA").text
-        chassi = dados_veiculo_tag.find("CHASSI").text
-        situacao_chassi = dados_veiculo_tag.find("SITUACAO_DO_CHASSI").text
-        marca_modelo = dados_veiculo_tag.find("MARCA_MODELO").text
-        ano = dados_veiculo_tag.find("ANO").text
-        capacidade_carga = dados_veiculo_tag.find("CAPACIDADE_DE_CARGA").text
-        combustivel = dados_veiculo_tag.find("COMBUSTIVEL").text
-        cor = dados_veiculo_tag.find("COR").text
-        potencia = dados_veiculo_tag.find("POTENCIA").text
-        cilindradas = dados_veiculo_tag.find("CILINDRADAS").text
-        max_passageiros = dados_veiculo_tag.find("QUANTIDADE_PASSAGEIRO").text
-        tipo_montagem = dados_veiculo_tag.find("TIPO_MONTAGEM").text
-        eixos = dados_veiculo_tag.find("QUANTIDADE_DE_EIXOS").text
-        pbt = dados_veiculo_tag.find("PBT").text
-        cmt = dados_veiculo_tag.find("CMT").text
-        tipo_veiculo = dados_veiculo_tag.find("TIPO_DE_VEICULO").text
-        tipo_carroceria = dados_veiculo_tag.find("TIPO_CARROCERIA").text
-        motor = dados_veiculo_tag.find("N_MOTOR").text
-        cambio = dados_veiculo_tag.find("CAIXA_CAMBIO").text
-        eixo_traseiro = dados_veiculo_tag.find("EIXO_TRASEIRO_DIF").text
-        carroceria = dados_veiculo_tag.find("CARROCERIA").text
+        procedencia = common.find_element(dados_veiculo_tag, "PROCEDENCIA")
+        municipio = common.find_element(dados_veiculo_tag, "MUNICIPIO")
+        uf = common.find_element(dados_veiculo_tag, "UF")
+        placa = common.find_element(dados_veiculo_tag, "PLACA")
+        chassi = common.find_element(dados_veiculo_tag, "CHASSI")
+        situacao_chassi = common.find_element(dados_veiculo_tag, "SITUACAO_DO_CHASSI")
+        marca_modelo = common.find_element(dados_veiculo_tag, "MARCA_MODELO")
+        ano = common.find_element(dados_veiculo_tag, "ANO")
+        capacidade_carga = common.find_element(dados_veiculo_tag, "CAPACIDADE_DE_CARGA")
+        combustivel = common.find_element(dados_veiculo_tag, "COMBUSTIVEL")
+        cor = common.find_element(dados_veiculo_tag, "COR")
+        potencia = common.find_element(dados_veiculo_tag, "POTENCIA")
+        cilindradas = common.find_element(dados_veiculo_tag, "CILINDRADAS")
+        max_passageiros = common.find_element(
+            dados_veiculo_tag, "QUANTIDADE_PASSAGEIRO"
+        )
+        tipo_montagem = common.find_element(dados_veiculo_tag, "TIPO_MONTAGEM")
+        eixos = common.find_element(dados_veiculo_tag, "QUANTIDADE_DE_EIXOS")
+        pbt = common.find_element(dados_veiculo_tag, "PBT")
+        cmt = common.find_element(dados_veiculo_tag, "CMT")
+        tipo_veiculo = common.find_element(dados_veiculo_tag, "TIPO_DE_VEICULO")
+        tipo_carroceria = common.find_element(dados_veiculo_tag, "TIPO_CARROCERIA")
+        motor = common.find_element(dados_veiculo_tag, "N_MOTOR")
+        cambio = common.find_element(dados_veiculo_tag, "CAIXA_CAMBIO")
+        eixo_traseiro = common.find_element(dados_veiculo_tag, "EIXO_TRASEIRO_DIF")
+        carroceria = common.find_element(dados_veiculo_tag, "CARROCERIA")
 
         self.procedencia = convert.to_string(procedencia)
         self.municipio = convert.to_string(municipio)
@@ -165,9 +166,11 @@ class Precificadores:
         valores = []
         for tabela_fipe_tag in tabelas_fipe_tag:
             for child in tabela_fipe_tag:
-                codigo = convert.to_string(child.find("CODIGO").text)
-                marca_modelo = convert.to_string(child.find("MARCA_MODELO").text)
-                valor = convert.to_float(child.find("VALOR").text, "US")
+                codigo = convert.to_string(common.find_element(child, "CODIGO"))
+                marca_modelo = convert.to_string(
+                    common.find_element(child, "MARCA_MODELO")
+                )
+                valor = convert.to_float(common.find_element(child, "VALOR"), "US")
 
                 codigos.append(codigo)
                 marcas_modelos.append(marca_modelo)

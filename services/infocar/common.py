@@ -95,3 +95,10 @@ def get_body(endpoint, data, type, key):
             </{endpoint}>
         </soap:Body>
     </soap:Envelope>"""
+
+
+def find_element(datasource, element_name):
+    try:
+        return datasource.find(element_name).text
+    except Exception:
+        return ""

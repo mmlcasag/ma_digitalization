@@ -78,7 +78,6 @@ class BaseEstadual:
             raise Exception(
                 f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
             )
-
         if dados_veiculo_tag is not None:
             self.dados_veiculo = DadosVeiculo(dados_veiculo_tag)
         if especificacoes_tag is not None:
@@ -102,11 +101,11 @@ class BaseEstadual:
 
 class Solicitacao:
     def __init__(self, solicitacao_tag):
-        dado = solicitacao_tag.find("DADO").text
-        numero_resposta = solicitacao_tag.find("NUMERO_RESPOSTA").text
-        tempo = solicitacao_tag.find("TEMPO").text
-        mensagem = solicitacao_tag.find("MENSAGEM").text
-        horario = solicitacao_tag.find("HORARIO").text
+        dado = common.find_element(solicitacao_tag, "DADO")
+        numero_resposta = common.find_element(solicitacao_tag, "NUMERO_RESPOSTA")
+        tempo = common.find_element(solicitacao_tag, "TEMPO")
+        mensagem = common.find_element(solicitacao_tag, "MENSAGEM")
+        horario = common.find_element(solicitacao_tag, "HORARIO")
 
         mensagem_extenso = ""
         match (int(mensagem)):
@@ -138,18 +137,20 @@ class Solicitacao:
 
 class DadosVeiculo:
     def __init__(self, dados_veiculo_tag):
-        placa = dados_veiculo_tag.find("PLACA").text
-        chassi = dados_veiculo_tag.find("CHASSI").text
-        municipio = dados_veiculo_tag.find("MUNICIPIO").text
-        uf = dados_veiculo_tag.find("UF").text
-        municipio_emplacado = dados_veiculo_tag.find("ORIGEM_DE_EMPLACAMENTO").text
-        renavam = dados_veiculo_tag.find("RENAVAM").text
-        cor = dados_veiculo_tag.find("COR").text
-        modelo = dados_veiculo_tag.find("MODELO").text
-        ano_modelo = dados_veiculo_tag.find("ANOMODELO").text
-        ano_fabricacao = dados_veiculo_tag.find("ANOFABRICACAO").text
-        combustivel = dados_veiculo_tag.find("COMBUSTIVEL").text
-        tipo_veiculo = dados_veiculo_tag.find("TIPOVEICULO").text
+        placa = common.find_element(dados_veiculo_tag, "PLACA")
+        chassi = common.find_element(dados_veiculo_tag, "CHASSI")
+        municipio = common.find_element(dados_veiculo_tag, "MUNICIPIO")
+        uf = common.find_element(dados_veiculo_tag, "UF")
+        municipio_emplacado = common.find_element(
+            dados_veiculo_tag, "ORIGEM_DE_EMPLACAMENTO"
+        )
+        renavam = common.find_element(dados_veiculo_tag, "RENAVAM")
+        cor = common.find_element(dados_veiculo_tag, "COR")
+        modelo = common.find_element(dados_veiculo_tag, "MODELO")
+        ano_modelo = common.find_element(dados_veiculo_tag, "ANOMODELO")
+        ano_fabricacao = common.find_element(dados_veiculo_tag, "ANOFABRICACAO")
+        combustivel = common.find_element(dados_veiculo_tag, "COMBUSTIVEL")
+        tipo_veiculo = common.find_element(dados_veiculo_tag, "TIPOVEICULO")
 
         self.placa = convert.to_string(placa)
         self.chassi = convert.to_string(chassi)
@@ -171,27 +172,36 @@ class DadosVeiculo:
 
 class Especificacoes:
     def __init__(self, especificacoes_tag):
-        motor = especificacoes_tag.find("MOTOR").text
-        cambio = especificacoes_tag.find("CAIXADECAMBIO").text
-        passageiros = especificacoes_tag.find("CAPACIDADEDEPASSAGEIROS").text
-        potencia = especificacoes_tag.find("POTENCIA").text
-        eixos = especificacoes_tag.find("QUANTIDADEDEEIXOS").text
-        carga = especificacoes_tag.find("CAPACIDADEDECARGA").text
-        cmt = especificacoes_tag.find("CMT").text
-        pbt = especificacoes_tag.find("PBT").text
-        num_carroceria = especificacoes_tag.find("NCARROCERIA").text
-        eixo_traseiro = especificacoes_tag.find("NDOEIXOTRASEIRODIFERENCIAL").text
-        terceiro_eixo = especificacoes_tag.find("NDOTERCEIROEIXO").text
-        cilindradas = especificacoes_tag.find("CILINDRADAS").text
-        especie = especificacoes_tag.find("ESPECIE").text
-        categoria = especificacoes_tag.find("CATEGORIA").text
-        carroceria = especificacoes_tag.find("CARROCERIA").text
-        procedencia = especificacoes_tag.find("PROCEDENCIA").text
-        data_atualizacao = especificacoes_tag.find("DATAATUALIZACAO").text
-        situacao_chassi = especificacoes_tag.find("SITUACAODOCHASSI").text
-        tipo_docto_faturado = especificacoes_tag.find("TIPODOCUMENTOFATURADO").text
-        num_docto_faturado = especificacoes_tag.find("DOCUMENTOFATURADO").text
-        uf_docto_faturado = especificacoes_tag.find("UFFATURADO").text
+        motor = common.find_element(especificacoes_tag, "MOTOR")
+        cambio = common.find_element(especificacoes_tag, "CAIXADECAMBIO")
+        passageiros = common.find_element(especificacoes_tag, "CAPACIDADEDEPASSAGEIROS")
+        potencia = common.find_element(especificacoes_tag, "POTENCIA")
+        eixos = common.find_element(especificacoes_tag, "QUANTIDADEDEEIXOS")
+        carga = common.find_element(especificacoes_tag, "CAPACIDADEDECARGA")
+        cmt = common.find_element(especificacoes_tag, "CMT")
+        pbt = common.find_element(especificacoes_tag, "PBT")
+        num_carroceria = common.find_element(especificacoes_tag, "NCARROCERIA")
+        eixo_traseiro = common.find_element(
+            especificacoes_tag, "NDOEIXOTRASEIRODIFERENCIAL"
+        )
+        terceiro_eixo = common.find_element(especificacoes_tag, "NDOTERCEIROEIXO")
+        cilindradas = common.find_element(especificacoes_tag, "CILINDRADAS")
+        especie = common.find_element(especificacoes_tag, "ESPECIE")
+        categoria = common.find_element(especificacoes_tag, "CATEGORIA")
+        carroceria = common.find_element(especificacoes_tag, "CARROCERIA")
+        procedencia = common.find_element(especificacoes_tag, "PROCEDENCIA")
+        data_atualizacao = common.find_element(especificacoes_tag, "DATAATUALIZACAO")
+        situacao_chassi = common.find_element(especificacoes_tag, "SITUACAODOCHASSI")
+        tipo_docto_faturado = common.find_element(
+            especificacoes_tag, "TIPODOCUMENTOFATURADO"
+        )
+        num_docto_faturado = common.find_element(
+            especificacoes_tag, "DOCUMENTOFATURADO"
+        )
+        uf_docto_faturado = common.find_element(especificacoes_tag, "UFFATURADO")
+
+        if cilindradas == "":
+            cilindradas = common.find_element(especificacoes_tag, "NUMERO_CILINDRADAS")
 
         self.motor = convert.to_string(motor)
         self.cambio = convert.to_string(cambio)
@@ -221,8 +231,8 @@ class Especificacoes:
 
 class Restricoes:
     def __init__(self, restricoes_tag, restricoes_arr):
-        situacao_veiculo = restricoes_tag.find("SITUACAO_VEICULO").text
-        roubo_furto = restricoes_tag.find("ROUBO_E_FURTO").text
+        situacao_veiculo = common.find_element(restricoes_tag, "SITUACAO_VEICULO")
+        roubo_furto = common.find_element(restricoes_tag, "ROUBO_E_FURTO")
 
         self.situacao_veiculo = convert.to_string(situacao_veiculo)
         self.roubo_furto = convert.to_string(roubo_furto)
@@ -242,21 +252,27 @@ class Restricoes:
 
 class IntencaoFinanciamento:
     def __init__(self, intencao_financiamento_tag):
-        nome_financiado = intencao_financiamento_tag.find("NOMEDOFINANCIADO").text
-        docto_financiado = intencao_financiamento_tag.find("DOCUMENTOFINANCIADO").text
-        restricao_documento = intencao_financiamento_tag.find(
-            "RESTRICAODOCUMENTOARRENDATARIO"
-        ).text
-        data_inclusao = intencao_financiamento_tag.find("DATAINCLUSAO").text
-        cod_financeira = intencao_financiamento_tag.find("CODIGOAGENTEFINANCEIRO").text
-        nome_financeira = intencao_financiamento_tag.find("AGENTE").text
-        restricao_financeira = intencao_financiamento_tag.find(
-            "RESTRICAOFINANCEIRA"
-        ).text
-        num_contrato = intencao_financiamento_tag.find("NCONTRATO").text
-        dat_vigencia_contrato = intencao_financiamento_tag.find(
-            "DATADAVIGENCIADOCONTRATOFINANCEIRA"
-        ).text
+        nome_financiado = common.find_element(
+            intencao_financiamento_tag, "NOMEDOFINANCIADO"
+        )
+        docto_financiado = common.find_element(
+            intencao_financiamento_tag, "DOCUMENTOFINANCIADO"
+        )
+        restricao_documento = common.find_element(
+            intencao_financiamento_tag, "RESTRICAODOCUMENTOARRENDATARIO"
+        )
+        data_inclusao = common.find_element(intencao_financiamento_tag, "DATAINCLUSAO")
+        cod_financeira = common.find_element(
+            intencao_financiamento_tag, "CODIGOAGENTEFINANCEIRO"
+        )
+        nome_financeira = common.find_element(intencao_financiamento_tag, "AGENTE")
+        restricao_financeira = common.find_element(
+            intencao_financiamento_tag, "RESTRICAOFINANCEIRA"
+        )
+        num_contrato = common.find_element(intencao_financiamento_tag, "NCONTRATO")
+        dat_vigencia_contrato = common.find_element(
+            intencao_financiamento_tag, "DATADAVIGENCIADOCONTRATOFINANCEIRA"
+        )
 
         self.nome_financiado = convert.to_string(nome_financiado)
         self.docto_financiado = convert.to_string(docto_financiado)
@@ -274,19 +290,23 @@ class IntencaoFinanciamento:
 
 class Debitos:
     def __init__(self, debitos_tag):
-        debitos_ipva = debitos_tag.find("DEBITOSDEIPVA").text
-        debitos_licenciamento = debitos_tag.find("DEBITOSDELICENCIAMENTO").text
-        debitos_dpvat = debitos_tag.find("DEBITOSDEDPVAT").text
-        debitos_multas = debitos_tag.find("DEBITOSDEMULTAS").text
-        multas_detran = debitos_tag.find("MULTASDETRAN").text
-        multas_cetesb = debitos_tag.find("MULTASCETESB").text
-        multas_municipais = debitos_tag.find("MULTASMUNICIPAIS").text
-        multas_renainf = debitos_tag.find("MULTASRENAINF").text
-        multas_dersa = debitos_tag.find("MULTASDERSA").text
-        multas_der = debitos_tag.find("MULTASDER").text
-        multas_prf = debitos_tag.find("MULTASPOLICIARODOVIARIAFEDERAL").text
-        data_licenciamento = debitos_tag.find("DATALICENCIAMENTO").text
-        exercicio_licenciamento = debitos_tag.find("EXERCICIOLICENCIAMENTO").text
+        debitos_ipva = common.find_element(debitos_tag, "DEBITOSDEIPVA")
+        debitos_licenciamento = common.find_element(
+            debitos_tag, "DEBITOSDELICENCIAMENTO"
+        )
+        debitos_dpvat = common.find_element(debitos_tag, "DEBITOSDEDPVAT")
+        debitos_multas = common.find_element(debitos_tag, "DEBITOSDEMULTAS")
+        multas_detran = common.find_element(debitos_tag, "MULTASDETRAN")
+        multas_cetesb = common.find_element(debitos_tag, "MULTASCETESB")
+        multas_municipais = common.find_element(debitos_tag, "MULTASMUNICIPAIS")
+        multas_renainf = common.find_element(debitos_tag, "MULTASRENAINF")
+        multas_dersa = common.find_element(debitos_tag, "MULTASDERSA")
+        multas_der = common.find_element(debitos_tag, "MULTASDER")
+        multas_prf = common.find_element(debitos_tag, "MULTASPOLICIARODOVIARIAFEDERAL")
+        data_licenciamento = common.find_element(debitos_tag, "DATALICENCIAMENTO")
+        exercicio_licenciamento = common.find_element(
+            debitos_tag, "EXERCICIOLICENCIAMENTO"
+        )
 
         self.debitos_ipva = convert.to_float(debitos_ipva, "BR")
         self.debitos_licenciamento = convert.to_float(debitos_licenciamento, "BR")
@@ -309,9 +329,9 @@ class Debitos:
 
 class ComunicacaoVenda:
     def __init__(self, comunicacao_venda_tag):
-        comunicado = comunicacao_venda_tag.find("COMUNICACAODEVENDAS").text
-        data_comunicado = comunicacao_venda_tag.find("DATACOMUNICACAO").text
-        data_venda = comunicacao_venda_tag.find("DATADEVENDAS").text
+        comunicado = common.find_element(comunicacao_venda_tag, "COMUNICACAODEVENDAS")
+        data_comunicado = common.find_element(comunicacao_venda_tag, "DATACOMUNICACAO")
+        data_venda = common.find_element(comunicacao_venda_tag, "DATADEVENDAS")
 
         self.comunicado = convert.to_string(comunicado)
         self.data_comunicado = convert.to_datetime(data_comunicado)
@@ -323,8 +343,13 @@ class ComunicacaoVenda:
 
 class Proprietario:
     def __init__(self, proprietario_tag):
-        nome = proprietario_tag.find("PROPRIETARIO_ATUAL").text
-        documento = proprietario_tag.find("DOCUMENTO").text
+        nome = common.find_element(proprietario_tag, "PROPRIETARIO_ATUAL")
+        documento = common.find_element(proprietario_tag, "DOCUMENTO")
+
+        if nome == "":
+            nome = common.find_element(proprietario_tag, "PROP_ATUAL")
+        if documento == "":
+            documento = common.find_element(proprietario_tag, "DOC_PROP_ATUAL")
 
         self.nome = convert.to_string(nome)
         self.documento = convert.to_string(documento)

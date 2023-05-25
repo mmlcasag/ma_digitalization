@@ -1,3 +1,4 @@
+import common
 import convert
 import requests
 import xml.etree.ElementTree as ET
@@ -105,7 +106,6 @@ class Extrato:
             raise Exception(
                 f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
             )
-
         if resposta_tag is not None:
             self.resposta = Resposta(resposta_tag)
 
@@ -115,11 +115,11 @@ class Extrato:
 
 class Solicitacao:
     def __init__(self, solicitacao_tag):
-        dado = solicitacao_tag.find("DADO").text
-        numero_resposta = solicitacao_tag.find("NUMERO_RESPOSTA").text
-        tempo = solicitacao_tag.find("TEMPO").text
-        mensagem = solicitacao_tag.find("MENSAGEM").text
-        horario = solicitacao_tag.find("HORARIO").text
+        dado = common.find_element(solicitacao_tag, "DADO")
+        numero_resposta = common.find_element(solicitacao_tag, "NUMERO_RESPOSTA")
+        tempo = common.find_element(solicitacao_tag, "TEMPO")
+        mensagem = common.find_element(solicitacao_tag, "MENSAGEM")
+        horario = common.find_element(solicitacao_tag, "HORARIO")
 
         mensagem_extenso = ""
         match (int(mensagem)):

@@ -51,6 +51,10 @@ def to_date(original_input):
 
     if str_input == "":
         return None
+    if str_input == "0000":
+        return None
+    if str_input == "00000000":
+        return None
 
     if len(str_input) == 4:
         try:
@@ -82,6 +86,10 @@ def to_datetime(original_input):
     str_input = to_string(original_input)
 
     if str_input == "":
+        return None
+    if str_input == "0000":
+        return None
+    if str_input == "00000000":
         return None
 
     if len(str_input) == 4:
