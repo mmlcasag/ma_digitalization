@@ -303,15 +303,9 @@ class InfocarConverter(SpreadsheetConverter):
                     )
 
         df = pandas.DataFrame(temp_list, columns=df_columns)
-
-        if os.path.isfile(self._output_xlsx_file):
-            append_data = pandas.read_excel(
-                self._output_xlsx_file, sheet_name="Listagem"
-            )
-            df = pandas.concat([append_data, df])
-
-        writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
-
+        writer = pandas.ExcelWriter(
+            file.replace("input", "output/xlsx"), engine="xlsxwriter"
+        )
         df.to_excel(writer, sheet_name="Listagem", index=False)
         writer.close()
 
@@ -654,15 +648,9 @@ class InfocarConverter(SpreadsheetConverter):
                     )
 
         df = pandas.DataFrame(temp_list, columns=df_columns)
-
-        if os.path.isfile(self._output_xlsx_file):
-            append_data = pandas.read_excel(
-                self._output_xlsx_file, sheet_name="Listagem"
-            )
-            df = pandas.concat([append_data, df])
-
-        writer = pandas.ExcelWriter(self._output_xlsx_file, engine="xlsxwriter")
-
+        writer = pandas.ExcelWriter(
+            file.replace("input", "output/xlsx"), engine="xlsxwriter"
+        )
         df.to_excel(writer, sheet_name="Listagem", index=False)
         writer.close()
 
