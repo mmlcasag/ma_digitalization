@@ -29,26 +29,29 @@ class CodificadorFipe:
         tabelas_fipe_tag = None
 
         envelope_tag = ET.fromstring(infocar_response)
-        for body_tag in envelope_tag:
-            for response_tag in body_tag:
-                for result_tag in response_tag:
-                    for info_xml_tag in result_tag:
-                        for child in info_xml_tag:
-                            if child.tag == "SOLICITACAO":
-                                solicitacao_tag = child
-                            if child.tag == "RESPOSTA":
-                                resposta_tag = child
+        if envelope_tag is not None:
+            for body_tag in envelope_tag:
+                for response_tag in body_tag:
+                    for result_tag in response_tag:
+                        for info_xml_tag in result_tag:
+                            for child in info_xml_tag:
+                                if child.tag == "SOLICITACAO":
+                                    solicitacao_tag = child
+                                if child.tag == "RESPOSTA":
+                                    resposta_tag = child
 
-        for infocar_codificacao_tag in resposta_tag:
-            for child in infocar_codificacao_tag:
-                if child.tag == "DADOS_DO_VEICULO":
-                    dados_veiculo_tag = child
-                if child.tag == "PRECIFICADORES":
-                    precificadores_tag = child
+        if resposta_tag is not None:
+            for infocar_codificacao_tag in resposta_tag:
+                for child in infocar_codificacao_tag:
+                    if child.tag == "DADOS_DO_VEICULO":
+                        dados_veiculo_tag = child
+                    if child.tag == "PRECIFICADORES":
+                        precificadores_tag = child
 
-        for precificador_tag in precificadores_tag:
-            if precificador_tag.tag == "FIPES":
-                tabelas_fipe_tag = child
+        if precificadores_tag is not None:
+            for precificador_tag in precificadores_tag:
+                if precificador_tag.tag == "FIPES":
+                    tabelas_fipe_tag = child
 
         if solicitacao_tag is not None:
             self.solicitacao = Solicitacao(solicitacao_tag)

@@ -90,15 +90,16 @@ class Extrato:
         resposta_tag = None
 
         envelope_tag = ET.fromstring(infocar_response)
-        for body_tag in envelope_tag:
-            for response_tag in body_tag:
-                for result_tag in response_tag:
-                    for info_xml_tag in result_tag:
-                        for child in info_xml_tag:
-                            if child.tag == "SOLICITACAO":
-                                solicitacao_tag = child
-                            if child.tag == "RESPOSTA":
-                                resposta_tag = child
+        if envelope_tag is not None:
+            for body_tag in envelope_tag:
+                for response_tag in body_tag:
+                    for result_tag in response_tag:
+                        for info_xml_tag in result_tag:
+                            for child in info_xml_tag:
+                                if child.tag == "SOLICITACAO":
+                                    solicitacao_tag = child
+                                if child.tag == "RESPOSTA":
+                                    resposta_tag = child
 
         if solicitacao_tag is not None:
             self.solicitacao = Solicitacao(solicitacao_tag)
