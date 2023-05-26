@@ -301,6 +301,7 @@ class InfocarConverter(SpreadsheetConverter):
                     logger.info(
                         "Registro adicionado à planilha de saída descrevendo erro encontrado durante o processamento"
                     )
+                    logger.error(f"Motivo do erro: {error}")
 
         df = pandas.DataFrame(temp_list, columns=df_columns)
         writer = pandas.ExcelWriter(
@@ -330,6 +331,27 @@ class InfocarConverter(SpreadsheetConverter):
             "Tipo Combustível",
             "Origem",
             "Valor Tabela FIPE",
+            "Fonte da Consulta",
+            "Cilindrada",
+            "Situação Veículo",
+            "Tipo de Remarcação do Chassi",
+            "Espécie",
+            "Carroceria",
+            "Potência",
+            "Município",
+            "Nº Motor",
+            "Procedência do Veículo",
+            "Capacidade de Carga",
+            "Capacidade de Passageiros",
+            "Nº Carroceria",
+            "Nº Caixa de Câmbio",
+            "Nº Eixos",
+            "Terceiro Eixo",
+            "Eixo Traseiro Diferencial",
+            "Montagem",
+            "CMT",
+            "PBT",
+            "Observações Gerais",
             "Chave de Ignição",
             "Tipo de Câmbio",
             "KM",
@@ -531,6 +553,31 @@ class InfocarConverter(SpreadsheetConverter):
                     )
                     logger.debug(f"Montagem: {montagem}")
 
+                    tipo_combustivel_padronizado = (
+                        dados_base_estadual.dados_veiculo.combustivel
+                    )
+                    if dados_base_estadual.dados_veiculo.combustivel == "ALCOOL":
+                        tipo_combustivel_padronizado = "Álcool (alcool)"
+                    if dados_base_estadual.dados_veiculo.combustivel == "DIESEL":
+                        tipo_combustivel_padronizado = "Diesel (diesel)"
+                    if dados_base_estadual.dados_veiculo.combustivel == "GASOLINA":
+                        tipo_combustivel_padronizado = "Gasolina (gasolina)"
+                    if dados_base_estadual.dados_veiculo.combustivel == "ALCO/GASOL":
+                        tipo_combustivel_padronizado = (
+                            "Gasolina e Álcool (gasolinaealcool)"
+                        )
+                    if dados_base_estadual.dados_veiculo.combustivel == "ALCOOL-GASOL":
+                        tipo_combustivel_padronizado = (
+                            "Gasolina e Álcool (gasolinaealcool)"
+                        )
+                    if (
+                        dados_base_estadual.dados_veiculo.combustivel
+                        == "ALCOOL/GASOLINA"
+                    ):
+                        tipo_combustivel_padronizado = (
+                            "Gasolina e Álcool (gasolinaealcool)"
+                        )
+
                     append_data = {
                         "Proprietário/CNPJ (Proprietário do documento)": dados_base_estadual.proprietario.nome
                         + " / "
@@ -553,38 +600,81 @@ class InfocarConverter(SpreadsheetConverter):
                         "Chassi": dados_base_estadual.dados_veiculo.chassi,
                         "Renavam": dados_base_estadual.dados_veiculo.renavam,
                         "Cor": dados_base_estadual.dados_veiculo.cor,
-                        "Tipo Combustível": dados_base_estadual.dados_veiculo.combustivel,
-                        "Origem": "Script Python Infocar",
+                        "Tipo Combustível": tipo_combustivel_padronizado,
+                        "Origem": dados_base_estadual.especificacoes.procedencia,
                         "Valor Tabela FIPE": tabelas_fipes_concatenadas,
+                        "Fonte da Consulta": "Script Python Infocar",
+                        "Cilindrada": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.cilindradas
+                        ),
+                        "Situação Veículo": dados_base_estadual.restricoes.situacao_veiculo,
+                        "Tipo de Remarcação do Chassi": dados_base_estadual.especificacoes.situacao_chassi,
+                        "Espécie": dados_base_estadual.especificacoes.especie,
+                        "Carroceria": dados_base_estadual.especificacoes.carroceria,
+                        "Potência": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.potencia
+                        ),
+                        "Município": dados_base_estadual.dados_veiculo.municipio,
+                        "Nº Motor": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.motor
+                        ),
+                        "Procedência do Veículo": dados_base_estadual.especificacoes.procedencia,
+                        "Capacidade de Carga": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.carga
+                        ),
+                        "Capacidade de Passageiros": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.passageiros
+                        ),
+                        "Nº Carroceria": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.num_carroceria
+                        ),
+                        "Nº Caixa de Câmbio": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.cambio
+                        ),
+                        "Nº Eixos": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.eixos
+                        ),
+                        "Terceiro Eixo": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.terceiro_eixo
+                        ),
+                        "Eixo Traseiro Diferencial": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.eixo_traseiro
+                        ),
+                        "Montagem": montagem,
+                        "CMT": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.cmt
+                        ),
+                        "PBT": convert.from_int_to_string(
+                            dados_base_estadual.especificacoes.pbt
+                        ),
+                        "Observações Gerais": dados_base_estadual.solicitacao.mensagem_extenso,
                         "Chave de Ignição": "",
                         "Tipo de Câmbio": "",
                         "KM": "",
-                        "Motor": dados_base_estadual.especificacoes.motor,
-                        "Câmbio": dados_base_estadual.especificacoes.cambio,
-                        "Pintura": dados_base_estadual.dados_veiculo.cor,
-                        "Lataria": dados_base_estadual.dados_veiculo.cor,
+                        "Motor": "",
+                        "Câmbio": "",
+                        "Pintura": "",
+                        "Lataria": "",
                         "Tapeçaria / Forração": "",
                         "Pneus": "",
-                        "Eixos": dados_base_estadual.especificacoes.eixos,
+                        "Eixos": "",
                         "Tração": "",
                         "Primeiro Cardan": "",
                         "Segundo Cardan": "",
                         "Primeiro Diferencial": "",
-                        "Segundo Diferencial": dados_base_estadual.especificacoes.eixo_traseiro,
+                        "Segundo Diferencial": "",
                         "Quinta Roda": "",
                         "Quantidade de Pneus": "",
                         "Bancos": "",
                         "Chassi Oxidado": "",
-                        "Chassi Remarcado": dados_base_estadual.especificacoes.situacao_chassi,
-                        "Tipo de Carroceria": dados_base_estadual.especificacoes.carroceria
-                        + " "
-                        + dados_base_estadual.especificacoes.num_carroceria,
+                        "Chassi Remarcado": "",
+                        "Tipo de Carroceria": "",
                         "Estado da Carroceria": "",
                         "Comprimento (m)": "",
                         "Largura (m)": "",
                         "Altura (m)": "",
-                        "PBT (kg)": dados_base_estadual.especificacoes.pbt,
-                        "CMT (kg)": dados_base_estadual.especificacoes.cmt,
+                        "PBT (kg)": "",
+                        "CMT (kg)": "",
                         "Dimesões dos Pneus": "",
                         "Tacógrafo": "",
                         "Pneu Estepe": "",
@@ -614,7 +704,7 @@ class InfocarConverter(SpreadsheetConverter):
                         "Longarina": "",
                         "Bateria": "",
                         "Total": "",
-                        "Observações": dados_base_estadual.solicitacao.mensagem_extenso,
+                        "Observações": "",
                         "Número de Portas": "",
                         "Cep de Origem": "",
                         "Número (Processo)": "",
@@ -640,12 +730,13 @@ class InfocarConverter(SpreadsheetConverter):
                         {
                             "Placa": str(placa).upper(),
                             "Chassi": str(chassi).upper(),
-                            "Observações": f"{error}",
+                            "Observações Gerais": f"{error}",
                         }
                     )
                     logger.info(
                         "Registro adicionado à planilha de saída descrevendo erro encontrado durante o processamento"
                     )
+                    logger.error(f"Motivo do erro: {error}")
 
         df = pandas.DataFrame(temp_list, columns=df_columns)
         writer = pandas.ExcelWriter(
@@ -659,34 +750,34 @@ if __name__ == "__main__":
     try:
         dados_extrato = extrato.request_extrato()
         while True:
-            print(
+            logger.info(
                 f"Já foram feitas {dados_extrato.resposta.quantidade} requisições para a API da Infocar nesse mês"
             )
-            print("Deseja continuar?")
-            print("S - Sim")
-            print("N - Não")
+            logger.info("Deseja continuar?")
+            logger.info("S - Sim")
+            logger.info("N - Não")
 
             option_selected = input()
 
             if option_selected.upper() == "N":
-                print("Finalizando a execução do script")
+                logger.info("Finalizando a execução do script")
                 exit()
             elif option_selected.upper() == "S":
                 break
             else:
-                print("Opção inválida. Tente novamente")
+                logger.info("Opção inválida. Tente novamente")
 
         while True:
-            print("Qual o formato que você quer gerar a planilha de saída?")
-            print("1 - Formato legado (Planilha colunada)")
-            print("2 - Formato novo (Plataforma gestor)")
+            logger.info("Qual o formato que você quer gerar a planilha de saída?")
+            logger.info("1 - Formato legado (Planilha colunada)")
+            logger.info("2 - Formato novo (Plataforma gestor)")
 
             output_format = input()
 
             if output_format.upper() == "1" or output_format.upper() == "2":
                 break
             else:
-                print("Opção inválida. Tente novamente")
+                logger.info("Opção inválida. Tente novamente")
 
         logger.info("Iniciando a conversão")
         infocarConverter = InfocarConverter(

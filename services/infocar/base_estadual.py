@@ -49,28 +49,29 @@ class BaseEstadual:
                             if child.tag == "RESPOSTA":
                                 resposta_tag = child
 
-        for base_estadual_tag in resposta_tag:
-            for child in base_estadual_tag:
-                if child.tag == "DADOS_DO_VEICULO":
-                    dados_veiculo_tag = child
-                if child.tag == "INFORMACOES_TECNICAS_E_ADICIONAIS":
-                    especificacoes_tag = child
-                if child.tag == "RESTRICOES_E_IMPEDIMENTOS":
-                    restricoes_tag = child
-                    for restricao_inner in restricoes_tag:
-                        if restricao_inner.tag == "RESTRICOES":
-                            for restricoes in restricao_inner:
-                                restricoes_arr.append(
-                                    convert.to_string(restricoes.text)
-                                )
-                        if restricao_inner.tag == "INTENCAO_DE_FINANCIAMENTO":
-                            intencao_financiamento_tag = restricao_inner
-                if child.tag == "DEBITOS_ESTADUAIS":
-                    debitos_tag = child
-                if child.tag == "COMUNICACAO_DE_VENDAS":
-                    comunicacao_venda_tag = child
-                if child.tag == "PROPRIETARIO_S_":
-                    proprietario_tag = child
+        if resposta_tag is not None:
+            for base_estadual_tag in resposta_tag:
+                for child in base_estadual_tag:
+                    if child.tag == "DADOS_DO_VEICULO":
+                        dados_veiculo_tag = child
+                    if child.tag == "INFORMACOES_TECNICAS_E_ADICIONAIS":
+                        especificacoes_tag = child
+                    if child.tag == "RESTRICOES_E_IMPEDIMENTOS":
+                        restricoes_tag = child
+                        for restricao_inner in restricoes_tag:
+                            if restricao_inner.tag == "RESTRICOES":
+                                for restricoes in restricao_inner:
+                                    restricoes_arr.append(
+                                        convert.to_string(restricoes.text)
+                                    )
+                            if restricao_inner.tag == "INTENCAO_DE_FINANCIAMENTO":
+                                intencao_financiamento_tag = restricao_inner
+                    if child.tag == "DEBITOS_ESTADUAIS":
+                        debitos_tag = child
+                    if child.tag == "COMUNICACAO_DE_VENDAS":
+                        comunicacao_venda_tag = child
+                    if child.tag == "PROPRIETARIO_S_":
+                        proprietario_tag = child
 
         if solicitacao_tag is not None:
             self.solicitacao = Solicitacao(solicitacao_tag)
