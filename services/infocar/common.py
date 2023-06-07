@@ -1,7 +1,6 @@
 import requests
 
-
-from services.base.logger import Logger
+from utils.logger import Logger
 
 
 logger = Logger.__call__().get_logger()

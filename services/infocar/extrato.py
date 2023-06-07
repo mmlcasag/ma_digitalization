@@ -2,8 +2,10 @@ import common
 import convert
 import requests
 import xml.etree.ElementTree as ET
-from services.base.logger import Logger
+
 from datetime import date
+from utils.logger import Logger
+
 
 logger = Logger.__call__().get_logger()
 
@@ -103,12 +105,8 @@ class Extrato:
 
         if solicitacao_tag is not None:
             self.solicitacao = Solicitacao(solicitacao_tag)
-        if self.solicitacao.mensagem != "1":
-            raise Exception(
-                f"Erro na resposta da Infocar: {self.solicitacao.mensagem_extenso}"
-            )
-        if resposta_tag is not None:
-            self.resposta = Resposta(resposta_tag)
+
+        self.resposta = Resposta(resposta_tag)
 
     def to_string(self):
         return f"{self.solicitacao.to_string()}{self.resposta.to_string()}"
@@ -155,11 +153,15 @@ class Resposta:
         today = date.today()
         quantidade = 0
 
-        for child in resposta_tag:
-            if child.tag == "USUARIO":
-                usuario = child.text
-            if child.tag == "QTD":
-                quantidade += convert.to_int(child.text)
+        if resposta_tag is None:
+            usuario = "jR4FJ1Sw"
+            quantidade = 0
+        else:
+            for child in resposta_tag:
+                if child.tag == "USUARIO":
+                    usuario = child.text
+                if child.tag == "QTD":
+                    quantidade += convert.to_int(child.text)
 
         self.usuario = convert.to_string(usuario)
         self.mes = convert.to_string(today.strftime("%m/%Y"))

@@ -4,8 +4,10 @@ import convert
 import extrato
 import base_estadual
 import codificador_fipe
-from services.base.logger import Logger
-from services.base.spreadsheet_converter import SpreadsheetConverter
+
+from datetime import date
+from utils.logger import Logger
+from utils.spreadsheet_converter import SpreadsheetConverter
 
 
 logger = Logger.__call__().get_logger()
@@ -41,6 +43,7 @@ class InfocarConverter(SpreadsheetConverter):
                 logger.error(f'Erro "{error}" no processamento do arquivo "{file}"')
 
     def planilha_colunada(self, file):
+        today = date.today()
         data = pandas.read_excel(file)
 
         temp_list = []
@@ -80,6 +83,7 @@ class InfocarConverter(SpreadsheetConverter):
             "CMT",
             "PBT",
             "Observações Gerais",
+            "Data da Consulta",
         ]
 
         for idx, v in enumerate(data["Placa"]):
@@ -283,6 +287,9 @@ class InfocarConverter(SpreadsheetConverter):
                             dados_base_estadual.especificacoes.pbt
                         ),
                         "Observações Gerais": dados_base_estadual.solicitacao.mensagem_extenso,
+                        "Data da Consulta": convert.to_string(
+                            today.strftime("%d/%m/%Y")
+                        ),
                     }
 
                     temp_list.append(append_data)
@@ -311,6 +318,7 @@ class InfocarConverter(SpreadsheetConverter):
         writer.close()
 
     def plataforma_gestor(self, file):
+        today = date.today()
         data = pandas.read_excel(file)
 
         temp_list = []
@@ -331,6 +339,7 @@ class InfocarConverter(SpreadsheetConverter):
             "Tipo Combustível",
             "Origem",
             "Valor Tabela FIPE",
+            "Data da Consulta",
             "Fonte da Consulta",
             "Cilindrada",
             "Situação Veículo",
@@ -352,78 +361,6 @@ class InfocarConverter(SpreadsheetConverter):
             "CMT",
             "PBT",
             "Observações Gerais",
-            "Chave de Ignição",
-            "Tipo de Câmbio",
-            "KM",
-            "Motor",
-            "Câmbio",
-            "Pintura",
-            "Lataria",
-            "Tapeçaria / Forração",
-            "Pneus",
-            "Eixos",
-            "Tração",
-            "Primeiro Cardan",
-            "Segundo Cardan",
-            "Primeiro Diferencial",
-            "Segundo Diferencial",
-            "Quinta Roda",
-            "Quantidade de Pneus",
-            "Bancos",
-            "Chassi Oxidado",
-            "Chassi Remarcado",
-            "Tipo de Carroceria",
-            "Estado da Carroceria",
-            "Comprimento (m)",
-            "Largura (m)",
-            "Altura (m)",
-            "PBT (kg)",
-            "CMT (kg)",
-            "Dimesões dos Pneus",
-            "Tacógrafo",
-            "Pneu Estepe",
-            "Ferramentas Obrigatórias",
-            "Rodoar",
-            "Grade",
-            "Parabrisa",
-            "Capô",
-            "Parachoque Dianteiro",
-            "Farol Direito",
-            "Lanterna Dianteira Direita",
-            "Farol Esquerdo",
-            "Lanterna Dianteira Esquerda",
-            "Paralama Direito",
-            "Retrovisor Direito",
-            "Porta Direita",
-            "Lanterna Traseira Direita",
-            "Lanterna Traseira Esquerda",
-            "Parachoque Traseiro",
-            "Vidro Traseiro",
-            "Porta Esquerda",
-            "Retrovisor Esquerdo",
-            "Paralama Esquerdo",
-            "Painel de Instrumentos",
-            "Bancos",
-            "Teto",
-            "Longarina",
-            "Bateria",
-            "Total",
-            "Observações",
-            "Número de Portas",
-            "Cep de Origem",
-            "Número (Processo)",
-            "Ano (Processo)",
-            "Tipo (Processo)",
-            "Natureza (Processo)",
-            "Fórum (Processo)",
-            "Comarca (Processo)",
-            "Juíz (Processo)",
-            "Autor (Processo)",
-            "Réu (Processo)",
-            "Advogados (Processo)",
-            "Depositário (Processo)",
-            "Recurso (Processo)",
-            "Link (Processo)",
         ]
 
         for idx, v in enumerate(data["Placa"]):
@@ -603,6 +540,9 @@ class InfocarConverter(SpreadsheetConverter):
                         "Tipo Combustível": tipo_combustivel_padronizado,
                         "Origem": dados_base_estadual.especificacoes.procedencia,
                         "Valor Tabela FIPE": tabelas_fipes_concatenadas,
+                        "Data da Consulta": convert.to_string(
+                            today.strftime("%d/%m/%Y")
+                        ),
                         "Fonte da Consulta": "Script Python Infocar",
                         "Cilindrada": convert.from_int_to_string(
                             dados_base_estadual.especificacoes.cilindradas
@@ -648,78 +588,6 @@ class InfocarConverter(SpreadsheetConverter):
                             dados_base_estadual.especificacoes.pbt
                         ),
                         "Observações Gerais": dados_base_estadual.solicitacao.mensagem_extenso,
-                        "Chave de Ignição": "",
-                        "Tipo de Câmbio": "",
-                        "KM": "",
-                        "Motor": "",
-                        "Câmbio": "",
-                        "Pintura": "",
-                        "Lataria": "",
-                        "Tapeçaria / Forração": "",
-                        "Pneus": "",
-                        "Eixos": "",
-                        "Tração": "",
-                        "Primeiro Cardan": "",
-                        "Segundo Cardan": "",
-                        "Primeiro Diferencial": "",
-                        "Segundo Diferencial": "",
-                        "Quinta Roda": "",
-                        "Quantidade de Pneus": "",
-                        "Bancos": "",
-                        "Chassi Oxidado": "",
-                        "Chassi Remarcado": "",
-                        "Tipo de Carroceria": "",
-                        "Estado da Carroceria": "",
-                        "Comprimento (m)": "",
-                        "Largura (m)": "",
-                        "Altura (m)": "",
-                        "PBT (kg)": "",
-                        "CMT (kg)": "",
-                        "Dimesões dos Pneus": "",
-                        "Tacógrafo": "",
-                        "Pneu Estepe": "",
-                        "Ferramentas Obrigatórias": "",
-                        "Rodoar": "",
-                        "Grade": "",
-                        "Parabrisa": "",
-                        "Capô": "",
-                        "Parachoque Dianteiro": "",
-                        "Farol Direito": "",
-                        "Lanterna Dianteira Direita": "",
-                        "Farol Esquerdo": "",
-                        "Lanterna Dianteira Esquerda": "",
-                        "Paralama Direito": "",
-                        "Retrovisor Direito": "",
-                        "Porta Direita": "",
-                        "Lanterna Traseira Direita": "",
-                        "Lanterna Traseira Esquerda": "",
-                        "Parachoque Traseiro": "",
-                        "Vidro Traseiro": "",
-                        "Porta Esquerda": "",
-                        "Retrovisor Esquerdo": "",
-                        "Paralama Esquerdo": "",
-                        "Painel de Instrumentos": "",
-                        "Bancos": "",
-                        "Teto": "",
-                        "Longarina": "",
-                        "Bateria": "",
-                        "Total": "",
-                        "Observações": "",
-                        "Número de Portas": "",
-                        "Cep de Origem": "",
-                        "Número (Processo)": "",
-                        "Ano (Processo)": "",
-                        "Tipo (Processo)": "",
-                        "Natureza (Processo)": "",
-                        "Fórum (Processo)": "",
-                        "Comarca (Processo)": "",
-                        "Juíz (Processo)": "",
-                        "Autor (Processo)": "",
-                        "Réu (Processo)": "",
-                        "Advogados (Processo)": "",
-                        "Depositário (Processo)": "",
-                        "Recurso (Processo)": "",
-                        "Link (Processo)": "",
                     }
 
                     temp_list.append(append_data)
