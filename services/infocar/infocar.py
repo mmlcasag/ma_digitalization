@@ -84,6 +84,7 @@ class InfocarConverter(SpreadsheetConverter):
             "PBT",
             "Observações Gerais",
             "Data da Consulta",
+            "Fonte da Consulta",
         ]
 
         for idx, v in enumerate(data["Placa"]):
@@ -162,6 +163,16 @@ class InfocarConverter(SpreadsheetConverter):
                             "Usuário optou por não consultar os dados do Precificador para esse registro"
                         )
 
+                    marca = dados_base_estadual.dados_veiculo.modelo.upper()
+                    modelo = dados_base_estadual.dados_veiculo.modelo.upper()
+                    if "/" in dados_base_estadual.dados_veiculo.modelo:
+                        marca = dados_base_estadual.dados_veiculo.modelo[
+                            0 : dados_base_estadual.dados_veiculo.modelo.index("/")
+                        ].upper()
+                        modelo = dados_base_estadual.dados_veiculo.modelo[
+                            (dados_base_estadual.dados_veiculo.modelo.index("/") + 1) :
+                        ].upper()
+
                     restricoes_concatenadas = ""
                     if dados_base_estadual is not None:
                         if len(dados_base_estadual.restricoes.restricoes) > 0:
@@ -184,26 +195,53 @@ class InfocarConverter(SpreadsheetConverter):
                     except Exception:
                         total_multas = 0
 
+                    fipe_modelos = []
+                    fipe_valores = []
                     tabelas_fipes_concatenadas = ""
                     if check_fipe and dados_precificador is not None:
                         if len(dados_precificador.tabelas_fipe.valores) > 0:
-                            for valor in dados_precificador.tabelas_fipe.valores:
-                                if tabelas_fipes_concatenadas == "":
-                                    tabelas_fipes_concatenadas = (
-                                        "R$ " + convert.from_float_to_string(valor, 2)
+                            for (
+                                tf_modelo
+                            ) in dados_precificador.tabelas_fipe.marcas_modelos:
+                                fipe_modelos.append(tf_modelo)
+                            for tf_valor in dados_precificador.tabelas_fipe.valores:
+                                fipe_valores.append(tf_valor)
+
+                    if len(fipe_valores) == 1:
+                        tabelas_fipes_concatenadas = (
+                            "R$ " + convert.from_float_to_string(fipe_valores[0], 2)
+                        )
+                    if len(fipe_valores) > 1:
+                        for index in range(len(fipe_valores)):
+                            if tabelas_fipes_concatenadas == "":
+                                tabelas_fipes_concatenadas = (
+                                    "R$ "
+                                    + convert.from_float_to_string(
+                                        fipe_valores[index], 2
                                     )
-                                else:
-                                    tabelas_fipes_concatenadas = (
-                                        tabelas_fipes_concatenadas
-                                        + " / "
-                                        + "R$ "
-                                        + convert.from_float_to_string(valor, 2)
+                                    + " ("
+                                    + fipe_modelos[index]
+                                    + ")"
+                                )
+                            else:
+                                tabelas_fipes_concatenadas = (
+                                    tabelas_fipes_concatenadas
+                                    + " / "
+                                    + "R$ "
+                                    + convert.from_float_to_string(
+                                        fipe_valores[index], 2
                                     )
+                                    + " ("
+                                    + fipe_modelos[index]
+                                    + ")"
+                                )
 
                     montagem = ""
                     if check_fipe and dados_precificador is not None:
                         montagem = dados_precificador.dados_veiculo.tipo_montagem
 
+                    logger.debug(f"Marca: {marca}")
+                    logger.debug(f"Modelo: {modelo}")
                     logger.debug(f"Restrições concatenadas: {restricoes_concatenadas}")
                     logger.debug(
                         f"Total de multas: {convert.from_float_to_string(total_multas, 2)}"
@@ -225,8 +263,8 @@ class InfocarConverter(SpreadsheetConverter):
                             total_multas, 2
                         ),
                         "Tipo": dados_base_estadual.dados_veiculo.tipo_veiculo,
-                        "Marca (SEMPRE MAIUSCULA)": dados_base_estadual.dados_veiculo.modelo,
-                        "Modelo (SEMPRE MAIUSCULA)": dados_base_estadual.dados_veiculo.modelo,
+                        "Marca (SEMPRE MAIUSCULA)": marca,
+                        "Modelo (SEMPRE MAIUSCULA)": modelo,
                         "Ano Fab/Modelo": convert.from_int_to_string(
                             dados_base_estadual.dados_veiculo.ano_fabricacao
                         )
@@ -290,6 +328,7 @@ class InfocarConverter(SpreadsheetConverter):
                         "Data da Consulta": convert.to_string(
                             today.strftime("%d/%m/%Y")
                         ),
+                        "Fonte da Consulta": "Script Python Infocar",
                     }
 
                     temp_list.append(append_data)
@@ -439,6 +478,16 @@ class InfocarConverter(SpreadsheetConverter):
                             "Usuário optou por não consultar os dados do Precificador para esse registro"
                         )
 
+                    marca = dados_base_estadual.dados_veiculo.modelo.upper()
+                    modelo = dados_base_estadual.dados_veiculo.modelo.upper()
+                    if "/" in dados_base_estadual.dados_veiculo.modelo:
+                        marca = dados_base_estadual.dados_veiculo.modelo[
+                            0 : dados_base_estadual.dados_veiculo.modelo.index("/")
+                        ].upper()
+                        modelo = dados_base_estadual.dados_veiculo.modelo[
+                            (dados_base_estadual.dados_veiculo.modelo.index("/") + 1) :
+                        ].upper()
+
                     restricoes_concatenadas = ""
                     if dados_base_estadual is not None:
                         if len(dados_base_estadual.restricoes.restricoes) > 0:
@@ -461,26 +510,53 @@ class InfocarConverter(SpreadsheetConverter):
                     except Exception:
                         total_multas = 0
 
+                    fipe_modelos = []
+                    fipe_valores = []
                     tabelas_fipes_concatenadas = ""
                     if check_fipe and dados_precificador is not None:
                         if len(dados_precificador.tabelas_fipe.valores) > 0:
-                            for valor in dados_precificador.tabelas_fipe.valores:
-                                if tabelas_fipes_concatenadas == "":
-                                    tabelas_fipes_concatenadas = (
-                                        "R$ " + convert.from_float_to_string(valor, 2)
+                            for (
+                                tf_modelo
+                            ) in dados_precificador.tabelas_fipe.marcas_modelos:
+                                fipe_modelos.append(tf_modelo)
+                            for tf_valor in dados_precificador.tabelas_fipe.valores:
+                                fipe_valores.append(tf_valor)
+
+                    if len(fipe_valores) == 1:
+                        tabelas_fipes_concatenadas = (
+                            "R$ " + convert.from_float_to_string(fipe_valores[0], 2)
+                        )
+                    if len(fipe_valores) > 1:
+                        for index in range(len(fipe_valores)):
+                            if tabelas_fipes_concatenadas == "":
+                                tabelas_fipes_concatenadas = (
+                                    "R$ "
+                                    + convert.from_float_to_string(
+                                        fipe_valores[index], 2
                                     )
-                                else:
-                                    tabelas_fipes_concatenadas = (
-                                        tabelas_fipes_concatenadas
-                                        + " / "
-                                        + "R$ "
-                                        + convert.from_float_to_string(valor, 2)
+                                    + " ("
+                                    + fipe_modelos[index]
+                                    + ")"
+                                )
+                            else:
+                                tabelas_fipes_concatenadas = (
+                                    tabelas_fipes_concatenadas
+                                    + " / "
+                                    + "R$ "
+                                    + convert.from_float_to_string(
+                                        fipe_valores[index], 2
                                     )
+                                    + " ("
+                                    + fipe_modelos[index]
+                                    + ")"
+                                )
 
                     montagem = ""
                     if check_fipe and dados_precificador is not None:
                         montagem = dados_precificador.dados_veiculo.tipo_montagem
 
+                    logger.debug(f"Marca: {marca}")
+                    logger.debug(f"Modelo: {modelo}")
                     logger.debug(f"Restrições concatenadas: {restricoes_concatenadas}")
                     logger.debug(
                         f"Total de multas: {convert.from_float_to_string(total_multas, 2)}"
@@ -524,8 +600,8 @@ class InfocarConverter(SpreadsheetConverter):
                             total_multas, 2
                         ),
                         "Tipo": dados_base_estadual.dados_veiculo.tipo_veiculo,
-                        "Marca": dados_base_estadual.dados_veiculo.modelo,
-                        "Modelo": dados_base_estadual.dados_veiculo.modelo,
+                        "Marca": marca,
+                        "Modelo": modelo,
                         "Ano Fabricação": convert.from_int_to_string(
                             dados_base_estadual.dados_veiculo.ano_fabricacao
                         ),
