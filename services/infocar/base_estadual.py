@@ -205,6 +205,11 @@ class Especificacoes:
         if cilindradas == "":
             cilindradas = common.find_element(especificacoes_tag, "NUMERO_CILINDRADAS")
 
+        for child in especificacoes_tag:
+            if child.tag == "CARROCERIA":
+                if child.text is not None:
+                    carroceria = child.text
+
         self.motor = convert.to_string(motor)
         self.cambio = convert.to_string(cambio)
         self.passageiros = convert.to_int(passageiros)
