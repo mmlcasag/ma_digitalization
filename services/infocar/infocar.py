@@ -163,15 +163,30 @@ class InfocarConverter(SpreadsheetConverter):
                             "Usuário optou por não consultar os dados do Precificador para esse registro"
                         )
 
-                    marca = dados_base_estadual.dados_veiculo.modelo.upper()
-                    modelo = dados_base_estadual.dados_veiculo.modelo.upper()
-                    if "/" in dados_base_estadual.dados_veiculo.modelo:
-                        marca = dados_base_estadual.dados_veiculo.modelo[
-                            0 : dados_base_estadual.dados_veiculo.modelo.index("/")
-                        ].upper()
-                        modelo = dados_base_estadual.dados_veiculo.modelo[
-                            (dados_base_estadual.dados_veiculo.modelo.index("/") + 1) :
-                        ].upper()
+                    marca_modelo = dados_base_estadual.dados_veiculo.modelo.upper()
+                    marca_modelo = marca_modelo.replace("CHEV ", "CHEVROLET ")
+                    marca_modelo = marca_modelo.replace("CHEV/", "CHEVROLET/")
+                    marca_modelo = marca_modelo.replace("GM ", "CHEVROLET ")
+                    marca_modelo = marca_modelo.replace("GM/", "CHEVROLET/")
+                    marca_modelo = marca_modelo.replace("VOLKS ", "VOLKSWAGEN ")
+                    marca_modelo = marca_modelo.replace("VOLKS/", "VOLKSWAGEN/")
+                    marca_modelo = marca_modelo.replace("VW ", "VOLKSWAGEN ")
+                    marca_modelo = marca_modelo.replace("VW/", "VOLKSWAGEN/")
+                    marca_modelo = marca_modelo.replace("MMC ", "MITSUBISHI ")
+                    marca_modelo = marca_modelo.replace("MMC/", "MITSUBISHI/")
+                    marca_modelo = marca_modelo.replace("MB ", "MERCEDES-BENZ ")
+                    marca_modelo = marca_modelo.replace("MB/", "MERCEDES-BENZ/")
+                    marca_modelo = marca_modelo.replace("MBB ", "MERCEDES-BENZ ")
+                    marca_modelo = marca_modelo.replace("MBB/", "MERCEDES-BENZ/")
+                    marca_modelo = marca_modelo.replace("LR ", "LAND ROVER ")
+                    marca_modelo = marca_modelo.replace("LR/", "LAND ROVER/")
+
+                    marca = marca_modelo
+                    modelo = marca_modelo
+
+                    if "/" in marca_modelo:
+                        marca = marca_modelo[0 : marca_modelo.index("/")].upper()
+                        modelo = marca_modelo[(marca_modelo.index("/") + 1) :].upper()
 
                     restricoes_concatenadas = ""
                     if dados_base_estadual is not None:
@@ -478,15 +493,30 @@ class InfocarConverter(SpreadsheetConverter):
                             "Usuário optou por não consultar os dados do Precificador para esse registro"
                         )
 
-                    marca = dados_base_estadual.dados_veiculo.modelo.upper()
-                    modelo = dados_base_estadual.dados_veiculo.modelo.upper()
-                    if "/" in dados_base_estadual.dados_veiculo.modelo:
-                        marca = dados_base_estadual.dados_veiculo.modelo[
-                            0 : dados_base_estadual.dados_veiculo.modelo.index("/")
-                        ].upper()
-                        modelo = dados_base_estadual.dados_veiculo.modelo[
-                            (dados_base_estadual.dados_veiculo.modelo.index("/") + 1) :
-                        ].upper()
+                    marca_modelo = dados_base_estadual.dados_veiculo.modelo.upper()
+                    marca_modelo = marca_modelo.replace("CHEV ", "CHEVROLET ")
+                    marca_modelo = marca_modelo.replace("CHEV/", "CHEVROLET/")
+                    marca_modelo = marca_modelo.replace("GM ", "CHEVROLET ")
+                    marca_modelo = marca_modelo.replace("GM/", "CHEVROLET/")
+                    marca_modelo = marca_modelo.replace("VOLKS ", "VOLKSWAGEN ")
+                    marca_modelo = marca_modelo.replace("VOLKS/", "VOLKSWAGEN/")
+                    marca_modelo = marca_modelo.replace("VW ", "VOLKSWAGEN ")
+                    marca_modelo = marca_modelo.replace("VW/", "VOLKSWAGEN/")
+                    marca_modelo = marca_modelo.replace("MMC ", "MITSUBISHI ")
+                    marca_modelo = marca_modelo.replace("MMC/", "MITSUBISHI/")
+                    marca_modelo = marca_modelo.replace("MB ", "MERCEDES-BENZ ")
+                    marca_modelo = marca_modelo.replace("MB/", "MERCEDES-BENZ/")
+                    marca_modelo = marca_modelo.replace("MBB ", "MERCEDES-BENZ ")
+                    marca_modelo = marca_modelo.replace("MBB/", "MERCEDES-BENZ/")
+                    marca_modelo = marca_modelo.replace("LR ", "LAND ROVER ")
+                    marca_modelo = marca_modelo.replace("LR/", "LAND ROVER/")
+
+                    marca = marca_modelo
+                    modelo = marca_modelo
+
+                    if "/" in marca_modelo:
+                        marca = marca_modelo[0 : marca_modelo.index("/")].upper()
+                        modelo = marca_modelo[(marca_modelo.index("/") + 1) :].upper()
 
                     restricoes_concatenadas = ""
                     if dados_base_estadual is not None:
