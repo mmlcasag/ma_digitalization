@@ -108,6 +108,48 @@ class Extrato:
 
         self.resposta = Resposta(resposta_tag)
 
+    def get_total_requests(self):
+        quantidade = 0
+
+        if len(self.resposta.registros) > 0:
+            for i in range(len(self.resposta.registros)):
+                quantidade = quantidade + self.resposta.registros[i]["quantidade"]
+
+        return quantidade
+
+    def get_requests_by_type(self):
+        total_count_base_estadual = 0
+        total_count_precificador = 0
+        count_base_estadual = 0
+        count_precificador = 0
+
+        if len(self.resposta.registros) > 0:
+            for i in range(len(self.resposta.registros)):
+                count_base_estadual = 0
+                count_precificador = 0
+
+                link = self.resposta.registros[i]["link"]
+                logger.debug(f"Lendo Arquivo CSV: {link}")
+
+                data = requests.get(link)
+                lines = data.text.splitlines()
+                for line in lines:
+                    if "BASE ESTADUAL" in line:
+                        total_count_base_estadual = total_count_base_estadual + 1
+                        count_base_estadual = count_base_estadual + 1
+                    if "INFOCAR CODIFICACAO" in line:
+                        total_count_precificador = total_count_precificador + 1
+                        count_precificador = count_precificador + 1
+
+                logger.debug(
+                    f"Encontradas {count_base_estadual} requisições de base estadual e {count_precificador} requisições de precificador"
+                )
+
+        return {
+            "total_count_base_estadual": total_count_base_estadual,
+            "total_count_precificador": total_count_precificador,
+        }
+
     def to_string(self):
         return f"{self.solicitacao.to_string()}{self.resposta.to_string()}"
 
@@ -151,21 +193,70 @@ class Solicitacao:
 class Resposta:
     def __init__(self, resposta_tag):
         today = date.today()
-        quantidade = 0
+        registros = []
 
         if resposta_tag is None:
-            usuario = "jR4FJ1Sw"
-            quantidade = 0
+            registros.append(
+                {
+                    "usuario": "jR4FJ1Sw",
+                    "data": convert.to_string(today.strftime("%m/%Y")),
+                    "quantidade": 0,
+                    "link": "",
+                }
+            )
         else:
+            usuario = None
+            data = None
+            quantidade = None
+            link = None
+
             for child in resposta_tag:
                 if child.tag == "USUARIO":
                     usuario = child.text
+                if child.tag == "DATA":
+                    data = child.text
                 if child.tag == "QTD":
-                    quantidade += convert.to_int(child.text)
+                    quantidade = convert.to_int(child.text)
+                if child.tag == "LINK":
+                    link = child.text
 
-        self.usuario = convert.to_string(usuario)
-        self.mes = convert.to_string(today.strftime("%m/%Y"))
-        self.quantidade = quantidade
+                if (
+                    usuario is not None
+                    and data is not None
+                    and quantidade is not None
+                    and link is not None
+                ):
+                    registros.append(
+                        {
+                            "usuario": usuario,
+                            "data": data,
+                            "quantidade": quantidade,
+                            "link": link,
+                        }
+                    )
+
+                    usuario = None
+                    data = None
+                    quantidade = None
+                    link = None
+
+        self.registros = registros
 
     def to_string(self):
-        return f"""\nRESPOSTA:\n* Usuário: {self.usuario}\n* Mês: {self.mes}\n* Quantidade: {convert.from_int_to_string(self.quantidade)}"""
+        string = f"\nREGISTROS:"
+
+        if len(self.registros) == 0:
+            string = string + f"\n* Nenhum registro encontrado"
+        else:
+            for i in range(len(self.registros)):
+                usuario = self.registros[i]["usuario"]
+                data = self.registros[i]["data"]
+                quantidade = self.registros[i]["quantidade"]
+                link = self.registros[i]["link"]
+
+                string = (
+                    string
+                    + f"\n* Registro: {(i+1)}\n  * Usuário: {usuario}\n  * Data: {data}\n  * Quantidade: {convert.from_int_to_string(quantidade)}\n  * Link: {link}"
+                )
+
+        return string

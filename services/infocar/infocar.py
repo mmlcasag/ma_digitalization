@@ -723,9 +723,16 @@ class InfocarConverter(SpreadsheetConverter):
 if __name__ == "__main__":
     try:
         dados_extrato = extrato.request_extrato()
+        total_requisicoes = dados_extrato.get_total_requests()
+        requisicoes_por_tipo = dados_extrato.get_requests_by_type()
+        requisicoes_base_estadual = requisicoes_por_tipo["total_count_base_estadual"]
+        requisicoes_precificador = requisicoes_por_tipo["total_count_precificador"]
         while True:
             logger.info(
-                f"Já foram feitas {dados_extrato.resposta.quantidade} requisições para a API da Infocar nesse mês"
+                f"Neste mês, já foram feitas {total_requisicoes} requisições para a API da Infocar"
+            )
+            logger.info(
+                f"Destas, {requisicoes_base_estadual} foram para a Base Estadual e {requisicoes_precificador} foram para o Precificador"
             )
             logger.info("Deseja continuar?")
             logger.info("S - Sim")
