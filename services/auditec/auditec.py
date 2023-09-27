@@ -1,10 +1,11 @@
 import os
+import re
 import string
 import pandas
 import requests
 import zipfile
 
-from services.base.logger import Logger
+from logger import Logger
 
 logger = Logger.__call__().get_logger()
 
@@ -101,7 +102,7 @@ def transform_uf(value):
 
 
 def transform_no_de_portas(value):
-    return value.replace("N/I", "").upper().strip()
+    return str(value.replace("N/I", "").upper().strip())
 
 
 def transform_kilometragem(value):
@@ -133,34 +134,34 @@ def extract_direcao(value):
 
 
 def extract_ar_condicionado(value):
-    if "AR CONDICIONADO":
+    if "AR CONDICIONADO" in value:
         return "Sim"
 
     return ""
 
 
 def extract_vidros(value):
-    if "VIDRO ELETRICO":
+    if "VIDRO ELETRICO" in value:
         return "Elétricos"
-    elif "VIDRO LATERAL CORREDICO":
+    elif "VIDRO LATERAL CORREDICO" in value:
         return "Manuais"
-    elif "VIDRO TRASEIRO CORREDICO":
+    elif "VIDRO TRASEIRO CORREDICO" in value:
         return "Manuais"
 
     return ""
 
 
 def extract_rodas(value):
-    if "RODA LIGA LEVE/ESPORTIVA":
+    if "RODA LIGA LEVE/ESPORTIVA" in value:
         return "Liga-Leve"
 
     return ""
 
 
 def extract_banco(value):
-    if "BANCO COURO E ELETRICO":
+    if "BANCO COURO E ELETRICO" in value:
         return "Couro"
-    elif "BANCO DE COURO":
+    elif "BANCO DE COURO" in value:
         return "Couro"
 
     return ""
@@ -183,15 +184,6 @@ def map_radio():
 
 def transform_observacoes(row):
     acessorios = row["Acessórios"].upper().strip()
-    avarias = (
-        row["Avarias"]
-        .upper()
-        .strip()
-        .replace(" - 1CM", "")
-        .replace(" - 99CM", "")
-        .replace(" - ", ": ")
-    )
-
     acessorios = acessorios.replace("DIRECAO HIDRAULICA, ", "").replace(
         "DIRECAO HIDRAULICA", ""
     )
@@ -216,23 +208,123 @@ def transform_observacoes(row):
     acessorios = acessorios.replace("BANCO DE COURO, ", "").replace(
         "BANCO DE COURO", ""
     )
-
+    acessorios = acessorios.replace("VIDRO VERDE, ", "").replace("VIDRO VERDE", "")
+    acessorios = acessorios.replace("VIDROS VERDES, ", "").replace("VIDROS VERDES", "")
+    acessorios = acessorios.replace("QUEBRA-SOL EXTERNO, ", "").replace(
+        "QUEBRA-SOL EXTERNO", ""
+    )
+    acessorios = acessorios.replace("TURBO, ", "").replace("TURBO", "")
+    acessorios = acessorios.replace("INSUFILME, ", "").replace("INSUFILME", "")
+    acessorios = acessorios.replace("INSULFILME, ", "").replace("INSULFILME", "")
+    acessorios = acessorios.replace("LIMPADOR TRASEIRO, ", "").replace(
+        "LIMPADOR TRASEIRO", ""
+    )
+    acessorios = acessorios.replace("CARPETE, ", "").replace("CARPETE", "")
+    acessorios = acessorios.replace("ENCOSTO DE CABECA, ", "").replace(
+        "ENCONSTO DE CABECA", ""
+    )
+    acessorios = acessorios.replace("ENCOSTO DE CABEÇA, ", "").replace(
+        "ENCONSTO DE CABEÇA", ""
+    )
+    acessorios = acessorios.replace("TAPETE, ", "").replace("TAPETE", "")
+    acessorios = acessorios.replace("CONSOLE, ", "").replace("CONSOLE", "")
+    acessorios = acessorios.replace("DESEMBACADOR TRASEIRO, ", "").replace(
+        "DESEMBACADOR TRASEIRO", ""
+    )
+    acessorios = acessorios.replace("DESEMBAÇADOR TRASEIRO, ", "").replace(
+        "DESEMBAÇADOR TRASEIRO", ""
+    )
+    acessorios = acessorios.replace("VOLANTE ESCAM., ", "").replace(
+        "VOLANTE ESCAM.", ""
+    )
+    acessorios = acessorios.replace("VOLANTE ESCAMOTEAVEL, ", "").replace(
+        "VOLANTE ESCAMOTEAVEL", ""
+    )
+    acessorios = acessorios.replace("VOLANTE ESCAMOTEÁVEL, ", "").replace(
+        "VOLANTE ESCAMOTEÁVEL", ""
+    )
+    acessorios = acessorios.replace("AR QUENTE, ", "").replace("AR QUENTE", "")
+    acessorios = acessorios.replace("AUTO-FAL. ORIG./SIMILAR., ", "").replace(
+        "AUTO-FAL. ORIG./SIMILAR.", ""
+    )
+    acessorios = acessorios.replace("PARA-BRISA DIANT DEGRADE, ", "").replace(
+        "PARA-BRISA DIANT DEGRADE", ""
+    )
+    acessorios = acessorios.replace("CARROCARIA, ", "CARROCERIA, ").replace(
+        "CARROCARIA", "CARROCERIA"
+    )
+    acessorios = acessorios.replace("CACAMBA, ", "CAÇAMBA, ").replace(
+        "CACAMBA", "CAÇAMBA"
+    )
+    acessorios = acessorios.replace("TRIANGULO, ", "TRIÂNGULO, ").replace(
+        "TRIANGULO", "TRIÂNGULO"
+    )
+    acessorios = acessorios.replace("TROCA, ", "AVARIADO, ").replace(
+        "TROCA", "AVARIADO"
+    )
+    acessorios = acessorios.replace("ARRANHADO, ", "RALADO, ").replace(
+        "ARRANHADO", "RALADO"
+    )
+    acessorios = acessorios.replace("RISCADO, ", "RISCADO, ").replace(
+        "RISCADO", "RISCADO"
+    )
+    acessorios = acessorios.replace("AMASSADO, ", "AMASSADO, ").replace(
+        "AMASSADO", "AMASSADO"
+    )
+    acessorios = acessorios.replace("QUEBRADO, ", "AVARIADO, ").replace(
+        "QUEBRADO", "AVARIADO"
+    )
+    acessorios = acessorios.replace("RECUPERA, ", "AVARIADO, ").replace(
+        "RECUPERA", "AVARIADO"
+    )
+    acessorios = acessorios.replace("OUTROS, ", "AVARIADO, ").replace(
+        "OUTROS", "AVARIADO"
+    )
     acessorios = acessorios.replace(", ", " <br> ")
+
+    avarias = row["Avarias"].upper().strip()
+    avarias = re.sub(r" - \d+CM", "", avarias)
+    avarias = avarias.replace("CARROCARIA, ", "CARROCERIA, ").replace(
+        "CARROCARIA", "CARROCERIA"
+    )
+    avarias = avarias.replace("CACAMBA, ", "CAÇAMBA, ").replace("CACAMBA", "CAÇAMBA")
+    avarias = avarias.replace("TRIANGULO, ", "TRIÂNGULO, ").replace(
+        "TRIANGULO", "TRIÂNGULO"
+    )
+    avarias = avarias.replace("TROCA, ", "AVARIADO, ").replace("TROCA", "AVARIADO")
+    avarias = avarias.replace("ARRANHADO, ", "RALADO, ").replace("ARRANHADO", "RALADO")
+    avarias = avarias.replace("RISCADO, ", "RISCADO, ").replace("RISCADO", "RISCADO")
+    avarias = avarias.replace("AMASSADO, ", "AMASSADO, ").replace(
+        "AMASSADO", "AMASSADO"
+    )
+    avarias = avarias.replace("QUEBRADO, ", "AVARIADO, ").replace(
+        "QUEBRADO", "AVARIADO"
+    )
+    avarias = avarias.replace("RECUPERA, ", "AVARIADO, ").replace(
+        "RECUPERA", "AVARIADO"
+    )
+    avarias = avarias.replace("OUTROS, ", "AVARIADO, ").replace("OUTROS", "AVARIADO")
     avarias = avarias.replace(", ", " <br> ")
 
     if len(acessorios) > 0 and len(avarias) > 0:
         return (
-            "ACESSÓRIOS:<br><br>"
-            + string.capwords(acessorios).replace(" <br> ", "<br>")
-            + "<br><br>AVARIAS:<br/><br/>"
-            + string.capwords(avarias).replace(" <br> ", "<br>")
+            (
+                "Acessórios:<br><br>"
+                + string.capwords(acessorios).replace(" <br> ", "<br>")
+                + "<br><br>Avarias:<br><br>"
+                + string.capwords(avarias).replace(" <br> ", "<br>")
+            )
+            .replace(" - ", ": ")
+            .replace("<br><br><br>", "<br><br>")
         )
     elif len(acessorios) > 0:
-        return "ACESSÓRIOS:<br><br>" + string.capwords(acessorios).replace(
+        return "Acessórios:<br><br>" + string.capwords(acessorios).replace(
             " <br> ", "<br>"
-        )
+        ).replace(" - ", ": ").replace("<br><br><br>", "<br><br>")
     elif len(avarias) > 0:
-        return "AVARIAS:<br><br>" + string.capwords(avarias).replace(" <br> ", "<br>")
+        return "Avarias:<br><br>" + string.capwords(avarias).replace(
+            " <br> ", "<br>"
+        ).replace(" - ", ": ").replace("<br><br><br>", "<br><br>")
 
     return ""
 
@@ -259,7 +351,7 @@ create_folder(output_folder, xlsx_folder)
 create_folder(output_folder, zip_folder)
 
 for excel_file_name in get_files_list(input_folder, ["xlsx"]):
-    logger.info("Lendo o arquivo Excel no pandas")
+    logger.info(f'Lendo o arquivo "{excel_file_name}" no pandas')
     planilha_auditec = pandas.read_excel(os.path.join(input_folder, excel_file_name))
 
     logger.info("Convertendo todas as colunas para texto")
