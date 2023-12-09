@@ -102,7 +102,7 @@ def transform_uf(value):
 
 
 def transform_no_de_portas(value):
-    return int(float(str(value.replace("N/I", "").upper().strip())))
+    return int(float(str(value.replace("N/I", "0").upper().strip())))
 
 
 def transform_kilometragem(value):
@@ -433,7 +433,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     )
     planilha_auditec = planilha_auditec.mask(planilha_auditec.eq("nan")).fillna("")
 
-    logger.info("Convertendo apenas algumas colunas para numérico")
+    logger.info("Convertendo algumas colunas para numérico")
     planilha_auditec["Item"] = planilha_auditec["Item"].astype(float).astype(int)
     planilha_auditec["Agendamento"] = (
         planilha_auditec["Agendamento"].astype(float).astype(int)
@@ -446,10 +446,6 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     )
     planilha_auditec["Ano Modelo"] = (
         planilha_auditec["Ano Modelo"].astype(float).astype(int)
-    )
-    planilha_auditec["Renavam"] = planilha_auditec["Renavam"].astype(float).astype(int)
-    planilha_auditec["Nr. CRLV"] = (
-        planilha_auditec["Nr. CRLV"].astype(float).astype(int)
     )
     planilha_auditec["KM"] = planilha_auditec["KM"].astype(float).astype(int)
 
