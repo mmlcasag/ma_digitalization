@@ -102,11 +102,11 @@ def transform_uf(value):
 
 
 def transform_no_de_portas(value):
-    return str(value.replace("N/I", "").upper().strip())
+    return int(float(str(value.replace("N/I", "").upper().strip())))
 
 
 def transform_kilometragem(value):
-    return str(value).replace("0", "").upper().strip()
+    return int(float(str(value).upper().strip()))
 
 
 def map_motor():
@@ -126,6 +126,33 @@ def map_cambio():
     return {"AUTOMÁTICO": "Automático", "MECÂNICO": "Manual", "NÃO POSSUI": "Falta"}
 
 
+def map_chave_original():
+    return {
+        "OK": "Chave principal: Sim",
+        "EXTRAVIOU": "Chave principal: Não",
+        "DANIFICADO": "Chave principal: Não",
+        "": "Chave principal: Não",
+    }
+
+
+def map_chave_reserva():
+    return {
+        "OK": "Chave reserva: Sim",
+        "EXTRAVIOU": "Chave reserva: Não",
+        "DANIFICADO": "Chave reserva: Não",
+        "": "Chave reserva: Não",
+    }
+
+
+def map_manual():
+    return {
+        "OK": "Manual: Sim",
+        "EXTRAVIOU": "Manual: Não",
+        "DANIFICADO": "Manual: Não",
+        "": "Manual: Não",
+    }
+
+
 def extract_direcao(value):
     if "DIRECAO HIDRAULICA" in value:
         return "Hidráulica"
@@ -142,6 +169,8 @@ def extract_ar_condicionado(value):
 
 def extract_vidros(value):
     if "VIDRO ELETRICO" in value:
+        return "Elétricos"
+    elif "TRIO ELETRICO" in value:
         return "Elétricos"
     elif "VIDRO LATERAL CORREDICO" in value:
         return "Manuais"
@@ -250,8 +279,45 @@ def transform_observacoes(row):
     acessorios = acessorios.replace("PARA-BRISA DIANT DEGRADE, ", "").replace(
         "PARA-BRISA DIANT DEGRADE", ""
     )
-    acessorios = acessorios.replace("CARROCARIA, ", "CARROCERIA, ").replace(
-        "CARROCARIA", "CARROCERIA"
+    acessorios = acessorios.replace("PARA-BRISA DIANT DEGRADE, ", "").replace(
+        "PARA-BRISA DIANT DEGRADE", ""
+    )
+    acessorios = acessorios.replace("CAMBIO AUTOMAT./SIMILAR, ", "").replace(
+        "CAMBIO AUTOMAT./SIMILAR", ""
+    )
+    acessorios = acessorios.replace("DVD/MULTIMIDIA, ", "").replace(
+        "DVD/MULTIMIDIA", ""
+    )
+    acessorios = acessorios.replace("EQUIP SOM/IMAGEM/CONECT., ", "").replace(
+        "EQUIP SOM/IMAGEM/CONECT.", ""
+    )
+    acessorios = acessorios.replace("RADIO AM/FM, ", "").replace("RADIO AM/FM", "")
+    acessorios = acessorios.replace("RADIO AM/FM/DISC-LASER, ", "").replace(
+        "RADIO AM/FM/DISC-LASER", ""
+    )
+    acessorios = acessorios.replace("RADIO AM/FM/TOCA-FITAS, ", "").replace(
+        "RADIO AM/FM/TOCA-FITAS", ""
+    )
+    acessorios = acessorios.replace("RADIO COMUNIC./SIMILAR, ", "").replace(
+        "RADIO COMUNIC./SIMILAR", ""
+    )
+    acessorios = acessorios.replace("RADIO DISC LASER F. REM., ", "").replace(
+        "RADIO DISC LASER F. REM.", ""
+    )
+    acessorios = acessorios.replace("RADIO FM CD/DVD TELA LCD, ", "").replace(
+        "RADIO FM CD/DVD TELA LCD", ""
+    )
+    acessorios = acessorios.replace("RADIO FM/T.FITAS/CD, ", "").replace(
+        "RADIO FM/T.FITAS/CD", ""
+    )
+    acessorios = acessorios.replace("RADIO FM/T.FITAS/TV, ", "").replace(
+        "RADIO FM/T.FITAS/TV", ""
+    )
+    acessorios = acessorios.replace("RADIO FM/T.FITAS-F. REM., ", "").replace(
+        "RADIO FM/T.FITAS-F. REM.", ""
+    )
+    acessorios = acessorios.replace("RADIO FM-FRENTE REMOV., ", "").replace(
+        "RADIO FM-FRENTE REMOV.", ""
     )
     acessorios = acessorios.replace("CACAMBA, ", "CAÇAMBA, ").replace(
         "CACAMBA", "CAÇAMBA"
@@ -433,7 +499,15 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     planilha_maisativo["Lataria"] = ""
     planilha_maisativo["Tapeçaria"] = ""
     planilha_maisativo["Pneus"] = ""
-    planilha_maisativo["Obs."] = planilha_auditec.apply(transform_observacoes, axis=1)
+    planilha_maisativo["Obs."] = (
+        planilha_auditec["Chave Original"].map(map_chave_original())
+        + "<br>"
+        + planilha_auditec["Chave Reserva"].map(map_chave_reserva())
+        + "<br>"
+        + planilha_auditec["Manual Uso / Manutenção"].map(map_manual())
+        + "<br><br>"
+        + planilha_auditec.apply(transform_observacoes, axis=1)
+    )
     planilha_maisativo["Informações para Análise"] = planilha_auditec.apply(
         transform_informacoes_analise, axis=1
     )
