@@ -85,6 +85,27 @@ def get_columns_planilha_maisativo():
     ]
 
 
+def transform_num_laudo(value):
+    if value == "" or value == "N/I":
+        value = "0"
+    return int(float(value))
+
+
+def transform_marca(row):
+    marca = row["Marca"].upper().strip()
+    return marca
+
+
+def transform_modelo(row):
+    modelo = row["Modelo"].upper().strip()
+    blindado = row["Veículo Blindado"].upper().strip()
+
+    if blindado == "SIM":
+        modelo = modelo + " (BLINDADO)"
+
+    return modelo
+
+
 def transform_placa(row):
     return (row["Placa"] + " (" + row["UF"] + ")").upper().strip()
 
@@ -102,11 +123,15 @@ def transform_uf(value):
 
 
 def transform_no_de_portas(value):
-    return int(float(str(value.replace("N/I", "0").upper().strip())))
+    if value == "" or value == "N/I":
+        value = "0"
+    return int(float(value))
 
 
 def transform_kilometragem(value):
-    return int(float(str(value).upper().strip()))
+    if value == "" or value == "N/I":
+        value = "0"
+    return int(float(value))
 
 
 def map_motor():
@@ -397,16 +422,38 @@ def transform_observacoes(row):
 
 def transform_informacoes_analise(row):
     motor = row["Motor"].replace("-", "").upper().strip()
+    ressalvas = row["Motivos de Ressalva"].upper().strip()
     obs = row["OBS"].upper().strip()
 
-    if len(motor) > 0 and len(obs) > 0:
-        return "MOTOR: " + motor + " / OBSERVAÇÕES: " + obs
-    elif len(motor) > 0:
-        return "MOTOR: " + motor
-    elif len(obs) > 0:
-        return "OBSERVAÇÕES: " + obs
+    count = 0
+    informacoes_analise = ""
 
-    return ""
+    if len(motor) > 0:
+        count = count + 1
+        if count == 1:
+            informacoes_analise = "MOTOR: " + motor
+        else:
+            informacoes_analise = informacoes_analise + " / MOTOR: " + motor
+
+    if len(ressalvas) > 0:
+        count = count + 1
+        if ressalvas[-1] == ",":
+            ressalvas = ressalvas[0 : len(ressalvas) - 1]
+        if count == 1:
+            informacoes_analise = "MOTIVOS DE RESSALVA: " + ressalvas
+        else:
+            informacoes_analise = (
+                informacoes_analise + " / MOTIVOS DE RESSALVA: " + ressalvas
+            )
+
+    if len(obs) > 0:
+        count = count + 1
+        if count == 1:
+            informacoes_analise = "OBSERVAÇÕES: " + obs
+        else:
+            informacoes_analise = informacoes_analise + " / OBSERVAÇÕES: " + obs
+
+    return informacoes_analise
 
 
 create_folder(input_folder)
@@ -433,33 +480,23 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     )
     planilha_auditec = planilha_auditec.mask(planilha_auditec.eq("nan")).fillna("")
 
-    logger.info("Convertendo algumas colunas para numérico")
-    planilha_auditec["Item"] = planilha_auditec["Item"].astype(float).astype(int)
-    planilha_auditec["Agendamento"] = (
-        planilha_auditec["Agendamento"].astype(float).astype(int)
-    )
-    planilha_auditec["Laudo N°"] = (
-        planilha_auditec["Laudo N°"].astype(float).astype(int)
-    )
-    planilha_auditec["Ano Fabricação"] = (
-        planilha_auditec["Ano Fabricação"].astype(float).astype(int)
-    )
-    planilha_auditec["Ano Modelo"] = (
-        planilha_auditec["Ano Modelo"].astype(float).astype(int)
-    )
-    planilha_auditec["KM"] = planilha_auditec["KM"].astype(float).astype(int)
-
     logger.info("Formatando a planilha no padrão unificada da Mais Ativo")
     planilha_maisativo = pandas.DataFrame(columns=get_columns_planilha_maisativo())
-    planilha_maisativo["Lote Ref. / Ativo-Frota"] = planilha_auditec["Laudo N°"]
+    planilha_maisativo["Lote Ref. / Ativo-Frota"] = planilha_auditec["Laudo N°"].map(
+        transform_num_laudo
+    )
     planilha_maisativo["Tabela Molicar"] = ""
     planilha_maisativo["Tabela Fipe"] = ""
     planilha_maisativo["Proprietário/CNPJ (Proprietário do documento)"] = ""
     planilha_maisativo["Restrições"] = ""
     planilha_maisativo["Débitos (Total)"] = ""
     planilha_maisativo["Tipo"] = ""
-    planilha_maisativo["Marca (SEMPRE MAIUSCULA)"] = ""
-    planilha_maisativo["Modelo (SEMPRE MAIUSCULA)"] = ""
+    planilha_maisativo["Marca (SEMPRE MAIUSCULA)"] = planilha_auditec.apply(
+        transform_marca, axis=1
+    )
+    planilha_maisativo["Modelo (SEMPRE MAIUSCULA)"] = planilha_auditec.apply(
+        transform_modelo, axis=1
+    )
     planilha_maisativo["Ano Fab/Modelo"] = ""
     planilha_maisativo[
         "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
@@ -530,7 +567,6 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Arquivo Excel gerado com sucesso")
 
     logger.info("Extraindo as imagens da vistoria")
-
     for index, row in planilha_auditec.iterrows():
         laudo_number = str(row["Laudo N°"])
         zip_file_link = str(row["Fotos"])
