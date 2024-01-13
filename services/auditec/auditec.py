@@ -430,6 +430,10 @@ def transform_nome(row):
     return nome
 
 
+def transform_combustivel(value):
+    return value.upper().strip()
+
+
 create_folder(input_folder)
 create_folder(output_folder)
 create_folder(output_folder, images_folder)
@@ -1018,12 +1022,10 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_motos["Município"] = dados_auditec_motos["Cidade"].map(transform_cidade)
         aba_motos["UF"] = dados_auditec_motos["UF"].map(transform_uf)
         aba_motos["Assessor"] = "AUDITEC"
-        aba_onibus["Kilometragem"] = dados_auditec_motos["KM"].map(
+        aba_motos["Kilometragem"] = dados_auditec_motos["KM"].map(
             transform_kilometragem
         )
-        aba_veiculos_leves["Motor"] = dados_auditec_motos["Condição do Motor"].map(
-            map_motor()
-        )
+        aba_motos["Motor"] = dados_auditec_motos["Condição do Motor"].map(map_motor())
         aba_motos["Partida Elétrica"] = ""
         aba_motos["Freio a Disco"] = ""
         aba_motos["Pintura"] = ""
@@ -1049,6 +1051,98 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("* Gravando os dados na planilha da Mais Ativo")
     aba_motos.to_excel(excel_file, sheet_name="Motos", index=False)
     # FIM MOTOS
+
+    # MÁQUINAS PESADAS
+    logger.info("Processando Máquinas Pesadas")
+
+    logger.info("* Filtrando os dados da planilha da Auditec")
+    dados_auditec_maquinas_pesadas = planilha_auditec.query(
+        'TEMPLATE == "MÁQUINAS PESADAS"'
+    )
+
+    logger.info("* Formatando os dados para a planilha da Mais Ativo")
+    aba_maquinas_pesadas = pandas.DataFrame(
+        columns=[
+            "Lote Ref. / Ativo-Frota",
+            "Comitente",
+            "Município",
+            "UF",
+            "Assessor",
+            "Nome (SEMPRE MAÍUSCULA)",
+            "Marca (SEMPRE MAIUSCULA)",
+            "Modelo (SEMPRE MAIUSCULA)",
+            "Ano",
+            "Série (SEMPRE MAIUSCULA)",
+            "Horímetro",
+            "Motor",
+            "Pneus (Qtd e estado)",
+            "Tração",
+            "Capacidade",
+            "Combustível",
+            "Nº do ativo",
+            "Obs.",
+            "Informações para Análise",
+            "Pendências",
+            "Descrição Html",
+            "Fotos",
+        ]
+    )
+
+    if len(dados_auditec_maquinas_pesadas) > 0:
+        aba_maquinas_pesadas[
+            "Lote Ref. / Ativo-Frota"
+        ] = dados_auditec_maquinas_pesadas["Laudo N°"].map(transform_num_laudo)
+        aba_maquinas_pesadas["Comitente"] = ""
+        aba_maquinas_pesadas["Município"] = dados_auditec_maquinas_pesadas[
+            "Cidade"
+        ].map(transform_cidade)
+        aba_maquinas_pesadas["UF"] = dados_auditec_maquinas_pesadas["UF"].map(
+            transform_uf
+        )
+        aba_maquinas_pesadas["Assessor"] = "AUDITEC"
+        aba_maquinas_pesadas["Nome (SEMPRE MAÍUSCULA)"] = ""
+        aba_maquinas_pesadas[
+            "Marca (SEMPRE MAIUSCULA)"
+        ] = dados_auditec_maquinas_pesadas.apply(transform_marca, axis=1)
+        aba_maquinas_pesadas[
+            "Modelo (SEMPRE MAIUSCULA)"
+        ] = dados_auditec_maquinas_pesadas.apply(transform_modelo, axis=1)
+        aba_maquinas_pesadas["Ano"] = ""
+        aba_maquinas_pesadas[
+            "Série (SEMPRE MAIUSCULA)"
+        ] = dados_auditec_maquinas_pesadas["Chassi"].map(transform_chassi)
+        aba_maquinas_pesadas["Horímetro"] = ""
+        aba_maquinas_pesadas["Motor"] = dados_auditec_maquinas_pesadas[
+            "Condição do Motor"
+        ].map(map_motor())
+        aba_maquinas_pesadas["Pneus (Qtd e estado)"] = ""
+        aba_maquinas_pesadas["Tração"] = ""
+        aba_maquinas_pesadas["Capacidade"] = ""
+        aba_maquinas_pesadas["Combustível"] = dados_auditec_maquinas_pesadas[
+            "Combustível"
+        ].map(transform_combustivel)
+        aba_maquinas_pesadas["Nº do ativo"] = ""
+        aba_maquinas_pesadas["Obs."] = (
+            dados_auditec_maquinas_pesadas["Chave Original"].map(map_chave_original())
+            + "<br>"
+            + dados_auditec_maquinas_pesadas["Chave Reserva"].map(map_chave_reserva())
+            + "<br>"
+            + dados_auditec_maquinas_pesadas["Manual Uso / Manutenção"].map(
+                map_manual()
+            )
+            + "<br><br>"
+            + dados_auditec_maquinas_pesadas.apply(transform_observacoes, axis=1)
+        )
+        aba_maquinas_pesadas[
+            "Informações para Análise"
+        ] = dados_auditec_maquinas_pesadas.apply(transform_informacoes_analise, axis=1)
+        aba_maquinas_pesadas["Pendências"] = ""
+        aba_maquinas_pesadas["Descrição Html"] = ""
+        aba_maquinas_pesadas["Fotos"] = ""
+
+    logger.info("* Gravando os dados na planilha da Mais Ativo")
+    aba_maquinas_pesadas.to_excel(excel_file, sheet_name="Máq.Pes.", index=False)
+    # FIM MÁQUINAS PESADAS
 
     logger.info("Salvando e fechando a planilha da Mais Ativo")
     excel_file.close()
