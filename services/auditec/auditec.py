@@ -414,7 +414,7 @@ def transform_informacoes_analise(row):
     return informacoes_analise
 
 
-def transform_nome_caminhao(row):
+def transform_nome(row):
     tipo = row["Tipo / Categoria"].upper().strip()
 
     arr_partes = tipo.split("/")
@@ -422,6 +422,10 @@ def transform_nome_caminhao(row):
 
     if nome == "CAMINHAO TRATOR":
         nome = "CAVALO MECÂNICO"
+    if nome == "SEMI REBOQUE":
+        nome = "SEMIRREBOQUE"
+    if nome == "SEMI-REBOQUE":
+        nome = "SEMIRREBOQUE"
 
     return nome
 
@@ -463,12 +467,12 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     # VEÍCULOS LEVES
     logger.info("Processando Veículos Leves")
 
-    logger.info("* Filtrando os dados de Veículos Leves da planilha da Auditec")
+    logger.info("* Filtrando os dados da planilha da Auditec")
     dados_auditec_veiculos_leves = planilha_auditec.query(
         'TEMPLATE == "VEÍCULOS LEVES"'
     )
 
-    logger.info("* Formatando os dados de Veículos Leves para a planilha da Mais Ativo")
+    logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_veiculos_leves = pandas.DataFrame(
         columns=[
             "Lote Ref. / Ativo-Frota",
@@ -511,99 +515,98 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         ]
     )
 
-    aba_veiculos_leves["Lote Ref. / Ativo-Frota"] = dados_auditec_veiculos_leves[
-        "Laudo N°"
-    ].map(transform_num_laudo)
-    aba_veiculos_leves["Tabela Molicar"] = ""
-    aba_veiculos_leves["Tabela Fipe"] = ""
-    aba_veiculos_leves["Proprietário/CNPJ (Proprietário do documento)"] = ""
-    aba_veiculos_leves["Restrições"] = ""
-    aba_veiculos_leves["Débitos (Total)"] = ""
-    aba_veiculos_leves["Tipo"] = ""
-    aba_veiculos_leves["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_veiculos_leves.apply(
-        transform_marca, axis=1
-    )
-    aba_veiculos_leves[
-        "Modelo (SEMPRE MAIUSCULA)"
-    ] = dados_auditec_veiculos_leves.apply(transform_modelo, axis=1)
-    aba_veiculos_leves["Ano Fab/Modelo"] = ""
-    aba_veiculos_leves[
-        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
-    ] = dados_auditec_veiculos_leves.apply(transform_placa, axis=1)
-    aba_veiculos_leves["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_veiculos_leves[
-        "Chassi"
-    ].map(transform_chassi)
-    aba_veiculos_leves["Renavam"] = ""
-    aba_veiculos_leves["Cor"] = ""
-    aba_veiculos_leves["Combustível"] = ""
-    aba_veiculos_leves["Município"] = dados_auditec_veiculos_leves["Cidade"].map(
-        transform_cidade
-    )
-    aba_veiculos_leves["UF"] = dados_auditec_veiculos_leves["UF"].map(transform_uf)
-    aba_veiculos_leves["Assessor"] = "AUDITEC"
-    aba_veiculos_leves["Nº de Portas"] = dados_auditec_veiculos_leves["Nr. Portas"].map(
-        transform_no_de_portas
-    )
-    aba_veiculos_leves["Kilometragem"] = dados_auditec_veiculos_leves["KM"].map(
-        transform_kilometragem
-    )
-    aba_veiculos_leves["Motor"] = dados_auditec_veiculos_leves["Condição do Motor"].map(
-        map_motor()
-    )
-    aba_veiculos_leves["Câmbio"] = dados_auditec_veiculos_leves["Tipo de Câmbio"].map(
-        map_cambio()
-    )
-    aba_veiculos_leves["Direção"] = dados_auditec_veiculos_leves["Acessórios"].map(
-        extract_direcao
-    )
-    aba_veiculos_leves["Ar condicionado"] = dados_auditec_veiculos_leves[
-        "Acessórios"
-    ].map(extract_ar_condicionado)
-    aba_veiculos_leves["Vidros"] = dados_auditec_veiculos_leves["Acessórios"].map(
-        extract_vidros
-    )
-    aba_veiculos_leves["Rodas"] = dados_auditec_veiculos_leves["Acessórios"].map(
-        extract_rodas
-    )
-    aba_veiculos_leves["Banco"] = dados_auditec_veiculos_leves["Acessórios"].map(
-        extract_banco
-    )
-    aba_veiculos_leves["Aparelho de Som"] = dados_auditec_veiculos_leves[
-        "Rádio / CD / DVD"
-    ].map(map_radio())
-    aba_veiculos_leves["Pintura"] = ""
-    aba_veiculos_leves["Lataria"] = ""
-    aba_veiculos_leves["Tapeçaria"] = ""
-    aba_veiculos_leves["Pneus"] = ""
-    aba_veiculos_leves["Obs."] = (
-        dados_auditec_veiculos_leves["Chave Original"].map(map_chave_original())
-        + "<br>"
-        + dados_auditec_veiculos_leves["Chave Reserva"].map(map_chave_reserva())
-        + "<br>"
-        + dados_auditec_veiculos_leves["Manual Uso / Manutenção"].map(map_manual())
-        + "<br><br>"
-        + dados_auditec_veiculos_leves.apply(transform_observacoes, axis=1)
-    )
-    aba_veiculos_leves["Informações para Análise"] = dados_auditec_veiculos_leves.apply(
-        transform_informacoes_analise, axis=1
-    )
-    aba_veiculos_leves["Pendências"] = ""
-    aba_veiculos_leves["Descrição Html"] = ""
-    aba_veiculos_leves["Fotos"] = ""
+    if len(dados_auditec_veiculos_leves) > 0:
+        aba_veiculos_leves["Lote Ref. / Ativo-Frota"] = dados_auditec_veiculos_leves[
+            "Laudo N°"
+        ].map(transform_num_laudo)
+        aba_veiculos_leves["Tabela Molicar"] = ""
+        aba_veiculos_leves["Tabela Fipe"] = ""
+        aba_veiculos_leves["Proprietário/CNPJ (Proprietário do documento)"] = ""
+        aba_veiculos_leves["Restrições"] = ""
+        aba_veiculos_leves["Débitos (Total)"] = ""
+        aba_veiculos_leves["Tipo"] = ""
+        aba_veiculos_leves[
+            "Marca (SEMPRE MAIUSCULA)"
+        ] = dados_auditec_veiculos_leves.apply(transform_marca, axis=1)
+        aba_veiculos_leves[
+            "Modelo (SEMPRE MAIUSCULA)"
+        ] = dados_auditec_veiculos_leves.apply(transform_modelo, axis=1)
+        aba_veiculos_leves["Ano Fab/Modelo"] = ""
+        aba_veiculos_leves[
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
+        ] = dados_auditec_veiculos_leves.apply(transform_placa, axis=1)
+        aba_veiculos_leves["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_veiculos_leves[
+            "Chassi"
+        ].map(transform_chassi)
+        aba_veiculos_leves["Renavam"] = ""
+        aba_veiculos_leves["Cor"] = ""
+        aba_veiculos_leves["Combustível"] = ""
+        aba_veiculos_leves["Município"] = dados_auditec_veiculos_leves["Cidade"].map(
+            transform_cidade
+        )
+        aba_veiculos_leves["UF"] = dados_auditec_veiculos_leves["UF"].map(transform_uf)
+        aba_veiculos_leves["Assessor"] = "AUDITEC"
+        aba_veiculos_leves["Nº de Portas"] = dados_auditec_veiculos_leves[
+            "Nr. Portas"
+        ].map(transform_no_de_portas)
+        aba_veiculos_leves["Kilometragem"] = dados_auditec_veiculos_leves["KM"].map(
+            transform_kilometragem
+        )
+        aba_veiculos_leves["Motor"] = dados_auditec_veiculos_leves[
+            "Condição do Motor"
+        ].map(map_motor())
+        aba_veiculos_leves["Câmbio"] = dados_auditec_veiculos_leves[
+            "Tipo de Câmbio"
+        ].map(map_cambio())
+        aba_veiculos_leves["Direção"] = dados_auditec_veiculos_leves["Acessórios"].map(
+            extract_direcao
+        )
+        aba_veiculos_leves["Ar condicionado"] = dados_auditec_veiculos_leves[
+            "Acessórios"
+        ].map(extract_ar_condicionado)
+        aba_veiculos_leves["Vidros"] = dados_auditec_veiculos_leves["Acessórios"].map(
+            extract_vidros
+        )
+        aba_veiculos_leves["Rodas"] = dados_auditec_veiculos_leves["Acessórios"].map(
+            extract_rodas
+        )
+        aba_veiculos_leves["Banco"] = dados_auditec_veiculos_leves["Acessórios"].map(
+            extract_banco
+        )
+        aba_veiculos_leves["Aparelho de Som"] = dados_auditec_veiculos_leves[
+            "Rádio / CD / DVD"
+        ].map(map_radio())
+        aba_veiculos_leves["Pintura"] = ""
+        aba_veiculos_leves["Lataria"] = ""
+        aba_veiculos_leves["Tapeçaria"] = ""
+        aba_veiculos_leves["Pneus"] = ""
+        aba_veiculos_leves["Obs."] = (
+            dados_auditec_veiculos_leves["Chave Original"].map(map_chave_original())
+            + "<br>"
+            + dados_auditec_veiculos_leves["Chave Reserva"].map(map_chave_reserva())
+            + "<br>"
+            + dados_auditec_veiculos_leves["Manual Uso / Manutenção"].map(map_manual())
+            + "<br><br>"
+            + dados_auditec_veiculos_leves.apply(transform_observacoes, axis=1)
+        )
+        aba_veiculos_leves[
+            "Informações para Análise"
+        ] = dados_auditec_veiculos_leves.apply(transform_informacoes_analise, axis=1)
+        aba_veiculos_leves["Pendências"] = ""
+        aba_veiculos_leves["Descrição Html"] = ""
+        aba_veiculos_leves["Fotos"] = ""
 
-    logger.info(
-        "* Gravando os dados para a aba de Veículos Leves na planilha da Mais Ativo"
-    )
+    logger.info("* Gravando os dados na planilha da Mais Ativo")
     aba_veiculos_leves.to_excel(excel_file, sheet_name="Veic.Leves", index=False)
     # FIM VEÍCULOS LEVES
 
     # CAMINHÕES
     logger.info("Processando Caminhões")
 
-    logger.info("* Filtrando os dados de Caminhões da planilha da Auditec")
+    logger.info("* Filtrando os dados da planilha da Auditec")
     dados_auditec_caminhoes = planilha_auditec.query('TEMPLATE == "CAMINHÕES"')
 
-    logger.info("* Formatando os dados de Veículos Leves para a planilha da Mais Ativo")
+    logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_caminhoes = pandas.DataFrame(
         columns=[
             "Lote Ref. / Ativo-Frota",
@@ -648,77 +651,196 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         ]
     )
 
-    aba_caminhoes["Lote Ref. / Ativo-Frota"] = dados_auditec_caminhoes["Laudo N°"].map(
-        transform_num_laudo
-    )
-    aba_caminhoes["Tabela Molicar"] = ""
-    aba_caminhoes["Tabela Fipe"] = ""
-    aba_caminhoes["Proprietário/CNPJ (Proprietário do documento)"] = ""
-    aba_caminhoes["Restrições"] = ""
-    aba_caminhoes["Débitos (Total)"] = ""
-    aba_caminhoes["Tipo"] = ""
-    aba_caminhoes["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_caminhoes.apply(
-        transform_marca, axis=1
-    )
-    aba_caminhoes["Modelo (SEMPRE MAIUSCULA)"] = dados_auditec_caminhoes.apply(
-        transform_modelo, axis=1
-    )
-    aba_caminhoes["Ano Fab/Modelo"] = ""
-    aba_caminhoes[
-        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
-    ] = dados_auditec_caminhoes.apply(transform_placa, axis=1)
-    aba_caminhoes["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_caminhoes["Chassi"].map(
-        transform_chassi
-    )
-    aba_caminhoes["Renavam"] = ""
-    aba_caminhoes["Cor"] = ""
-    aba_caminhoes["Combustível"] = ""
-    aba_caminhoes["Endereço (via geolocalização Memento)"] = ""
-    aba_caminhoes["Município"] = dados_auditec_caminhoes["Cidade"].map(transform_cidade)
-    aba_caminhoes["UF"] = dados_auditec_caminhoes["UF"].map(transform_uf)
-    aba_caminhoes["Assessor"] = "AUDITEC"
-    aba_caminhoes[
-        "Nome (CAMINHÃO + CARROCERIA OU CAVALO MECÂNICO)"
-    ] = dados_auditec_caminhoes.apply(transform_nome_caminhao, axis=1)
-    aba_caminhoes["Kilometragem"] = dados_auditec_caminhoes["KM"].map(
-        transform_kilometragem
-    )
-    aba_caminhoes["Eixos"] = ""
-    aba_caminhoes["Tração"] = ""
-    aba_caminhoes["Carroceria"] = ""
-    aba_caminhoes["Cardan"] = ""
-    aba_caminhoes["Diferencial"] = ""
-    aba_caminhoes["Motor"] = dados_auditec_caminhoes["Condição do Motor"].map(
-        map_motor()
-    )
-    aba_caminhoes["Câmbio"] = dados_auditec_caminhoes["Tipo de Câmbio"].map(
-        map_cambio()
-    )
-    aba_caminhoes["Tapeçaria/Forração"] = ""
-    aba_caminhoes["Pintura"] = ""
-    aba_caminhoes["Lataria"] = ""
-    aba_caminhoes["Bancos"] = dados_auditec_caminhoes["Acessórios"].map(extract_banco)
-    aba_caminhoes["Qtd. de Pneus"] = ""
-    aba_caminhoes["Estado dos Pneus"] = ""
-    aba_caminhoes["Obs."] = (
-        dados_auditec_caminhoes["Chave Original"].map(map_chave_original())
-        + "<br>"
-        + dados_auditec_caminhoes["Chave Reserva"].map(map_chave_reserva())
-        + "<br>"
-        + dados_auditec_caminhoes["Manual Uso / Manutenção"].map(map_manual())
-        + "<br><br>"
-        + dados_auditec_caminhoes.apply(transform_observacoes, axis=1)
-    )
-    aba_caminhoes["Informações para Análise"] = dados_auditec_caminhoes.apply(
-        transform_informacoes_analise, axis=1
-    )
-    aba_caminhoes["Pendências"] = ""
-    aba_caminhoes["Descrição Html"] = ""
-    aba_caminhoes["Fotos"] = ""
+    if len(dados_auditec_caminhoes) > 0:
+        aba_caminhoes["Lote Ref. / Ativo-Frota"] = dados_auditec_caminhoes[
+            "Laudo N°"
+        ].map(transform_num_laudo)
+        aba_caminhoes["Tabela Molicar"] = ""
+        aba_caminhoes["Tabela Fipe"] = ""
+        aba_caminhoes["Proprietário/CNPJ (Proprietário do documento)"] = ""
+        aba_caminhoes["Restrições"] = ""
+        aba_caminhoes["Débitos (Total)"] = ""
+        aba_caminhoes["Tipo"] = ""
+        aba_caminhoes["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_caminhoes.apply(
+            transform_marca, axis=1
+        )
+        aba_caminhoes["Modelo (SEMPRE MAIUSCULA)"] = dados_auditec_caminhoes.apply(
+            transform_modelo, axis=1
+        )
+        aba_caminhoes["Ano Fab/Modelo"] = ""
+        aba_caminhoes[
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
+        ] = dados_auditec_caminhoes.apply(transform_placa, axis=1)
+        aba_caminhoes["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_caminhoes[
+            "Chassi"
+        ].map(transform_chassi)
+        aba_caminhoes["Renavam"] = ""
+        aba_caminhoes["Cor"] = ""
+        aba_caminhoes["Combustível"] = ""
+        aba_caminhoes["Endereço (via geolocalização Memento)"] = ""
+        aba_caminhoes["Município"] = dados_auditec_caminhoes["Cidade"].map(
+            transform_cidade
+        )
+        aba_caminhoes["UF"] = dados_auditec_caminhoes["UF"].map(transform_uf)
+        aba_caminhoes["Assessor"] = "AUDITEC"
+        aba_caminhoes[
+            "Nome (CAMINHÃO + CARROCERIA OU CAVALO MECÂNICO)"
+        ] = dados_auditec_caminhoes.apply(transform_nome, axis=1)
+        aba_caminhoes["Kilometragem"] = dados_auditec_caminhoes["KM"].map(
+            transform_kilometragem
+        )
+        aba_caminhoes["Eixos"] = ""
+        aba_caminhoes["Tração"] = ""
+        aba_caminhoes["Carroceria"] = ""
+        aba_caminhoes["Cardan"] = ""
+        aba_caminhoes["Diferencial"] = ""
+        aba_caminhoes["Motor"] = dados_auditec_caminhoes["Condição do Motor"].map(
+            map_motor()
+        )
+        aba_caminhoes["Câmbio"] = dados_auditec_caminhoes["Tipo de Câmbio"].map(
+            map_cambio()
+        )
+        aba_caminhoes["Tapeçaria/Forração"] = ""
+        aba_caminhoes["Pintura"] = ""
+        aba_caminhoes["Lataria"] = ""
+        aba_caminhoes["Bancos"] = dados_auditec_caminhoes["Acessórios"].map(
+            extract_banco
+        )
+        aba_caminhoes["Qtd. de Pneus"] = ""
+        aba_caminhoes["Estado dos Pneus"] = ""
+        aba_caminhoes["Obs."] = (
+            dados_auditec_caminhoes["Chave Original"].map(map_chave_original())
+            + "<br>"
+            + dados_auditec_caminhoes["Chave Reserva"].map(map_chave_reserva())
+            + "<br>"
+            + dados_auditec_caminhoes["Manual Uso / Manutenção"].map(map_manual())
+            + "<br><br>"
+            + dados_auditec_caminhoes.apply(transform_observacoes, axis=1)
+        )
+        aba_caminhoes["Informações para Análise"] = dados_auditec_caminhoes.apply(
+            transform_informacoes_analise, axis=1
+        )
+        aba_caminhoes["Pendências"] = ""
+        aba_caminhoes["Descrição Html"] = ""
+        aba_caminhoes["Fotos"] = ""
 
-    logger.info("* Gravando os dados para a aba de Caminhões na planilha da Mais Ativo")
+    logger.info("* Gravando os dados na planilha da Mais Ativo")
     aba_caminhoes.to_excel(excel_file, sheet_name="Camin.", index=False)
     # FIM CAMINHÕES
+
+    # ÔNIBUS
+    logger.info("Processando Ônibus")
+
+    logger.info("* Filtrando os dados da planilha da Auditec")
+    dados_auditec_onibus = planilha_auditec.query('TEMPLATE == "ÔNIBUS"')
+
+    logger.info("* Formatando os dados para a planilha da Mais Ativo")
+    aba_onibus = pandas.DataFrame(
+        columns=[
+            "Lote Ref. / Ativo-Frota",
+            "Tabela Molicar",
+            "Tabela Fipe",
+            "Proprietário/CNPJ (Proprietário do documento)",
+            "Restrições",
+            "Débitos (Total)",
+            "Tipo",
+            "Marca (SEMPRE MAIUSCULA)",
+            "Modelo (SEMPRE MAIUSCULA)",
+            "Ano Fab/Modelo",
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))",
+            "Chassi (SEMPRE MAIUSCULA)",
+            "Renavam",
+            "Cor",
+            "Combustível",
+            "Endereço (via geolocalização Memento)",
+            "Município",
+            "UF",
+            "Assessor",
+            "Nome (ÔNIBUS URBANO OU ÔNIBUS RODOVIÁRIO)",
+            "Kilometragem",
+            "Motor",
+            "Câmbio",
+            "Pintura",
+            "Lataria",
+            "Bancos",
+            "Tapeçaria/Forração",
+            "Qtd. de Pneus",
+            "Estado dos Pneus",
+            "Tipo (Urbano ou Rodoviário)",
+            "Quantidade de Lugares",
+            "Obs.",
+            "Informações para Análise",
+            "Pendências",
+            "Descrição Html",
+            "Fotos",
+        ]
+    )
+
+    if len(dados_auditec_onibus) > 0:
+        aba_onibus["Lote Ref. / Ativo-Frota"] = dados_auditec_onibus["Laudo N°"].map(
+            transform_num_laudo
+        )
+        aba_onibus["Tabela Molicar"] = ""
+        aba_onibus["Tabela Fipe"] = ""
+        aba_onibus["Proprietário/CNPJ (Proprietário do documento)"] = ""
+        aba_onibus["Restrições"] = ""
+        aba_onibus["Débitos (Total)"] = ""
+        aba_onibus["Tipo"] = ""
+        aba_onibus["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_onibus.apply(
+            transform_marca, axis=1
+        )
+        aba_onibus["Modelo (SEMPRE MAIUSCULA)"] = dados_auditec_onibus.apply(
+            transform_modelo, axis=1
+        )
+        aba_onibus["Ano Fab/Modelo"] = ""
+        aba_onibus[
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
+        ] = dados_auditec_onibus.apply(transform_placa, axis=1)
+        aba_onibus["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_onibus["Chassi"].map(
+            transform_chassi
+        )
+        aba_onibus["Renavam"] = ""
+        aba_onibus["Cor"] = ""
+        aba_onibus["Combustível"] = ""
+        aba_onibus["Endereço (via geolocalização Memento)"] = ""
+        aba_onibus["Município"] = dados_auditec_onibus["Cidade"].map(transform_cidade)
+        aba_onibus["UF"] = dados_auditec_onibus["UF"].map(transform_uf)
+        aba_onibus["Assessor"] = "AUDITEC"
+        aba_onibus[
+            "Nome (ÔNIBUS URBANO OU ÔNIBUS RODOVIÁRIO)"
+        ] = dados_auditec_onibus.apply(transform_nome, axis=1)
+        aba_onibus["Kilometragem"] = dados_auditec_onibus["KM"].map(
+            transform_kilometragem
+        )
+        aba_onibus["Motor"] = dados_auditec_onibus["Condição do Motor"].map(map_motor())
+        aba_onibus["Câmbio"] = dados_auditec_onibus["Tipo de Câmbio"].map(map_cambio())
+        aba_onibus["Pintura"] = ""
+        aba_onibus["Lataria"] = ""
+        aba_onibus["Bancos"] = dados_auditec_onibus["Acessórios"].map(extract_banco)
+        aba_onibus["Tapeçaria/Forração"] = ""
+        aba_onibus["Qtd. de Pneus"] = ""
+        aba_onibus["Estado dos Pneus"] = ""
+        aba_onibus["Tipo (Urbano ou Rodoviário)"] = ""
+        aba_onibus["Quantidade de Lugares"] = ""
+        aba_onibus["Obs."] = (
+            dados_auditec_onibus["Chave Original"].map(map_chave_original())
+            + "<br>"
+            + dados_auditec_onibus["Chave Reserva"].map(map_chave_reserva())
+            + "<br>"
+            + dados_auditec_onibus["Manual Uso / Manutenção"].map(map_manual())
+            + "<br><br>"
+            + dados_auditec_onibus.apply(transform_observacoes, axis=1)
+        )
+        aba_onibus["Informações para Análise"] = dados_auditec_onibus.apply(
+            transform_informacoes_analise, axis=1
+        )
+        aba_onibus["Pendências"] = ""
+        aba_onibus["Descrição Html"] = ""
+        aba_onibus["Fotos"] = ""
+
+    logger.info("* Gravando os dados na planilha da Mais Ativo")
+    aba_onibus.to_excel(excel_file, sheet_name="Ônib.", index=False)
+    # FIM ÔNIBUS
 
     logger.info("Salvando e fechando a planilha da Mais Ativo")
     excel_file.close()
