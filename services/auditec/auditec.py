@@ -43,7 +43,7 @@ def get_files_list(folder_name, file_extension_list=[]):
     return files_list
 
 
-def get_columns_planilha_maisativo():
+def get_columns_aba_veiculos_leves():
     return [
         "Lote Ref. / Ativo-Frota",
         "Tabela Molicar",
@@ -464,13 +464,15 @@ create_folder(output_folder, xlsx_folder)
 create_folder(output_folder, zip_folder)
 
 for excel_file_name in get_files_list(input_folder, ["xlsx"]):
-    logger.info(f'Lendo o arquivo "{excel_file_name}" no pandas')
+    logger.info(f'Lendo a planilha da Auditec "{excel_file_name}"')
     planilha_auditec = pandas.read_excel(os.path.join(input_folder, excel_file_name))
 
     logger.info("Convertendo todas as colunas para texto")
     planilha_auditec = planilha_auditec.astype(str)
 
-    logger.info("Desconsiderando linhas cujos valores de todas as colunas estão vazios")
+    logger.info(
+        "Desconsiderando as linhas cujos valores de todas as colunas estão vazios"
+    )
     planilha_auditec = planilha_auditec.mask(planilha_auditec.eq("None")).dropna(
         how="all"
     )
@@ -480,77 +482,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     )
     planilha_auditec = planilha_auditec.mask(planilha_auditec.eq("nan")).fillna("")
 
-    logger.info("Formatando a planilha no padrão unificada da Mais Ativo")
-    planilha_maisativo = pandas.DataFrame(columns=get_columns_planilha_maisativo())
-    planilha_maisativo["Lote Ref. / Ativo-Frota"] = planilha_auditec["Laudo N°"].map(
-        transform_num_laudo
-    )
-    planilha_maisativo["Tabela Molicar"] = ""
-    planilha_maisativo["Tabela Fipe"] = ""
-    planilha_maisativo["Proprietário/CNPJ (Proprietário do documento)"] = ""
-    planilha_maisativo["Restrições"] = ""
-    planilha_maisativo["Débitos (Total)"] = ""
-    planilha_maisativo["Tipo"] = ""
-    planilha_maisativo["Marca (SEMPRE MAIUSCULA)"] = planilha_auditec.apply(
-        transform_marca, axis=1
-    )
-    planilha_maisativo["Modelo (SEMPRE MAIUSCULA)"] = planilha_auditec.apply(
-        transform_modelo, axis=1
-    )
-    planilha_maisativo["Ano Fab/Modelo"] = ""
-    planilha_maisativo[
-        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
-    ] = planilha_auditec.apply(transform_placa, axis=1)
-    planilha_maisativo["Chassi (SEMPRE MAIUSCULA)"] = planilha_auditec["Chassi"].map(
-        transform_chassi
-    )
-    planilha_maisativo["Renavam"] = ""
-    planilha_maisativo["Cor"] = ""
-    planilha_maisativo["Combustível"] = ""
-    planilha_maisativo["Município"] = planilha_auditec["Cidade"].map(transform_cidade)
-    planilha_maisativo["UF"] = planilha_auditec["UF"].map(transform_uf)
-    planilha_maisativo["Acessor"] = "AUDITEC"
-    planilha_maisativo["Nº de Portas"] = planilha_auditec["Nr. Portas"].map(
-        transform_no_de_portas
-    )
-    planilha_maisativo["Kilometragem"] = planilha_auditec["KM"].map(
-        transform_kilometragem
-    )
-    planilha_maisativo["Motor"] = planilha_auditec["Condição do Motor"].map(map_motor())
-    planilha_maisativo["Câmbio"] = planilha_auditec["Tipo de Câmbio"].map(map_cambio())
-    planilha_maisativo["Direção"] = planilha_auditec["Acessórios"].map(extract_direcao)
-    planilha_maisativo["Ar condicionado"] = planilha_auditec["Acessórios"].map(
-        extract_ar_condicionado
-    )
-    planilha_maisativo["Vidros"] = planilha_auditec["Acessórios"].map(extract_vidros)
-    planilha_maisativo["Rodas"] = planilha_auditec["Acessórios"].map(extract_rodas)
-    planilha_maisativo["Banco"] = planilha_auditec["Acessórios"].map(extract_banco)
-    planilha_maisativo["Aparelho de Som"] = planilha_auditec["Rádio / CD / DVD"].map(
-        map_radio()
-    )
-    planilha_maisativo["Pintura"] = ""
-    planilha_maisativo["Lataria"] = ""
-    planilha_maisativo["Tapeçaria"] = ""
-    planilha_maisativo["Pneus"] = ""
-    planilha_maisativo["Obs."] = (
-        planilha_auditec["Chave Original"].map(map_chave_original())
-        + "<br>"
-        + planilha_auditec["Chave Reserva"].map(map_chave_reserva())
-        + "<br>"
-        + planilha_auditec["Manual Uso / Manutenção"].map(map_manual())
-        + "<br><br>"
-        + planilha_auditec.apply(transform_observacoes, axis=1)
-    )
-    planilha_maisativo["Informações para Análise"] = planilha_auditec.apply(
-        transform_informacoes_analise, axis=1
-    )
-    planilha_maisativo["Pendências"] = ""
-    planilha_maisativo["Descrição Html"] = ""
-    planilha_maisativo["Fotos"] = ""
-
-    logger.info("Gerando o arquivo Excel resultante")
-
-    logger.info("Montando o objeto de geração do arquivo Excel")
+    logger.info("Criando a planilha da Mais Ativo")
     excel_file = pandas.ExcelWriter(
         os.path.join(
             "output", "xlsx", "Planilha_Unificada_2022_v7.2_" + excel_file_name
@@ -558,13 +490,102 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         engine="xlsxwriter",
     )
 
-    logger.info("Escrevendo na primeira aba da planilha")
-    planilha_maisativo.to_excel(excel_file, sheet_name="Veículos Leves", index=False)
+    logger.info("Processando Veículos Leves")
 
-    logger.info("Salvando e fechando o arquivo Excel resultante")
+    logger.info("Filtrando os dados de Veículos Leves da planilha da Auditec")
+    dados_auditec_veiculos_leves = planilha_auditec.query(
+        'TEMPLATE == "VEÍCULOS LEVES"'
+    )
+
+    logger.info("Formatando os dados de Veículos Leves para a planilha da Mais Ativo")
+    aba_veiculos_leves = pandas.DataFrame(columns=get_columns_aba_veiculos_leves())
+    aba_veiculos_leves["Lote Ref. / Ativo-Frota"] = dados_auditec_veiculos_leves[
+        "Laudo N°"
+    ].map(transform_num_laudo)
+    aba_veiculos_leves["Tabela Molicar"] = ""
+    aba_veiculos_leves["Tabela Fipe"] = ""
+    aba_veiculos_leves["Proprietário/CNPJ (Proprietário do documento)"] = ""
+    aba_veiculos_leves["Restrições"] = ""
+    aba_veiculos_leves["Débitos (Total)"] = ""
+    aba_veiculos_leves["Tipo"] = ""
+    aba_veiculos_leves["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_veiculos_leves.apply(
+        transform_marca, axis=1
+    )
+    aba_veiculos_leves[
+        "Modelo (SEMPRE MAIUSCULA)"
+    ] = dados_auditec_veiculos_leves.apply(transform_modelo, axis=1)
+    aba_veiculos_leves["Ano Fab/Modelo"] = ""
+    aba_veiculos_leves[
+        "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
+    ] = dados_auditec_veiculos_leves.apply(transform_placa, axis=1)
+    aba_veiculos_leves["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_veiculos_leves[
+        "Chassi"
+    ].map(transform_chassi)
+    aba_veiculos_leves["Renavam"] = ""
+    aba_veiculos_leves["Cor"] = ""
+    aba_veiculos_leves["Combustível"] = ""
+    aba_veiculos_leves["Município"] = dados_auditec_veiculos_leves["Cidade"].map(
+        transform_cidade
+    )
+    aba_veiculos_leves["UF"] = dados_auditec_veiculos_leves["UF"].map(transform_uf)
+    aba_veiculos_leves["Acessor"] = "AUDITEC"
+    aba_veiculos_leves["Nº de Portas"] = dados_auditec_veiculos_leves["Nr. Portas"].map(
+        transform_no_de_portas
+    )
+    aba_veiculos_leves["Kilometragem"] = dados_auditec_veiculos_leves["KM"].map(
+        transform_kilometragem
+    )
+    aba_veiculos_leves["Motor"] = dados_auditec_veiculos_leves["Condição do Motor"].map(
+        map_motor()
+    )
+    aba_veiculos_leves["Câmbio"] = dados_auditec_veiculos_leves["Tipo de Câmbio"].map(
+        map_cambio()
+    )
+    aba_veiculos_leves["Direção"] = dados_auditec_veiculos_leves["Acessórios"].map(
+        extract_direcao
+    )
+    aba_veiculos_leves["Ar condicionado"] = dados_auditec_veiculos_leves[
+        "Acessórios"
+    ].map(extract_ar_condicionado)
+    aba_veiculos_leves["Vidros"] = dados_auditec_veiculos_leves["Acessórios"].map(
+        extract_vidros
+    )
+    aba_veiculos_leves["Rodas"] = dados_auditec_veiculos_leves["Acessórios"].map(
+        extract_rodas
+    )
+    aba_veiculos_leves["Banco"] = dados_auditec_veiculos_leves["Acessórios"].map(
+        extract_banco
+    )
+    aba_veiculos_leves["Aparelho de Som"] = dados_auditec_veiculos_leves[
+        "Rádio / CD / DVD"
+    ].map(map_radio())
+    aba_veiculos_leves["Pintura"] = ""
+    aba_veiculos_leves["Lataria"] = ""
+    aba_veiculos_leves["Tapeçaria"] = ""
+    aba_veiculos_leves["Pneus"] = ""
+    aba_veiculos_leves["Obs."] = (
+        dados_auditec_veiculos_leves["Chave Original"].map(map_chave_original())
+        + "<br>"
+        + dados_auditec_veiculos_leves["Chave Reserva"].map(map_chave_reserva())
+        + "<br>"
+        + dados_auditec_veiculos_leves["Manual Uso / Manutenção"].map(map_manual())
+        + "<br><br>"
+        + dados_auditec_veiculos_leves.apply(transform_observacoes, axis=1)
+    )
+    aba_veiculos_leves["Informações para Análise"] = dados_auditec_veiculos_leves.apply(
+        transform_informacoes_analise, axis=1
+    )
+    aba_veiculos_leves["Pendências"] = ""
+    aba_veiculos_leves["Descrição Html"] = ""
+    aba_veiculos_leves["Fotos"] = ""
+
+    logger.info(
+        "Gravando os dados para a aba de Veículos Leves na planilha da Mais Ativo"
+    )
+    aba_veiculos_leves.to_excel(excel_file, sheet_name="Veículos Leves", index=False)
+
+    logger.info("Salvando e fechando a planilha da Mais Ativo")
     excel_file.close()
-
-    logger.info("Arquivo Excel gerado com sucesso")
 
     logger.info("Extraindo as imagens da vistoria")
     for index, row in planilha_auditec.iterrows():
