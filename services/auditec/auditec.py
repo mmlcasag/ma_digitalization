@@ -842,6 +842,214 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     aba_onibus.to_excel(excel_file, sheet_name="Ônib.", index=False)
     # FIM ÔNIBUS
 
+    # SEMIRREBOQUES E REBOQUES
+    logger.info("Processando Reboques")
+
+    logger.info("* Filtrando os dados da planilha da Auditec")
+    dados_auditec_reboques = planilha_auditec.query(
+        'TEMPLATE == "SEMIRREBOQUES E REBOQUES"'
+    )
+
+    logger.info("* Formatando os dados para a planilha da Mais Ativo")
+    aba_reboques = pandas.DataFrame(
+        columns=[
+            "Lote Ref. / Ativo-Frota",
+            "Proprietário/CNPJ (Proprietário do documento)",
+            "Restrições",
+            "Débitos (Total)",
+            "Tipo",
+            "Marca (SEMPRE MAIUSCULA)",
+            "Modelo (SEMPRE MAIUSCULA)",
+            "Ano Fab/Modelo",
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))",
+            "Chassi (SEMPRE MAIUSCULA)",
+            "Renavam",
+            "Cor",
+            "Combustível",
+            "Endereço (via geolocalização Memento)",
+            "Município",
+            "UF",
+            "Assessor",
+            "Nome (SEMIRREBOQUE + CARROCERIA OU REBOQUE + CARROCERIA)",
+            "Eixos",
+            "Carroceria / Capacidade / Estado Geral",
+            "Medidas (Em metros)",
+            "Lataria/Pintura",
+            "Qtd. de Pneus",
+            "Estado dos Pneus",
+            "Obs.",
+            "Informações para Análise",
+            "Pendências",
+            "Descrição Html",
+            "Fotos",
+        ]
+    )
+
+    if len(dados_auditec_reboques) > 0:
+        aba_reboques["Lote Ref. / Ativo-Frota"] = dados_auditec_reboques[
+            "Laudo N°"
+        ].map(transform_num_laudo)
+        aba_reboques["Proprietário/CNPJ (Proprietário do documento)"] = ""
+        aba_reboques["Restrições"] = ""
+        aba_reboques["Débitos (Total)"] = ""
+        aba_reboques["Tipo"] = ""
+        aba_reboques["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_reboques.apply(
+            transform_marca, axis=1
+        )
+        aba_reboques["Modelo (SEMPRE MAIUSCULA)"] = dados_auditec_reboques.apply(
+            transform_modelo, axis=1
+        )
+        aba_reboques["Ano Fab/Modelo"] = ""
+        aba_reboques[
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
+        ] = dados_auditec_reboques.apply(transform_placa, axis=1)
+        aba_reboques["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_reboques[
+            "Chassi"
+        ].map(transform_chassi)
+        aba_reboques["Renavam"] = ""
+        aba_reboques["Cor"] = ""
+        aba_reboques["Combustível"] = ""
+        aba_reboques["Endereço (via geolocalização Memento)"] = ""
+        aba_reboques["Município"] = dados_auditec_reboques["Cidade"].map(
+            transform_cidade
+        )
+        aba_reboques["UF"] = dados_auditec_reboques["UF"].map(transform_uf)
+        aba_reboques["Assessor"] = "AUDITEC"
+        aba_reboques[
+            "Nome (SEMIRREBOQUE + CARROCERIA OU REBOQUE + CARROCERIA)"
+        ] = dados_auditec_reboques.apply(transform_nome, axis=1)
+        aba_reboques["Eixos"] = ""
+        aba_reboques["Carroceria / Capacidade / Estado Geral"] = ""
+        aba_reboques["Medidas (Em metros)"] = ""
+        aba_reboques["Lataria/Pintura"] = ""
+        aba_reboques["Qtd. de Pneus"] = ""
+        aba_reboques["Estado dos Pneus"] = ""
+        aba_reboques["Obs."] = (
+            dados_auditec_reboques["Chave Original"].map(map_chave_original())
+            + "<br>"
+            + dados_auditec_reboques["Chave Reserva"].map(map_chave_reserva())
+            + "<br>"
+            + dados_auditec_reboques["Manual Uso / Manutenção"].map(map_manual())
+            + "<br><br>"
+            + dados_auditec_reboques.apply(transform_observacoes, axis=1)
+        )
+        aba_reboques["Informações para Análise"] = dados_auditec_reboques.apply(
+            transform_informacoes_analise, axis=1
+        )
+        aba_reboques["Pendências"] = ""
+        aba_reboques["Descrição Html"] = ""
+        aba_reboques["Fotos"] = ""
+
+    logger.info("* Gravando os dados na planilha da Mais Ativo")
+    aba_reboques.to_excel(excel_file, sheet_name="Semirreb.Reb", index=False)
+    # FIM SEMIRREBOQUES E REBOQUES
+
+    # MOTOS
+    logger.info("Processando Motos")
+
+    logger.info("* Filtrando os dados da planilha da Auditec")
+    dados_auditec_motos = planilha_auditec.query('TEMPLATE == "MOTOS"')
+
+    logger.info("* Formatando os dados para a planilha da Mais Ativo")
+    aba_motos = pandas.DataFrame(
+        columns=[
+            "Lote Ref. / Ativo-Frota",
+            "Tabela Molicar",
+            "Tabela Fipe",
+            "Proprietário/CNPJ (Proprietário do documento)",
+            "Restrições",
+            "Débitos (Total)",
+            "Tipo",
+            "Marca (SEMPRE MAIUSCULA)",
+            "Modelo (SEMPRE MAIUSCULA)",
+            "Ano Fab/Modelo",
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))",
+            "Chassi (SEMPRE MAIUSCULA)",
+            "Renavam",
+            "Cor",
+            "Combustível",
+            "Endereço (via geolocalização Memento)",
+            "Município",
+            "UF",
+            "Assessor",
+            "Kilometragem",
+            "Motor",
+            "Partida Elétrica",
+            "Freio a Disco",
+            "Pintura",
+            "Lataria",
+            "Banco",
+            "Pneus",
+            "Obs.",
+            "Informações para Análise",
+            "Pendências",
+            "Descrição Html",
+            "Fotos",
+        ]
+    )
+
+    if len(dados_auditec_motos) > 0:
+        aba_motos["Lote Ref. / Ativo-Frota"] = dados_auditec_motos["Laudo N°"].map(
+            transform_num_laudo
+        )
+        aba_motos["Tabela Molicar"] = ""
+        aba_motos["Tabela Fipe"] = ""
+        aba_motos["Proprietário/CNPJ (Proprietário do documento)"] = ""
+        aba_motos["Restrições"] = ""
+        aba_motos["Débitos (Total)"] = ""
+        aba_motos["Tipo"] = ""
+        aba_motos["Marca (SEMPRE MAIUSCULA)"] = dados_auditec_motos.apply(
+            transform_marca, axis=1
+        )
+        aba_motos["Modelo (SEMPRE MAIUSCULA)"] = dados_auditec_motos.apply(
+            transform_modelo, axis=1
+        )
+        aba_motos["Ano Fab/Modelo"] = ""
+        aba_motos[
+            "Placa (colocar apenas a placa e qual UF está registrada) (SEMPRE MAIUSCULA - EX.: XXX1234 (UF))"
+        ] = dados_auditec_motos.apply(transform_placa, axis=1)
+        aba_motos["Chassi (SEMPRE MAIUSCULA)"] = dados_auditec_motos["Chassi"].map(
+            transform_chassi
+        )
+        aba_motos["Renavam"] = ""
+        aba_motos["Cor"] = ""
+        aba_motos["Combustível"] = ""
+        aba_motos["Endereço (via geolocalização Memento)"] = ""
+        aba_motos["Município"] = dados_auditec_motos["Cidade"].map(transform_cidade)
+        aba_motos["UF"] = dados_auditec_motos["UF"].map(transform_uf)
+        aba_motos["Assessor"] = "AUDITEC"
+        aba_onibus["Kilometragem"] = dados_auditec_motos["KM"].map(
+            transform_kilometragem
+        )
+        aba_veiculos_leves["Motor"] = dados_auditec_motos["Condição do Motor"].map(
+            map_motor()
+        )
+        aba_motos["Partida Elétrica"] = ""
+        aba_motos["Freio a Disco"] = ""
+        aba_motos["Pintura"] = ""
+        aba_motos["Lataria"] = ""
+        aba_motos["Banco"] = dados_auditec_motos["Acessórios"].map(extract_banco)
+        aba_motos["Pneus"] = ""
+        aba_motos["Obs."] = (
+            dados_auditec_motos["Chave Original"].map(map_chave_original())
+            + "<br>"
+            + dados_auditec_motos["Chave Reserva"].map(map_chave_reserva())
+            + "<br>"
+            + dados_auditec_motos["Manual Uso / Manutenção"].map(map_manual())
+            + "<br><br>"
+            + dados_auditec_motos.apply(transform_observacoes, axis=1)
+        )
+        aba_motos["Informações para Análise"] = dados_auditec_motos.apply(
+            transform_informacoes_analise, axis=1
+        )
+        aba_motos["Pendências"] = ""
+        aba_motos["Descrição Html"] = ""
+        aba_motos["Fotos"] = ""
+
+    logger.info("* Gravando os dados na planilha da Mais Ativo")
+    aba_motos.to_excel(excel_file, sheet_name="Motos", index=False)
+    # FIM MOTOS
+
     logger.info("Salvando e fechando a planilha da Mais Ativo")
     excel_file.close()
 
