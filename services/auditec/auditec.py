@@ -87,8 +87,23 @@ def transform_no_de_portas(value):
 
 
 def transform_kilometragem(value):
-    if value == "" or value == "N/I":
-        value = "0"
+    if (
+        value == ""
+        or value == "N/I"
+        or value == "0"
+        or value == "9"
+        or value == "99"
+        or value == "999"
+        or value == "9999"
+        or value == "99999"
+        or value == "999999"
+        or value == "9999999"
+        or value == "99999999"
+        or value == "999999999"
+        or value == "9999999999"
+    ):
+        return 0
+
     return int(float(value))
 
 
@@ -420,8 +435,13 @@ def transform_nome(row):
     arr_partes = tipo.split("/")
     nome = arr_partes[0].strip()
 
+    if nome == "C. TRATOR":
+        nome = "CAVALO MECÂNICO"
     if nome == "CAMINHAO TRATOR":
         nome = "CAVALO MECÂNICO"
+
+    if nome == "S. REBOQUE":
+        nome = "SEMIRREBOQUE"
     if nome == "SEMI REBOQUE":
         nome = "SEMIRREBOQUE"
     if nome == "SEMI-REBOQUE":
@@ -472,9 +492,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Processando Veículos Leves")
 
     logger.info("* Filtrando os dados da planilha da Auditec")
-    dados_auditec_veiculos_leves = planilha_auditec.query(
-        'TEMPLATE == "VEÍCULOS LEVES"'
-    )
+    dados_auditec_veiculos_leves = planilha_auditec.query('Aba == "Veic.Leves"')
 
     logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_veiculos_leves = pandas.DataFrame(
@@ -556,6 +574,9 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_veiculos_leves["Kilometragem"] = dados_auditec_veiculos_leves["KM"].map(
             transform_kilometragem
         )
+        aba_veiculos_leves["Kilometragem"] = aba_veiculos_leves["Kilometragem"].replace(
+            {0: None, 9999999999: None}
+        )
         aba_veiculos_leves["Motor"] = dados_auditec_veiculos_leves[
             "Condição do Motor"
         ].map(map_motor())
@@ -584,14 +605,8 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_veiculos_leves["Lataria"] = ""
         aba_veiculos_leves["Tapeçaria"] = ""
         aba_veiculos_leves["Pneus"] = ""
-        aba_veiculos_leves["Obs."] = (
-            dados_auditec_veiculos_leves["Chave Original"].map(map_chave_original())
-            + "<br>"
-            + dados_auditec_veiculos_leves["Chave Reserva"].map(map_chave_reserva())
-            + "<br>"
-            + dados_auditec_veiculos_leves["Manual Uso / Manutenção"].map(map_manual())
-            + "<br><br>"
-            + dados_auditec_veiculos_leves.apply(transform_observacoes, axis=1)
+        aba_veiculos_leves["Obs."] = dados_auditec_veiculos_leves.apply(
+            transform_observacoes, axis=1
         )
         aba_veiculos_leves[
             "Informações para Análise"
@@ -608,7 +623,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Processando Caminhões")
 
     logger.info("* Filtrando os dados da planilha da Auditec")
-    dados_auditec_caminhoes = planilha_auditec.query('TEMPLATE == "CAMINHÕES"')
+    dados_auditec_caminhoes = planilha_auditec.query('Aba == "Camin."')
 
     logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_caminhoes = pandas.DataFrame(
@@ -693,6 +708,9 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_caminhoes["Kilometragem"] = dados_auditec_caminhoes["KM"].map(
             transform_kilometragem
         )
+        aba_caminhoes["Kilometragem"] = aba_caminhoes["Kilometragem"].replace(
+            {0: None, 9999999999: None}
+        )
         aba_caminhoes["Eixos"] = ""
         aba_caminhoes["Tração"] = ""
         aba_caminhoes["Carroceria"] = ""
@@ -712,14 +730,8 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         )
         aba_caminhoes["Qtd. de Pneus"] = ""
         aba_caminhoes["Estado dos Pneus"] = ""
-        aba_caminhoes["Obs."] = (
-            dados_auditec_caminhoes["Chave Original"].map(map_chave_original())
-            + "<br>"
-            + dados_auditec_caminhoes["Chave Reserva"].map(map_chave_reserva())
-            + "<br>"
-            + dados_auditec_caminhoes["Manual Uso / Manutenção"].map(map_manual())
-            + "<br><br>"
-            + dados_auditec_caminhoes.apply(transform_observacoes, axis=1)
+        aba_caminhoes["Obs."] = dados_auditec_caminhoes.apply(
+            transform_observacoes, axis=1
         )
         aba_caminhoes["Informações para Análise"] = dados_auditec_caminhoes.apply(
             transform_informacoes_analise, axis=1
@@ -736,7 +748,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Processando Ônibus")
 
     logger.info("* Filtrando os dados da planilha da Auditec")
-    dados_auditec_onibus = planilha_auditec.query('TEMPLATE == "ÔNIBUS"')
+    dados_auditec_onibus = planilha_auditec.query('Aba == "Ônib."')
 
     logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_onibus = pandas.DataFrame(
@@ -816,6 +828,9 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_onibus["Kilometragem"] = dados_auditec_onibus["KM"].map(
             transform_kilometragem
         )
+        aba_onibus["Kilometragem"] = aba_onibus["Kilometragem"].replace(
+            {0: None, 9999999999: None}
+        )
         aba_onibus["Motor"] = dados_auditec_onibus["Condição do Motor"].map(map_motor())
         aba_onibus["Câmbio"] = dados_auditec_onibus["Tipo de Câmbio"].map(map_cambio())
         aba_onibus["Pintura"] = ""
@@ -826,15 +841,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_onibus["Estado dos Pneus"] = ""
         aba_onibus["Tipo (Urbano ou Rodoviário)"] = ""
         aba_onibus["Quantidade de Lugares"] = ""
-        aba_onibus["Obs."] = (
-            dados_auditec_onibus["Chave Original"].map(map_chave_original())
-            + "<br>"
-            + dados_auditec_onibus["Chave Reserva"].map(map_chave_reserva())
-            + "<br>"
-            + dados_auditec_onibus["Manual Uso / Manutenção"].map(map_manual())
-            + "<br><br>"
-            + dados_auditec_onibus.apply(transform_observacoes, axis=1)
-        )
+        aba_onibus["Obs."] = dados_auditec_onibus.apply(transform_observacoes, axis=1)
         aba_onibus["Informações para Análise"] = dados_auditec_onibus.apply(
             transform_informacoes_analise, axis=1
         )
@@ -850,9 +857,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Processando Reboques")
 
     logger.info("* Filtrando os dados da planilha da Auditec")
-    dados_auditec_reboques = planilha_auditec.query(
-        'TEMPLATE == "SEMIRREBOQUES E REBOQUES"'
-    )
+    dados_auditec_reboques = planilha_auditec.query('Aba == "Semirreb.Reb"')
 
     logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_reboques = pandas.DataFrame(
@@ -928,14 +933,8 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_reboques["Lataria/Pintura"] = ""
         aba_reboques["Qtd. de Pneus"] = ""
         aba_reboques["Estado dos Pneus"] = ""
-        aba_reboques["Obs."] = (
-            dados_auditec_reboques["Chave Original"].map(map_chave_original())
-            + "<br>"
-            + dados_auditec_reboques["Chave Reserva"].map(map_chave_reserva())
-            + "<br>"
-            + dados_auditec_reboques["Manual Uso / Manutenção"].map(map_manual())
-            + "<br><br>"
-            + dados_auditec_reboques.apply(transform_observacoes, axis=1)
+        aba_reboques["Obs."] = dados_auditec_reboques.apply(
+            transform_observacoes, axis=1
         )
         aba_reboques["Informações para Análise"] = dados_auditec_reboques.apply(
             transform_informacoes_analise, axis=1
@@ -952,7 +951,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Processando Motos")
 
     logger.info("* Filtrando os dados da planilha da Auditec")
-    dados_auditec_motos = planilha_auditec.query('TEMPLATE == "MOTOS"')
+    dados_auditec_motos = planilha_auditec.query('Aba == "Motos"')
 
     logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_motos = pandas.DataFrame(
@@ -1025,6 +1024,9 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_motos["Kilometragem"] = dados_auditec_motos["KM"].map(
             transform_kilometragem
         )
+        aba_motos["Kilometragem"] = aba_motos["Kilometragem"].replace(
+            {0: None, 9999999999: None}
+        )
         aba_motos["Motor"] = dados_auditec_motos["Condição do Motor"].map(map_motor())
         aba_motos["Partida Elétrica"] = ""
         aba_motos["Freio a Disco"] = ""
@@ -1032,15 +1034,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_motos["Lataria"] = ""
         aba_motos["Banco"] = dados_auditec_motos["Acessórios"].map(extract_banco)
         aba_motos["Pneus"] = ""
-        aba_motos["Obs."] = (
-            dados_auditec_motos["Chave Original"].map(map_chave_original())
-            + "<br>"
-            + dados_auditec_motos["Chave Reserva"].map(map_chave_reserva())
-            + "<br>"
-            + dados_auditec_motos["Manual Uso / Manutenção"].map(map_manual())
-            + "<br><br>"
-            + dados_auditec_motos.apply(transform_observacoes, axis=1)
-        )
+        aba_motos["Obs."] = dados_auditec_motos.apply(transform_observacoes, axis=1)
         aba_motos["Informações para Análise"] = dados_auditec_motos.apply(
             transform_informacoes_analise, axis=1
         )
@@ -1056,9 +1050,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
     logger.info("Processando Máquinas Pesadas")
 
     logger.info("* Filtrando os dados da planilha da Auditec")
-    dados_auditec_maquinas_pesadas = planilha_auditec.query(
-        'TEMPLATE == "MÁQUINAS PESADAS"'
-    )
+    dados_auditec_maquinas_pesadas = planilha_auditec.query('Aba == "Máq.Pes."')
 
     logger.info("* Formatando os dados para a planilha da Mais Ativo")
     aba_maquinas_pesadas = pandas.DataFrame(
@@ -1122,16 +1114,8 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
             "Combustível"
         ].map(transform_combustivel)
         aba_maquinas_pesadas["Nº do ativo"] = ""
-        aba_maquinas_pesadas["Obs."] = (
-            dados_auditec_maquinas_pesadas["Chave Original"].map(map_chave_original())
-            + "<br>"
-            + dados_auditec_maquinas_pesadas["Chave Reserva"].map(map_chave_reserva())
-            + "<br>"
-            + dados_auditec_maquinas_pesadas["Manual Uso / Manutenção"].map(
-                map_manual()
-            )
-            + "<br><br>"
-            + dados_auditec_maquinas_pesadas.apply(transform_observacoes, axis=1)
+        aba_maquinas_pesadas["Obs."] = dados_auditec_maquinas_pesadas.apply(
+            transform_observacoes, axis=1
         )
         aba_maquinas_pesadas[
             "Informações para Análise"
@@ -1149,7 +1133,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
 
     logger.info("Extraindo as imagens da vistoria")
     for index, row in planilha_auditec.iterrows():
-        laudo_number = str(row["Laudo N°"])
+        laudo_number = str(int(float(row["Laudo N°"])))
         zip_file_link = str(row["Fotos"])
         zip_file_path = os.path.join(output_folder, zip_folder, laudo_number + ".zip")
 
