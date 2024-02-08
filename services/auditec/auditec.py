@@ -454,6 +454,46 @@ def transform_combustivel(value):
     return value.upper().strip()
 
 
+def transform_eixos(row):
+    if "4X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Dois"
+    if "4X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Dois"
+    if "6X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Três"
+    if "6X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Três"
+    if "8X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Quatro"
+    if "8X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Quatro"
+    if "10X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Cinco"
+    if "10X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "Cinco"
+    return ""
+
+
+def transform_tracao(row):
+    if "4X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "4X2"
+    if "4X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "4X4"
+    if "6X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "6X2"
+    if "6X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "6X4"
+    if "8X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "8X2"
+    if "8X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "8X4"
+    if "10X2" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "10X2"
+    if "10X4" in row["Modelo (SEMPRE MAIUSCULA)"].upper().strip():
+        return "10X4"
+    return ""
+
+
 create_folder(input_folder)
 create_folder(output_folder)
 create_folder(output_folder, images_folder)
@@ -575,7 +615,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
             transform_kilometragem
         )
         aba_veiculos_leves["Kilometragem"] = aba_veiculos_leves["Kilometragem"].replace(
-            {0: None, 9999999999: None}
+            {0: "Não visualizado", 9999999999: "Não visualizado"}
         )
         aba_veiculos_leves["Motor"] = dados_auditec_veiculos_leves[
             "Condição do Motor"
@@ -709,10 +749,10 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
             transform_kilometragem
         )
         aba_caminhoes["Kilometragem"] = aba_caminhoes["Kilometragem"].replace(
-            {0: None, 9999999999: None}
+            {0: "Não visualizado", 9999999999: "Não visualizado"}
         )
-        aba_caminhoes["Eixos"] = ""
-        aba_caminhoes["Tração"] = ""
+        aba_caminhoes["Eixos"] = aba_caminhoes.apply(transform_eixos, axis=1)
+        aba_caminhoes["Tração"] = aba_caminhoes.apply(transform_tracao, axis=1)
         aba_caminhoes["Carroceria"] = ""
         aba_caminhoes["Cardan"] = ""
         aba_caminhoes["Diferencial"] = ""
@@ -829,7 +869,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
             transform_kilometragem
         )
         aba_onibus["Kilometragem"] = aba_onibus["Kilometragem"].replace(
-            {0: None, 9999999999: None}
+            {0: "Não visualizado", 9999999999: "Não visualizado"}
         )
         aba_onibus["Motor"] = dados_auditec_onibus["Condição do Motor"].map(map_motor())
         aba_onibus["Câmbio"] = dados_auditec_onibus["Tipo de Câmbio"].map(map_cambio())
@@ -927,7 +967,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
         aba_reboques[
             "Nome (SEMIRREBOQUE + CARROCERIA OU REBOQUE + CARROCERIA)"
         ] = dados_auditec_reboques.apply(transform_nome, axis=1)
-        aba_reboques["Eixos"] = ""
+        aba_reboques["Eixos"] = aba_reboques.apply(transform_eixos, axis=1)
         aba_reboques["Carroceria / Capacidade / Estado Geral"] = ""
         aba_reboques["Medidas (Em metros)"] = ""
         aba_reboques["Lataria/Pintura"] = ""
@@ -1025,7 +1065,7 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
             transform_kilometragem
         )
         aba_motos["Kilometragem"] = aba_motos["Kilometragem"].replace(
-            {0: None, 9999999999: None}
+            {0: "Não visualizado", 9999999999: "Não visualizado"}
         )
         aba_motos["Motor"] = dados_auditec_motos["Condição do Motor"].map(map_motor())
         aba_motos["Partida Elétrica"] = ""
@@ -1108,7 +1148,9 @@ for excel_file_name in get_files_list(input_folder, ["xlsx"]):
             "Condição do Motor"
         ].map(map_motor())
         aba_maquinas_pesadas["Pneus (Qtd e estado)"] = ""
-        aba_maquinas_pesadas["Tração"] = ""
+        aba_maquinas_pesadas["Tração"] = aba_maquinas_pesadas.apply(
+            transform_tracao, axis=1
+        )
         aba_maquinas_pesadas["Capacidade"] = ""
         aba_maquinas_pesadas["Combustível"] = dados_auditec_maquinas_pesadas[
             "Combustível"
